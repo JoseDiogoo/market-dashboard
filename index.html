@@ -6,11 +6,12 @@
 *{box-sizing:border-box}html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--t1);font:12px/1.4 system-ui,"Segoe UI",sans-serif}
 .m,td,.num{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-variant-numeric:tabular-nums}
-#app{display:grid;grid-template-rows:34px 26px minmax(0,1fr);height:100vh}
+#app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:34px 26px minmax(0,1fr);height:100vh;height:100dvh}
+#tabs{display:none}
 #bar{display:flex;align-items:center;gap:14px;padding:0 10px;background:var(--panel);border-bottom:1px solid var(--line)}
 #bar b{letter-spacing:.12em;font-size:11px}#cmd{background:var(--bg);border:1px solid var(--line2);color:var(--t1);padding:4px 8px;width:220px;font:12px ui-monospace,Consolas,monospace;outline:none}#cmd:focus{border-color:var(--blue)}
 #live{margin-left:auto;color:var(--mut)}
-#tape{display:flex;gap:18px;align-items:center;padding:0 10px;border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;background:var(--bg)}
+#tape{scrollbar-width:none;display:flex;gap:18px;align-items:center;padding:0 10px;border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;background:var(--bg)}#tape::-webkit-scrollbar{display:none}
 #tape span.n{color:var(--mut);margin-right:5px}
 #main{display:grid;grid-template-columns:minmax(360px,.9fr) minmax(0,1.7fr) minmax(290px,.8fr);gap:1px;background:var(--line);min-height:0}
 .pane{background:var(--bg);overflow:auto;min-height:0}
@@ -29,16 +30,28 @@ select,input.f{background:var(--bg);border:1px solid var(--line2);color:var(--t1
 .three{display:grid;grid-template-columns:200px minmax(0,1fr);gap:10px}@media(max-width:1300px){.three{grid-template-columns:1fr}}
 .verdict{font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.7}.verdict div{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line2)}
 .pb{display:inline-block;width:44px;height:6px;background:var(--line);vertical-align:middle;margin-left:6px}.pb i{display:block;height:100%;background:var(--blue)}
-.tip{border-bottom:1px dotted var(--mut);cursor:help;position:relative}.tip:hover::after{content:attr(data-tip);position:absolute;left:0;top:100%;z-index:50;width:250px;white-space:normal;background:#000;border:1px solid var(--line2);color:var(--t1);padding:6px 8px;font:11px system-ui;text-transform:none;letter-spacing:0}
+.tip{border-bottom:1px dotted var(--mut);cursor:help;position:relative}.tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;left:0;top:100%;z-index:50;width:250px;white-space:normal;background:#000;border:1px solid var(--line2);color:var(--t1);padding:6px 8px;font:11px system-ui;text-transform:none;letter-spacing:0}
 svg text{fill:var(--mut);font:10px ui-monospace,Consolas,monospace}
 dl{margin:0}dt{color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-top:8px}dd{margin:2px 0 0}
 .news a{display:block;color:var(--t1);text-decoration:none;padding:5px 0;border-bottom:1px solid var(--line)}.news a:hover{color:var(--blue)}
 #ctip{position:fixed;pointer-events:none;background:#000;border:1px solid var(--line2);padding:4px 7px;display:none;z-index:60;font:11px ui-monospace,Consolas,monospace}
 details{padding:8px 10px}summary{cursor:pointer;color:var(--mut);text-transform:uppercase;font-size:10px;letter-spacing:.08em}details dt{color:var(--t1);text-transform:none;font-size:12px}details dd{color:var(--mut)}
-@media(max-width:1100px){html,body,#app{height:auto}#app{display:block}#main{display:block}.pane{overflow:visible}}
+@media(max-width:1100px){
+#app{grid-template-rows:auto 26px 40px minmax(0,1fr)}
+#tabs{display:flex;background:var(--panel);border-bottom:1px solid var(--line)}
+#tabs button{flex:1;background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);font:600 12px system-ui;text-transform:uppercase;letter-spacing:.06em;padding:0}
+#tabs button.on{color:var(--t1);border-bottom-color:var(--blue)}
+#main{display:block;position:relative}.pane{display:none;height:100%}.pane.act{display:block}
+#bar{flex-wrap:wrap;height:auto;min-height:34px;padding:4px 10px;gap:6px 10px}#bar b{display:none}#cmd{flex:1;min-width:0;width:auto}#live{margin-left:0;flex-basis:100%;font-size:10px}
+.three{grid-template-columns:minmax(0,1fr)}.blk{overflow-x:auto}.kb{display:none}#p2 .three>div:first-child{max-width:260px;margin:0 auto;width:100%}.px{font-size:22px}.tk{font-size:18px}
+.tip:hover::after,.tip:focus::after{width:200px}}
+@media(max-width:600px){
+#p1 th:nth-child(5),#p1 td:nth-child(5),#p1 th:nth-child(7),#p1 td:nth-child(7),#p1 th:nth-child(8),#p1 td:nth-child(8){display:none}
+#p1 .pb{display:none}th,td{padding:7px 6px}select,input.f,#cmd{font-size:16px}}
 </style></head><body><div id="app">
 <div id="bar"><b>TERMINAL FUNDAMENTAL</b><input id="cmd" placeholder="Ticker ↵   ( / )" autocomplete="off" spellcheck="false"><span class="mut" id="cmdmsg"></span><span id="live">a ligar…</span></div>
 <div id="tape"></div>
+<div id="tabs"><button data-p="1" class="on">Ranking</button><button data-p="2">Ficha</button><button data-p="3">Mercado</button></div>
 <div id="main">
  <section class="pane" id="p1"></section>
  <section class="pane" id="p2"></section>
@@ -75,16 +88,19 @@ function rows(){let ks=tab=="top"?D.top10.slice():Object.keys(T).filter(k=>(!sec
 if(tab!="top")ks.sort((a,b)=>{const x=sk=="k"?a:T[a][sk],y=sk=="k"?b:T[b][sk];return sd*((x??-1e9)>(y??-1e9)?1:-1)});return ks}
 const COLS=[["k","Ticker"],["score","Score"],["price","Preço"],["d1","1D"],["m1","1M"],["upside","Upside"],["fpe","P/E f."],["dy","Div"]];
 function screener(){const secs=[...new Set(Object.values(T).map(t=>t.sector).filter(Boolean))].sort();
-$("#p1").innerHTML=`<div class="ph"><span class="tabs"><button class="${tab=="top"?"on":""}" data-t="top">Top 10</button><button class="${tab=="all"?"on":""}" data-t="all">Screener (${Object.keys(T).length})</button></span><span>↑↓ navegar</span></div>
+$("#p1").innerHTML=`<div class="ph"><span class="tabs"><button class="${tab=="top"?"on":""}" data-t="top">Top 10</button><button class="${tab=="all"?"on":""}" data-t="all">Screener (${Object.keys(T).length})</button></span><span class="kb">↑↓ navegar</span></div>
 ${tab=="all"?`<div class="filters"><select id="fs"><option value="">Todos os setores</option>${secs.map(s=>`<option ${s==sector?"selected":""}>${esc(s)}</option>`).join("")}</select><input class="f" id="fm" type="number" placeholder="Score ≥" value="${minS||""}"></div>`:""}
 <table><thead><tr>${COLS.map(([k,l])=>`<th data-k="${k}">${l}${k==sk&&tab=="all"?(sd>0?" ↑":" ↓"):""}</th>`).join("")}</tr></thead><tbody>${rows().map(k=>{const t=T[k];return `<tr data-k="${k}" class="${k==sel?"sel":""}"><td><b>${k}</b></td><td>${t.score}<span class="pb"><i style="width:${t.score}%"></i></span></td><td data-px="${k}">${f(t.price,2)}</td><td data-d1="${k}">${chg(t.d1,2)}</td><td>${chg(t.m1)}</td><td data-up="${k}">${chg(t.upside,0)}</td><td>${f(t.fpe)}</td><td>${f(t.dy)}</td></tr>`}).join("")}</tbody></table>`}
 $("#p1").onclick=e=>{const b=e.target.closest("[data-t]"),th=e.target.closest("th"),tr=e.target.closest("tbody tr");
 if(b){tab=b.dataset.t;screener()}else if(th&&tab=="all"){sd=th.dataset.k==sk?-sd:-1;sk=th.dataset.k;screener()}else if(tr)pick(tr.dataset.k)};
 $("#p1").onchange=e=>{if(e.target.id=="fs"){sector=e.target.value;screener()}if(e.target.id=="fm"){minS=+e.target.value||0;screener()}};
-function pick(k){sel=k;location.hash=k;screener();work();$("#p2").scrollTop=0}
+function showPane(n){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.p==n));[1,2,3].forEach(i=>$("#p"+i).classList.toggle("act",i==n))}
+$("#tabs").onclick=e=>{const b=e.target.closest("[data-p]");if(b)showPane(b.dataset.p)};
+function pick(k){sel=k;location.hash=k;screener();work();$("#p2").scrollTop=0;if(matchMedia("(max-width:1100px)").matches)showPane(2)}
 
 // ---------- gráficos
-function chart(t){let h=t.hist.slice(-RN[rng]-1);const W=700,H=250,m={l:44,r:84,t:8,b:20};
+const PW=()=>Math.min(700,($('#p2').clientWidth||innerWidth)-22);
+function chart(t){let h=t.hist.slice(-RN[rng]-1);const W=PW(),H=250,m={l:44,r:84,t:8,b:20};
 const pmin=Math.min(...h.map(x=>x[1])),pmax=Math.max(...h.map(x=>x[1]));
 const L=[[t.high,"Máx 52s","var(--mut)"],[t.low,"Mín 52s","var(--mut)"],[t.target,"Alvo","var(--org)"],[t.dcf,"DCF","var(--blue)"]].filter(l=>l[0]&&l[0]>=pmin*.6&&l[0]<=pmax*1.6);
 const vals=[pmin,pmax,...L.map(l=>l[0])],lo=Math.min(...vals)*.98,hi=Math.max(...vals)*1.02;
@@ -93,15 +109,15 @@ let g=[0,1,2,3].map(i=>{const v=lo+(hi-lo)*i/3;return `<line x1="${m.l}" x2="${W
 g+=L.map(([v,l,c])=>`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-dasharray="4 3"/><text x="${W-m.r+4}" y="${y(v)+3}" style="fill:${c}">${l} ${v.toFixed(0)}</text>`).join("");
 g+=`<text x="${m.l}" y="${H-5}">${h[0][0]}</text><text x="${W-m.r}" y="${H-5}" text-anchor="end">${h.at(-1)[0]}</text>`;
 g+=`<path d="${h.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(p[1]).toFixed(1)).join("")}" fill="none" stroke="var(--blue)" stroke-width="1.6"/><line id="${id}" y1="${m.t}" y2="${H-m.b}" stroke="var(--mut)" display="none"/>`;
-setTimeout(()=>{const s=document.getElementById(id)?.closest("svg");if(!s)return;s.onmousemove=e=>{const b=s.getBoundingClientRect(),i=Math.max(0,Math.min(h.length-1,Math.round(((e.clientX-b.left)*W/b.width-m.l)/(W-m.l-m.r)*(h.length-1))));const l=document.getElementById(id);l.setAttribute("x1",x(i));l.setAttribute("x2",x(i));l.removeAttribute("display");const c=$("#ctip");c.style.display="block";c.style.left=e.clientX+12+"px";c.style.top=e.clientY+12+"px";c.textContent=h[i][0]+"  "+h[i][1].toFixed(2)};
-s.onmouseleave=()=>{$("#ctip").style.display="none";document.getElementById(id)?.setAttribute("display","none")}});
+setTimeout(()=>{const s=document.getElementById(id)?.closest("svg");if(!s)return;s.style.touchAction='pan-y';s.onpointermove=e=>{const b=s.getBoundingClientRect(),i=Math.max(0,Math.min(h.length-1,Math.round(((e.clientX-b.left)*W/b.width-m.l)/(W-m.l-m.r)*(h.length-1))));const l=document.getElementById(id);l.setAttribute("x1",x(i));l.setAttribute("x2",x(i));l.removeAttribute("display");const c=$("#ctip");c.style.display="block";c.style.left=e.clientX+12+"px";c.style.top=e.clientY+12+"px";c.textContent=h[i][0]+"  "+h[i][1].toFixed(2)};
+s.onpointerleave=()=>{$("#ctip").style.display="none";document.getElementById(id)?.setAttribute("display","none")}});
 return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Preço de ${esc(t.name)}">${g}</svg>`}
 function radar(t){const N=["Valor","Cresc.","Rentab.","Saúde","Dividendo"],cx=100,cy=92,R=62,pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/5;return[cx+Math.cos(a)*R*v/100,cy+Math.sin(a)*R*v/100]};
 const poly=v=>v.map((x,i)=>pt(i,x).join(",")).join(" ");
 return `<svg viewBox="-14 0 228 184" width="100%" role="img" aria-label="Perfil fundamental">${[25,50,75,100].map(q=>`<polygon points="${poly([q,q,q,q,q])}" fill="none" stroke="var(--line2)"/>`).join("")}
 ${N.map((n,i)=>{const[x,y]=pt(i,118);return `<text x="${x}" y="${y+3}" text-anchor="middle">${n} ${t.radar[i]}</text>`}).join("")}
 <polygon points="${poly(t.radar)}" fill="#3987e544" stroke="var(--blue)" stroke-width="1.5"/></svg>`}
-function football(t){const W=520,m={l:78,r:20},rows=[["52 semanas",t.low,t.high,null],["Analistas",t.tlow,t.thigh,t.target],["DCF",null,null,t.dcf]];
+function football(t){const W=Math.min(520,PW()),m={l:78,r:20},rows=[["52 semanas",t.low,t.high,null],["Analistas",t.tlow,t.thigh,t.target],["DCF",null,null,t.dcf]];
 const all=[t.price,t.low,t.high,t.tlow,t.thigh,t.target,t.dcf].filter(Boolean),lo=Math.min(...all)*.95,hi=Math.min(Math.max(...all)*1.05,t.price*2.6);
 const x=v=>m.l+(Math.min(v,hi)-lo)/(hi-lo)*(W-m.l-m.r);
 let g=rows.map(([l,a,b,mk],i)=>{const y=14+i*30;let s=`<text x="0" y="${y+9}">${l}</text>`;
@@ -127,12 +143,12 @@ $("#p2").innerHTML=`<div class="ph"><span>Ficha · ${sel}</span><span class="tab
  <div class="verdict">
  <div><span>Score fundamental</span><b>${t.score}/100</b></div>
  <div><span>Valor · Rent. · Solv. · Cresc.</span><span>${t.pillars.join(" · ")} (de 25)</span></div>
- <div><span class="tip" data-tip="Valor do DCF próprio vs preço. Positivo = ação abaixo do valor estimado. Depende fortemente das premissas (g, r).">Margem seg. DCF</span><span data-mos>${chg(mos,0)}</span></div>
+ <div><span class="tip" tabindex="0" data-tip="Valor do DCF próprio vs preço. Positivo = ação abaixo do valor estimado. Depende fortemente das premissas (g, r).">Margem seg. DCF</span><span data-mos>${chg(mos,0)}</span></div>
  <div><span>Upside alvo analistas</span><span data-up="${sel}">${chg(t.upside,0)}</span></div>
  <div><span>P/E proj. vs mediana setor</span><span>${f(t.fpe)}x vs ${f(t.peer?.fpe)}x</span></div></div>
  <div style="margin-top:10px">${football(t)}</div></div></div>
 <div class="blk"><table><thead><tr><th style="position:static">Métrica</th><th style="position:static">Valor</th><th style="position:static">Mediana setor</th><th style="position:static;text-align:left">Percentil (100 = melhor)</th></tr></thead><tbody>
-${M.map(([k,l,u,tip])=>`<tr><td><span class="tip" data-tip="${esc(tip)}">${l}</span></td><td>${f(t[k],1,u)}</td><td class="mut">${f(t.peer?.[k],1,u)}</td><td style="text-align:left">${t.pct?.[k]==null?"–":`${t.pct[k]}<span class="pb"><i style="width:${t.pct[k]}%"></i></span>`}</td></tr>`).join("")}</tbody></table>
+${M.map(([k,l,u,tip])=>`<tr><td><span class="tip" tabindex="0" data-tip="${esc(tip)}">${l}</span></td><td>${f(t[k],1,u)}</td><td class="mut">${f(t.peer?.[k],1,u)}</td><td style="text-align:left">${t.pct?.[k]==null?"–":`${t.pct[k]}<span class="pb"><i style="width:${t.pct[k]}%"></i></span>`}</td></tr>`).join("")}</tbody></table>
 <div class="mut" style="font-size:10px;margin-top:4px">Percentil e mediana calculados sobre as ${Object.keys(T).length} ações do ecrã, não sobre o mercado inteiro.</div></div>
 <div class="blk"><dl><dt>O que faz</dt><dd>${esc(th[0])}</dd><dt>Porque caiu / porque está barata</dt><dd>${why}</dd><dt>Catalisadores</dt><dd>${esc(th[1])}</dd><dt>Riscos</dt><dd>${esc(th[2])}</dd></dl></div>
 <div class="blk"><div class="ph" style="position:static;margin:-10px -10px 6px">Desconto real ou value trap?</div><table><tbody>${checks(t).map(([l,ok,v])=>`<tr><td>${ok==null?"?":ok?'<span class="up">✓</span>':'<span class="dn">✗</span>'} ${l}</td><td>${v}</td></tr>`).join("")}</tbody></table></div>
@@ -180,5 +196,5 @@ ws.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.type!="pricing")return;cons
 ws.onclose=()=>{live("a reconectar…");setTimeout(connect,Math.min(30000,1000*2**retry++))};ws.onerror=()=>ws.close()}
 setInterval(()=>{if(last&&Date.now()-last>90000)live("sem negócios há >90 s (mercado fechado?)")},15000);
 
-tape();screener();work();side();connect();
+tape();screener();work();side();showPane(1);addEventListener('resize',()=>{clearTimeout(window._rz);window._rz=setTimeout(work,200)});connect();
 </script></body></html>
