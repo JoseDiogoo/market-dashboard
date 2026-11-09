@@ -146,6 +146,10 @@ def analyze(t, i, p, mcap, beta, hist5, fin_sector):
         tax = 0.21 if tax is None or not (0 <= tax <= 0.4) else tax
         ic = _v(bs, "Invested Capital", k)
         roic = _div(ebit * (1 - tax), ic) if ebit is not None and ic and ic > 0 else None
+        ta_k, eq_k = _v(bs, "Total Assets", k), _v(bs, ["Stockholders Equity", "Common Stock Equity"], k)
+        ta_p = _v(bs, "Total Assets", k + 1)
+        at_k = _div(rev, (ta_k + ta_p) / 2 if ta_k and ta_p else ta_k)
+        lev_k = _div(ta_k, eq_k) if eq_k and eq_k > 0 else None
         d = fin.columns[k]
         pe_h = None
         if same and eps and eps > 0 and hist5 is not None and len(hist5):
@@ -155,7 +159,8 @@ def analyze(t, i, p, mcap, beta, hist5, fin_sector):
             except Exception:
                 pe_h = None
         ser.append({"y": d.year, "rev": _r(None if rev is None else rev / 1e6, 0), "gm": _r(_pc(gp, rev), 1), "om": _r(_pc(ebit, rev), 1), "nm": _r(_pc(ni, rev), 1),
-                    "fcfm": _r(_pc(fcf, rev), 1), "eps": _r(eps, 2), "roic": _r(None if roic is None else 100 * roic, 1), "pe": _r(pe_h, 1)})
+                    "fcfm": _r(_pc(fcf, rev), 1), "eps": _r(eps, 2), "roic": _r(None if roic is None else 100 * roic, 1), "pe": _r(pe_h, 1),
+                    "at": _r(at_k, 2), "lev": _r(lev_k, 2), "roe": _r(_pc(ni, eq_k) if eq_k and eq_k > 0 else None, 1), "_fcf": fcf, "_ni": ni})
     out["series"] = ser
 
     def cagr(key):
@@ -178,6 +183,44 @@ def analyze(t, i, p, mcap, beta, hist5, fin_sector):
     oms = [s["om"] for s in ser if s["om"] is not None]
     if len(oms) >= 3:
         out["hist_om"] = {"now": oms[-1], "mean": _r(float(np.mean(oms)), 1), "min": min(oms), "max": max(oms)}
+
+    # ---- lucros normalizados (média de 3-5 anos) e ciclicidade
+    epss = [x["eps"] for x in ser if x["eps"] is not None]
+    cyc_kw = ("semiconductor", "memory", "steel", "oil", "gas", "coal", "mining", "gold", "copper", "aluminum", "chemicals", "auto manufacturers", "airlines", "marine", "shipping", "lumber", "building materials", "agricultural", "uranium", "drilling", "refining")
+    ind = ((i.get("industry") or "") + " " + (i.get("sector") or "")).lower()
+    cyc_ind = (i.get("sector") in ("Energy", "Basic Materials")) or any(k in ind for k in cyc_kw)
+    cv = None
+    if len(epss) >= 3 and abs(np.mean(epss)) > 0:
+        cv = float(np.std(epss) / abs(np.mean(epss)))
+    cyc = bool(cyc_ind or (cv is not None and cv > 0.6))
+    if len(epss) >= 3 and same:
+        en = float(np.mean(epss))
+        pe_n = p / en if en > 0 else None
+        eps_ttm = i.get("trailingEps")
+        peak = bool(cyc and en > 0 and eps_ttm and eps_ttm > 1.6 * en)
+        out["norm"] = {"eps": _r(en, 2), "pe": _r(pe_n, 1) if pe_n and pe_n < 1000 else None, "years": len(epss), "cyc": cyc, "peak": peak, "cv": _r(cv, 2),
+                       "reason": "setor/indústria cíclica" if cyc_ind else ("lucros muito voláteis entre anos" if cyc else None)}
+    else:
+        out["norm"] = {"cyc": cyc, "peak": False, "reason": "setor/indústria cíclica" if cyc_ind else None}
+
+    # ---- DuPont (ROE = margem líquida × rotação dos ativos × alavancagem)
+    du = [x for x in ser if x["nm"] is not None and x["at"] and x["lev"]]
+    if len(du) >= 2:
+        a, b = du[0], du[-1]
+        out["dupont"] = {"y0": a["y"], "y1": b["y"], "nm": [a["nm"], b["nm"]], "at": [a["at"], b["at"]], "lev": [a["lev"], b["lev"]], "roe": [a["roe"], b["roe"]]}
+
+    # ---- insiders (últimos 6 meses)
+    try:
+        ip = t.insider_purchases
+        rows = {str(r.iloc[0]): r for _, r in ip.iterrows()}
+        buy, sell = rows.get("Purchases"), rows.get("Sales")
+        ins = {"buy_tx": int(buy["Trans"]) if buy is not None and not pd.isna(buy["Trans"]) else 0, "sell_tx": int(sell["Trans"]) if sell is not None and not pd.isna(sell["Trans"]) else 0,
+               "buy_sh": _r(float(buy["Shares"]), 0) if buy is not None and not pd.isna(buy["Shares"]) else 0, "sell_sh": _r(float(sell["Shares"]), 0) if sell is not None and not pd.isna(sell["Shares"]) else 0}
+        if ins["buy_tx"] or ins["sell_tx"]:
+            ins["label"] = "compras" if ins["buy_sh"] > 1.5 * ins["sell_sh"] and ins["buy_tx"] >= 2 else "vendas" if ins["sell_sh"] > 3 * max(ins["buy_sh"], 1) and ins["sell_tx"] >= 3 else "misto"
+            out["insiders"] = ins
+    except Exception:
+        pass
 
     # ---- qualidade
     if n >= 2 and not fin_sector:
@@ -239,6 +282,29 @@ def analyze(t, i, p, mcap, beta, hist5, fin_sector):
     except Exception:
         pass
     out["analysts"] = an
+    # ---- "compounder": consistência de vendas, lucros, caixa livre e retorno do capital + moat (proxy quantitativa)
+    chk = {}
+    rv_ = [x["rev"] for x in ser if x["rev"]]
+    if len(rv_) >= 3:
+        ups = sum(1 for a_, b_ in zip(rv_, rv_[1:]) if b_ > a_)
+        chk["Vendas a crescer (maioria dos anos)"] = ups >= max(2, len(rv_) - 2) and rv_[-1] > rv_[0]
+    if len(epss) >= 3:
+        chk["Lucro por ação positivo e a crescer"] = all(e_ > 0 for e_ in epss[-3:]) and epss[-1] > epss[0]
+    fc = [x["_fcf"] for x in ser if x["_fcf"] is not None]
+    if len(fc) >= 3 and not fin_sector:
+        chk["Caixa livre positivo todos os anos"] = all(f_ > 0 for f_ in fc)
+    rois = [x["roic"] for x in ser if x["roic"] is not None]
+    gms = [x["gm"] for x in ser if x["gm"] is not None]
+    moat = None
+    if not fin_sector and len(rois) >= 3:
+        wide = all(r_ >= 100 * wacc + 5 for r_ in rois) and (len(gms) < 3 or float(np.std(gms)) < 4)
+        nar = sum(1 for r_ in rois if r_ > 100 * wacc) >= len(rois) - 1
+        moat = "largo" if wide else "estreito" if nar else "sem evidência"
+        chk["Retorno do capital acima do custo (moat)"] = moat != "sem evidência"
+    out["moat"] = moat
+    out["compounder"] = {"checks": chk, "ok": len(chk) >= (2 if fin_sector else 3) and all(chk.values())}
+    for x in ser:
+        x.pop("_fcf", None); x.pop("_ni", None)
     out.update(_verdict(out, i, p, tm))
     return out
 
@@ -305,7 +371,11 @@ def _verdict(q, i, p, tm):
     dear = bool(hp and hp["vs_mean"] is not None and hp["vs_mean"] >= 25)
     if hp:
         (why if cheap else risk if dear else []).append(f"P/E {hp['now']} vs média própria {hp['mean']} ({hp['n']} anos): " + ("abaixo do habitual." if cheap else "acima do habitual." if dear else ""))
-    trap = bool(cheap and ((score is not None and score < 45) or peak or len(risk) >= 2))
+    nm_ = q.get("norm") or {}
+    if nm_.get("peak"):
+        peak = True
+        risk.append(f"Lucros atuais bem acima da média de {nm_.get('years')} anos (setor cíclico): P/E normalizado {nm_.get('pe')} vs P/E atual {(q.get('hist_pe') or {}).get('now', i.get('trailingPE') and round(i['trailingPE'], 1))}.")
+    trap = bool((cheap and ((score is not None and score < 45) or peak or len(risk) >= 2)) or nm_.get("peak"))
     if score is None:
         label = "Sem dados suficientes"
     elif trap:

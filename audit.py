@@ -85,5 +85,18 @@ for s in random.sample(list(Q), min(15, len(Q))):
         pass
 bad_r = [x for x in rev_d if not 0.5 <= x[1] <= 1.6]
 check("vendas do último exercício ≈ vendas 12m", len(bad_r) <= max(1, len(rev_d) // 8), f"{len(rev_d)} amostras; fora: {bad_r}")
+import re
+EN = re.compile(r"\b(the|and|provides|which|its)\b", re.I)
+auto = {k: t["tese"] for k, t in T.items() if not t["tese"].get("hand")}
+eng = [k for k, x in auto.items() if EN.search(" ".join([x["faz"].replace(T[k]["name"].strip(" -"), ""), *x["barata"], *x["saude"], *x["cat"], *x["riscos"]]))]
+check("teses automáticas 100% em português (sem texto em inglês do Yahoo)", not eng and all(len(x["faz"]) > 60 and "resumo do Yahoo" not in x["faz"] for x in auto.values()), str(eng[:5]))
+el = [k for k in D["order"] if T[k]["elite"]]
+top = el[:10]
+check("Top 10: só compounders que passam o crivo", all(T[k]["cons"]["total"] >= 10 and (T[k]["cons"]["buy_pct"] or 0) > 65 and T[k]["q"]["compounder"]["ok"] and not T[k]["q"]["trap"] and not T[k]["q"]["norm"].get("peak") and (T[k]["q"]["qscore"] or 0) >= 60 for k in top), f"{len(el)} elite: {top}")
+check("elite vem primeiro na ordem das oportunidades", D["order"][:len(el)] == el)
+check("destaque principal sem armadilha de valor", not T[D["highlights"]["pick"]]["q"]["trap"])
+check("taxa sem risco (FRED) plausível", 0.005 < D["meta"]["rf"] < 0.12, f"rf={D['meta']['rf']} macro={D.get('macro')}")
+check("sentimento só pos/neu/neg", all(a.get("s") in ("pos", "neu", "neg") for t in T.values() for a in t["news"]) and all(a["s"] in ("pos", "neu", "neg") for a in D["mnews"]["items"]))
+print("INFO notícias de mercado:", len(D["mnews"]["items"]), D["mnews"]["sources"], "| insiders com dados:", sum(1 for t in T.values() if t["q"].get("insiders")), "| cíclicas:", sum(1 for t in T.values() if t["q"]["norm"].get("cyc")))
 print("\nresumo:", D["audit"])
 sys.exit(1 if bad else 0)

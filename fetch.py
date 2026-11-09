@@ -1,6 +1,6 @@
 """Pipeline global: screener (milhares de ações) -> estatística (percentis por setor) -> análise profunda do top N -> data.js
 Uso: python fetch.py [--quick]   (--quick = só 2 setores, para testar)"""
-import quality
+import quality, news, tese_auto
 import json, math, re, sys, time
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
@@ -108,7 +108,7 @@ STOPW = {"inc", "incorporated", "corp", "corporation", "ltd", "limited", "plc", 
 
 def is_receipt(s):
     """Recibos de depósito/BDRs/NVDRs duplicam empresas estrangeiras com métricas pouco fiáveis."""
-    return bool(re.search(r"[A-Z]\d{2}\.SA$", s) and not s.endswith("11.SA")) or bool(re.search(r"\d{2}\.BK$|-[RFN]\.BK$", s))
+    return bool(re.search(r"-P[A-Z]?$", s)) or bool(re.search(r"[A-Z]\d{2}\.SA$", s) and not s.endswith("11.SA")) or bool(re.search(r"\d{2}\.BK$|-[RFN]\.BK$", s))
 
 
 def norm(name):
@@ -359,32 +359,54 @@ def deep(sym):
         q = quality.analyze(t, i, p, mcap, rs.get("beta"), h5, fin)
         vol = rs.get("vol") or 0
         risk = "Baixo" if vol < 22 else "Médio" if vol < 35 else "Alto"
-        news = []
-        for n in (t.news or [])[:6]:
-            c = n.get("content", n)
+        nws = []
+        for n_ in (t.news or [])[:10]:
+            c = n_.get("content", n_)
             url = (c.get("canonicalUrl") or {}).get("url") or c.get("link")
             if c.get("title") and url:
-                news.append({"title": c["title"], "link": url, "src": (c.get("provider") or {}).get("displayName", ""), "date": (c.get("pubDate") or "")[:10]})
+                nws.append({"title": c["title"], "link": url, "src": (c.get("provider") or {}).get("displayName", ""), "date": (c.get("pubDate") or "")[:10]})
+        news.tag(nws)
+        senti = news.summarize(nws)
+        dropv = news.drop_verdict((p / hi - 1) * 100 if hi else None, senti, q)
         co = consenso(t, i)
         dy = i.get("dividendYield")
-        if sym in TESE:
-            f = TESE[sym]
-            tese = {"faz": f[0], "barata": f[1], "cat": f[2], "riscos": f[3]}
-        else:
-            tese = {"faz": ((i.get("longBusinessSummary") or "Sem descrição disponível.")[:420] + " (resumo do Yahoo, em inglês)"), "barata": [], "cat": [], "riscos": []}
         cat = CURATED.get(sym) or ("d" if (dy or 0) >= 3 and risk != "Alto" else "g" if (rg or 0) >= 10 or (eg or 0) >= 15 else "v")
-        return sym, {
+        out = {
             "name": NOMES.get(sym) or i.get("shortName") or i.get("longName") or sym, "cat": cat, "sector": i.get("sector"), "industry": i.get("industry"), "cur": cur,
             "price": r(p), "low": r(lo), "high": r(hi), "d1": r((p / float(h.iloc[-2]) - 1) * 100, 2) if len(h) > 1 else None, "m1": r((p / float(h.iloc[-22]) - 1) * 100, 1) if len(h) > 22 else None,
             "drawdown": r((p / hi - 1) * 100, 1), "target": r(tgt), "tlow": r(tl), "thigh": r(th), "upside": r(up, 1),
             "dcf": r(dcfv), "dcf_ok": dcf_ok, "dcf_up": r((dcfv / p - 1) * 100, 1) if dcfv else None, "fair": r(fair), "buy_below": r(buy_below),
             "zone": "buy" if buy_below and p <= buy_below else "wait", "cons": co, "risk": risk, "vol": rs.get("vol"), "rs": rs,
             "dy": r(dy, 2), "payout": r(pct(i.get("payoutRatio")), 0), "pe": r(i.get("trailingPE"), 1), "fpe": r(fpe, 1), "eve": r(eve, 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1),
-            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "tese": tese, "q": q,
-            "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "news": news}
+            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "q": q,
+            "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "news": nws, "senti": senti, "drop": dropv}
+        auto = tese_auto.gen(i, {**out, "cat": None})
+        if sym in TESE:  # curadas: texto escrito à mão + saúde financeira automática
+            f = TESE[sym]
+            out["tese"] = {"faz": f[0], "barata": f[1], "saude": auto["saude"], "cat": f[2] + auto["cat"][:2], "riscos": f[3] + auto["riscos"][:2], "hand": True}
+        else:
+            out["tese"] = {**auto, "hand": False}
+        return sym, out
     except Exception as e:
         log("deep falhou", sym, str(e)[:80])
         return sym, None
+
+
+def macro():
+    """Taxas dos EUA via FRED (CSV público, sem chave). Falha → mantém 4%. Devolve {id: (valor %, data)}."""
+    global RF
+    import requests, io
+    out = {}
+    for sid, nm in (("DGS10", "Treasury 10 anos"), ("DGS2", "Treasury 2 anos"), ("DFF", "Fed Funds")):
+        try:
+            txt = requests.get(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}", timeout=25, headers={"User-Agent": "Mozilla/5.0"}).text
+            rows = [l.split(",") for l in txt.strip().splitlines()[1:] if l.split(",")[-1] not in (".", "")]
+            out[sid] = {"n": nm, "v": float(rows[-1][1]), "d": rows[-1][0]}
+        except Exception:
+            pass
+    if "DGS10" in out and 0.5 < out["DGS10"]["v"] < 12:
+        RF = quality.RF = out["DGS10"]["v"] / 100
+    return out
 
 
 # ---------------------------------------------------------------- orquestração
@@ -395,6 +417,8 @@ def nz(v, d=0):
 def build(quick=False):
     t0 = time.time()
     QC.clear()
+    MAC = macro()
+    log(f"macro: {MAC} · RF={RF:.4f}")
     quotes, fx = fetch_universe(SECTORS[:2] if quick else SECTORS)
     df = to_frame(quotes, fx)
     log(f"universo: {len(df)} ações · {df.ex.nunique()} bolsas · {time.time() - t0:.0f}s")
@@ -432,13 +456,25 @@ def build(quick=False):
         bpa = 100 * (c["strongBuy"] + c["buy"] + 2.5) / (c["total"] + 5)  # consenso com prior de 5 analistas neutros: 1 só analista não vale 100%
         qs = t["q"].get("qscore")
         qs = 50 if qs is None else qs
-        t["rank"] = round(0.22 * t["score"] + 0.15 * v + 0.23 * 100 * (sc(t["upside"], 0, 40) or 0) + 0.20 * bpa + 0.20 * qs - {"Baixo": 0, "Médio": 4, "Alto": 12}[t["risk"]] - (8 if t["q"].get("trap") else 0))
+        nm_ = t["q"].get("norm") or {}
+        pen = {"Baixo": 0, "Médio": 4, "Alto": 12}[t["risk"]] + (8 if t["q"].get("trap") else 0) + (12 if nm_.get("peak") else 6 if nm_.get("cyc") else 0)
+        t["rank"] = round(0.22 * t["score"] + 0.15 * v + 0.23 * 100 * (sc(t["upside"], 0, 40) or 0) + 0.20 * bpa + 0.20 * qs - pen)
+
+    def elite(t):  # crivo do Top 10: compounders com consenso forte, caixa real, balanço saudável
+        q, c = t["q"], t["cons"]
+        return bool(c["total"] >= 10 and (c["buy_pct"] or 0) > 65 and q.get("compounder", {}).get("ok") and not q.get("trap") and not (q.get("norm") or {}).get("peak")
+                    and (q.get("qscore") or 0) >= 60 and (q.get("altman") or {}).get("zone") != "perigo" and (t["nd"] is None or t["nd"] < 4)
+                    and (t.get("fcfy") is None or t["fcfy"] > 0))
+    for t in T.values():
+        t["elite"] = elite(t)
     elig = [s for s in T if s in CURATED or (s in byS.index and byS.mcap[s] >= DEEP_MIN_USD)]
-    order = sorted(elig, key=lambda s: -T[s]["rank"])
+    order = sorted(elig, key=lambda s: (not T[s]["elite"], -T[s]["rank"]))
     solid = [s for s in order if T[s]["cons"]["total"] >= 5]  # destaques exigem pelo menos 5 analistas
-    safe = [s for s in solid if (T[s]["dy"] or 0) >= 2 and T[s]["risk"] != "Alto" and (T[s]["payout"] or 0) < 90 and (T[s]["fcfy"] or 0) > 0 and (T[s]["eg"] is None or T[s]["eg"] >= -5)]
-    disc = [s for s in solid if s != solid[0] and T[s]["score"] >= 55 and (T[s]["cons"]["buy_pct"] or 0) >= 50 and T[s]["upside"]]
-    hl = {"pick": solid[0], "dividend": max(safe, key=lambda s: T[s]["dy"]) if safe else None, "discount": max(disc, key=lambda s: T[s]["upside"]) if disc else None}
+    clean = [s for s in solid if not T[s]["q"].get("trap")]
+    safe = [s for s in clean if (T[s]["dy"] or 0) >= 2 and T[s]["risk"] != "Alto" and (T[s]["payout"] or 0) < 90 and (T[s]["fcfy"] or 0) > 0 and (T[s]["eg"] is None or T[s]["eg"] >= -5)]
+    pick = clean[0] if clean else solid[0]
+    disc = [s for s in clean if s != pick and T[s]["score"] >= 55 and (T[s]["cons"]["buy_pct"] or 0) >= 50 and T[s]["upside"] and (T[s]["q"].get("qscore") or 0) >= 60]
+    hl = {"pick": pick, "dividend": max(safe, key=lambda s: T[s]["dy"]) if safe else None, "discount": max(disc, key=lambda s: T[s]["upside"]) if disc else None}
     def pos(v, d=1):  # rácios negativos (prejuízo / capital próprio negativo) não são mostrados
         return None if v is None or pd.isna(v) or v <= 0 else nz(v, d)
     cols = ["s", "name", "ex", "cur", "sec", "px", "chg", "mcap", "fpe", "pe", "pb", "dy", "ret", "hi", "lo", "rat", "sc1", "fv", "fg", "fm", "fa", "fi", "fx", "dp", "tm"]
@@ -462,14 +498,37 @@ def build(quick=False):
     QC.update({"universe": len(df), "dup_symbols": int(len(df) - df.s.nunique()), "dup_names_left": dupn, "deep_missing_in_rows": [s for s in T if s not in byS.index],
                "price_mismatch": mism, "deep_ok": len(T), "deep_wanted": len(want), "oldest_price_days": round((time.time() - float(df.tm.min())) / 86400, 1),
                "median_price_age_h": round(float((time.time() - df.tm).median()) / 3600, 1)})
-    return {"tape": tape, "tape_names": TAPE, "audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": tape.get("EURUSD=X", {}).get("price"), "order": order, "highlights": hl, "tickers": T, "cols": cols, "rows": rows,
-            "pais": PAIS, "exinfo": {k: {"n": v[0], "p": v[1], "r": v[2]} for k, v in EX.items()}, "sector_stats": stats, "meta": {"n_universe": len(df), "n_deep": len(T), "n_exch": int(df.ex.nunique()), "min_usd": MIN_USD, "deep_min_usd": DEEP_MIN_USD, "rf": RF, "erp": ERP}}
+    try:
+        mn = news.market()
+    except Exception:
+        mn = {"items": [], "sources": [], "summary": {"n": 0}}
+    QC.update({"elite": sum(1 for t in T.values() if t["elite"]), "market_news_sources": mn["sources"], "macro": {k: v["v"] for k, v in MAC.items()}})
+    return {"mnews": mn, "macro": MAC, "version": "Pro Institutional", "tape": tape, "tape_names": TAPE, "audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": tape.get("EURUSD=X", {}).get("price"), "order": order, "highlights": hl, "tickers": T, "cols": cols, "rows": rows,
+            "pais": PAIS, "exinfo": {k: {"n": v[0], "p": v[1], "r": v[2]} for k, v in EX.items()}, "sector_stats": stats, "meta": {"n_universe": len(df), "n_deep": len(T), "n_exch": int(df.ex.nunique()), "min_usd": MIN_USD, "deep_min_usd": DEEP_MIN_USD, "rf": RF, "erp": ERP, "sources": ["Yahoo Finance (cotações, fundamentais, analistas, insiders)", "FRED (taxas EUA)", "CNBC / MarketWatch / Bloomberg / Yahoo (notícias RSS)"]}}
 
 
 def refresh_rows(d):
-    """Atualiza preços/variação do universo inteiro (≈10 s) sem refazer a análise profunda. Usado pelo Streamlit."""
-    quotes, fx = fetch_universe(SECTORS)
-    cur = to_frame(quotes, fx).set_index("s")
+    """Atualiza preços do universo (≈10 s) sem refazer a análise profunda. Multi-fonte com reserva:
+    1) screener do Yahoo (universo inteiro) → 2) download em lote do Yahoo (só análises completas) → 3) mantém o snapshot (marcado como atrasado)."""
+    t0 = time.time()
+    src = {"name": "Yahoo Finance · screener", "ok": True, "mode": "full"}
+    cur = None
+    try:
+        quotes, fx = fetch_universe(SECTORS)
+        cur = to_frame(quotes, fx).set_index("s")
+    except Exception as e:
+        log("refresh: screener falhou", str(e)[:80])
+    if cur is None or cur.empty:
+        try:  # reserva: endpoint diferente, só as ações com análise completa
+            syms = list(d["tickers"])
+            h = yf.download(syms, period="5d", progress=False, auto_adjust=False, threads=True)["Close"].dropna(how="all")
+            rows = {s: (float(h[s].dropna().iloc[-1]), float(h[s].dropna().iloc[-1] / h[s].dropna().iloc[-2] - 1) * 100) for s in syms if s in h and len(h[s].dropna()) > 1}
+            cur = pd.DataFrame({"px": {s: v[0] for s, v in rows.items()}, "chg": {s: v[1] for s, v in rows.items()}, "tm": {s: time.time() for s in rows}})
+            src = {"name": "Yahoo Finance · download (reserva)", "ok": bool(len(cur)), "mode": "deep"}
+        except Exception as e:
+            log("refresh: reserva falhou", str(e)[:80])
+            cur = pd.DataFrame(columns=["px", "chg", "tm"])
+            src = {"name": "Snapshot guardado", "ok": False, "mode": "stale"}
     ci = {c: i for i, c in enumerate(d["cols"])}
     for row in d["rows"]:
         if row[0] in cur.index:
@@ -482,6 +541,13 @@ def refresh_rows(d):
             if t.get("target"):
                 t["upside"] = round((t["target"] / p - 1) * 100, 1)
             t["zone"] = "buy" if t.get("buy_below") and p <= t["buy_below"] else "wait"
+    try:
+        d["mnews"] = news.market()
+    except Exception:
+        pass
+    src["ms"] = int((time.time() - t0) * 1000)
+    src["ts"] = int(time.time())
+    d["source"] = src
     d["updated"] = time.strftime("%Y-%m-%d %H:%M")
     return d
 
