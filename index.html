@@ -128,6 +128,7 @@ h3{letter-spacing:-.01em}
 .how .stp{display:flex;gap:12px;margin:12px 0}.how .stp i{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accbg);color:var(--acc);font-style:normal;font-weight:800;display:flex;align-items:center;justify-content:center}.how p{margin:4px 0 0;font-size:13px;line-height:1.55;color:var(--t2)}
 @media(max-width:900px){.plimp{grid-template-columns:1fr}.oh{display:none}.orow{grid-template-columns:1fr 1fr;gap:10px 14px;padding:16px 10px;background:var(--card2);border:1px solid var(--line);border-radius:14px;margin:10px 0}.orow .oc:first-child{grid-column:1/-1}.orow .oc:nth-child(4),.orow .oc:nth-child(5),.orow .oc:nth-child(6){grid-column:1/-1}.orow .oc:not(:first-child):before{content:attr(data-l);display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-weight:700;margin-bottom:2px}}
 @media(max-width:520px){.plprof{grid-template-columns:1fr}.pp{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 8px}.plv{font-size:26px}.imp b{font-size:22px}}
+.act{display:flex;align-items:center;gap:10px;margin:10px 0 2px;flex-wrap:wrap}.act .why{font-size:12px;color:var(--t2);line-height:1.3;flex:1;min-width:120px}.one{font-size:12px;color:var(--t2);margin-top:2px}.one b{color:var(--t1)}
 </style></head><body><div class="wrap">
 <div class="vbar"><i></i>Versão Pro Institutional (Live Multi-API)</div>
 <header class="top"><div class="brand"><span class="logo">◆</span>Radar<span>.</span>Invest</div><input id="q" placeholder="Procurar entre milhares de ações (ex.: Nestlé, SAP)" autocomplete="off"><span id="live" class="livepill" title="Estado das fontes de dados">a ligar…</span><button class="ibtn" id="theme" aria-label="Alternar tema claro/escuro">◐</button></header>
@@ -170,7 +171,12 @@ const av=k=>`<div class="av" style="background:hsl(${hue(k)} 55% 45%)">${esc(T[k
 const GR={"strong buy":"Compra Forte","buy":"Compra","overweight":"Sobreponderar","outperform":"Superar mercado","positive":"Positivo","hold":"Manter","neutral":"Neutro","market perform":"Manter","equal-weight":"Manter","sector perform":"Manter","underweight":"Subponderar","sell":"Vender","underperform":"Abaixo do mercado"};
 const gr=g=>GR[String(g).toLowerCase()]||g;
 const riskChip=r=>`<span class="chip ${r=="Baixo"?"g":r=="Médio"?"a":"r"}">${r=="Baixo"?"Risco baixo":r=="Médio"?"Risco médio":"Risco alto"}</span>`;
-const zoneTag=t=>!t.buy_below?`<span class="chip b">Sem meta fiável</span>`:t.price<=t.buy_below?`<span class="chip g">Na zona de compra</span>`:`<span class="chip a">Esperar recuo</span>`;
+const call=t=>{const q=t.q||{},inz=t.buy_below&&t.price<=t.buy_below;
+if(q.trap)return["a","⚠️ Cuidado",(q.norm&&q.norm.peak)?"lucros em pico de ciclo":"possível armadilha de valor"];
+if(!t.buy_below)return["n","Sem meta fiável","poucos dados"];
+if(inz)return["g","🟢 Comprar agora",t.elite?"empresa de elite, abaixo da zona de compra":"abaixo da zona de compra"];
+return["a","🟡 Esperar",`comprar abaixo de ${usd(t.buy_below,t.cur)} (${n((t.buy_below/t.price-1)*100)}%)`]};
+const zoneTag=t=>{const[c,a]=call(t);return `<span class="chip ${c=="n"?"b":c}" style="font-size:13px;padding:6px 12px">${a}</span>`};
 const consBar=c=>{const t=c.total||1;return `<div class="cb"><i style="width:${100*c.strongBuy/t}%;background:#047857"></i><i style="width:${100*c.buy/t}%;background:#34d399"></i><i style="width:${100*c.hold/t}%;background:#fbbf24"></i><i style="width:${100*(c.sell+c.strongSell)/t}%;background:#ef4444"></i></div>`};
 
 // ---------- destaques
@@ -205,13 +211,12 @@ if(cat=="top")ks=ks.filter(k=>T[k].elite).slice(0,10);else if(cat=="v")ks=ks.fil
 
 if(sort!="rank")ks.sort((a,b)=>(T[b][sort]??-1e9)-(T[a][sort]??-1e9));return ks}
 function grid(){$("#pills").innerHTML=CATS.map(([k,l])=>`<button class="pill ${k==cat&&!q?"on":""}" data-c="${k}">${l}</button>`).join("");
-const ks=list();$("#ord").textContent=(ORD[sort]||"")+(cat=="top"?` · crivo Top 10: ≥10 analistas com >65% compra, caixa livre positivo todos os anos, balanço saudável, sem pico de ciclo, qualidade ≥60 · ${ks.length} de 10 passam hoje`:"");$("#grid").innerHTML=ks.map((k,i)=>{const t=T[k],c=t.cons;return `<div class="card" data-k="${k}" style="animation-delay:${Math.min(i,12)*25}ms"><div class="pos">#${i+1}</div>
+const ks=list();$("#ord").textContent=(ORD[sort]||"")+(cat=="top"?` · crivo Top 10: ≥10 analistas com >65% compra, caixa livre positivo todos os anos, balanço saudável, sem pico de ciclo, qualidade ≥60 · ${ks.length} de 10 passam hoje`:"");$("#grid").innerHTML=ks.map((k,i)=>{const t=T[k],c=t.cons;const [cc,ca,cw]=call(t),qs=t.q&&t.q.qscore;return `<div class="card" data-k="${k}" style="animation-delay:${Math.min(i,12)*25}ms"><div class="pos">#${i+1}</div>
 <div class="ch">${av(k)}<div class="who"><div class="nm">${esc(t.name)}</div><div class="sub">${k} · ${exName(k)}</div></div>${ring(t.rank)}</div>
-<div class="spk">${spark(k,{w:280,h:54,n:90})}</div>
+<div class="act ${cc}"><span data-zone="${k}">${zoneTag(t)}</span><span class="why">${esc(cw)}${t.risk=="Alto"?" · risco alto":""}</span></div>
 <div class="pr"><div><span class="price" data-px="${k}">${usd(t.price,t.cur)}</span> <span class="sub">${eur(t.price,k)}</span></div><span data-d1="${k}">${chgPill(t.d1)}</span></div>
 <div class="trio"><div><span>Comprar até</span><b>${usd(t.buy_below,t.cur)}</b></div><div><span>Meta</span><b>${usd(t.target,t.cur)}</b></div><div><span>Potencial</span><b data-up="${k}">${sg(t.upside)}</b></div></div>
-<div class="cons"><div class="cb"><i style="width:${100*c.strongBuy/(c.total||1)}%;background:#047857"></i><i style="width:${100*c.buy/(c.total||1)}%;background:#34d399"></i><i style="width:${100*c.hold/(c.total||1)}%;background:#fbbf24"></i><i style="width:${100*(c.sell+c.strongSell)/(c.total||1)}%;background:#ef4444"></i></div><span>${c.buy_pct==null?"–":c.buy_pct+"%"} compra · ${c.total}</span></div>
-<div class="tags">${t.elite?'<span class="chip g tiny" title="Passa o crivo de compounders de elite">★ Compounder</span>':""}${(t.q&&t.q.norm&&t.q.norm.cyc)?'<span class="chip a tiny" title="Negócio cíclico: os lucros oscilam com o ciclo">Cíclica</span>':""}${riskChip(t.risk)}<span data-zone="${k}">${zoneTag(t)}</span>${brk(k)}</div></div>`}).join("")||'<p class="sub">Sem resultados.</p>'}
+<div class="one">${c.buy_pct==null?"":`<b>${c.buy_pct}%</b> dos ${c.total} analistas recomendam compra`}${qs!=null?` · qualidade <b>${qs}</b>/100`:""}</div></div>`}).join("")||'<p class="sub">Sem resultados.</p>'}
 $("#pills").onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;q="";$("#q").value="";grid()}};
 $("#sort").onchange=e=>{sort=e.target.value;grid()};$("#q").oninput=e=>{setView(2);X.q=e.target.value.trim();X.n=100;$("#xq").value=X.q;xrender()};
 $("#grid").onclick=e=>{const c=e.target.closest("[data-k]");if(c)location.hash=c.dataset.k};$("#feat").onclick=$("#grid").onclick;$("#mini").onclick=$("#grid").onclick;
