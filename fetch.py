@@ -1,9 +1,10 @@
 """Terminal fundamental: yfinance -> data.js. Uso: python fetch.py  (ou fetch.build() no Streamlit)"""
-import json, time
+import json, statistics, time
 from concurrent.futures import ThreadPoolExecutor
 import yfinance as yf
 
 SCREENS = ["undervalued_large_caps", "undervalued_growth_stocks"]  # screeners dinâmicos do Yahoo; universo muda sozinho
+TAPE = {"^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^DJI": "Dow Jones", "^VIX": "VIX", "^TNX": "US 10Y", "EURUSD=X": "EUR/USD", "GC=F": "Ouro", "CL=F": "WTI", "BTC-USD": "Bitcoin"}
 PIN = []  # ações fixas a incluir sempre (vazio = só screeners)
 ARISTOCRATS = {"MCD", "KO", "JNJ", "PG", "PEP"}  # ponytail: lista manual, yfinance não expõe isto
 CYC_WORDS = ("semiconductor", "homebuilder", "residential construction", "oil", "gas", "steel", "gold", "copper", "airlines", "cruise", "auto")
@@ -59,6 +60,16 @@ def pct(v):
     return None if v is None else v * 100
 
 
+def dcf(fcf, g, shares, netdebt, r=0.09, tg=0.03, yrs=10):
+    """DCF simples e transparente: FCF cresce a g (a decair linearmente para tg), desconto r, valor terminal Gordon."""
+    cash, pv = fcf, 0.0
+    for y in range(1, yrs + 1):
+        cash *= 1 + g + (tg - g) * (y - 1) / (yrs - 1)
+        pv += cash / (1 + r) ** y
+    pv += cash * (1 + tg) / (r - tg) / (1 + r) ** yrs
+    return (pv - netdebt) / shares
+
+
 def one(sym):
     try:
         t = yf.Ticker(sym)
@@ -80,6 +91,15 @@ def one(sym):
         solv = avg([None if nd is None else sc(4 - nd, 0, 4)])
         grow = avg([sc(eg, -10, 20), sc(rg, -5, 15)])
         score = round(25 * (val + rent + solv + grow))
+        dy0 = i.get("dividendYield")
+        radar = [round(100 * x) for x in (val, grow, rent, solv, avg([sc(dy0, 0, 5)]))]  # estilo Snowflake: valor, crescimento, rentab., saúde, dividendo
+        shares = mcap / p if mcap else None
+        fin = i.get("sector") == "Financial Services"  # FCF não faz sentido em bancos/seguradoras
+        g = min(0.08, max(0.0, avg([sc(eg, 0, 15) and eg / 100, sc(rg, 0, 15) and rg / 100]) if eg is not None or rg is not None else 0.03))
+        dcfv = None
+        if not fin and shares and i.get("freeCashflow") and i["freeCashflow"] > 0:
+            dcfv = dcf(i["freeCashflow"], g, shares, (debt or 0) - (cash or 0))
+            dcfv = dcfv if dcfv > 0 else None
         dd = (p / hi - 1) * 100
         bounce = (p / lo - 1) * 100
         trap = [m for ok, m in [(eg is not None and eg < 0, "lucros a cair"), (om is not None and om < 8, "margem operacional baixa"),
@@ -114,6 +134,9 @@ def one(sym):
             "fair": r(tgt or p), "upside": r(up, 1), "drawdown": r(dd, 1), "bounce": r(bounce, 1), "rec": i.get("recommendationKey"), "analysts": i.get("numberOfAnalystOpinions"),
             "pe": r(i.get("trailingPE"), 1), "fpe": r(fpe, 1), "peg": r(i.get("trailingPegRatio") or i.get("pegRatio")), "dy": r(dy, 2),
             "eve": r(eve, 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1), "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1),
+            "tlow": r(i.get("targetLowPrice")), "thigh": r(i.get("targetHighPrice")), "mcap": mcap, "radar": radar,
+            "dcf": r(dcfv), "dcf_g": r(g * 100, 1), "d1": r((p / float(h.iloc[-2]) - 1) * 100, 2) if len(h) > 1 else None,
+            "m1": r((p / float(h.iloc[-22]) - 1) * 100, 1) if len(h) > 22 else None, "industry": i.get("industry"),
             "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "badges": badges, "trap": trap, "cheap": cheap,
             "thesis": THESIS.get(sym) or ((i.get("longBusinessSummary") or "Sem descrição.")[:420] + " (resumo do Yahoo, em inglês)", "Consulta o relatório e as notícias da empresa.", "Consulta o relatório (secção Risk Factors do 10-K)."), "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "news": news}
     except Exception as e:
@@ -129,7 +152,25 @@ def build():
     except Exception:
         fx = None
     top = sorted(T, key=lambda s: (-T[s]["score"], -(T[s]["upside"] or -99)))[:10]
-    return {"updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": r(fx, 4), "top10": top, "tickers": T}
+    # Posição relativa no universo (percentil, 100 = melhor) e mediana do setor
+    LOWER = {"fpe", "eve", "nd"}
+    for k in ("fpe", "eve", "fcfy", "om", "roe", "eg", "rg", "nd", "dy"):
+        vals = [(s, T[s][k]) for s in T if T[s][k] is not None and not (k in ("fpe", "eve") and T[s][k] <= 0)]
+        for s, v in vals:
+            worse = sum(1 for _, w in vals if (w > v if k in LOWER else w < v))
+            T[s].setdefault("pct", {})[k] = round(100 * worse / max(1, len(vals) - 1))
+            sec = [w for s2, w in vals if T[s2]["sector"] == T[s]["sector"]]
+            if len(sec) >= 3:
+                T[s].setdefault("peer", {})[k] = r(statistics.median(sec), 1)
+    def quote(sym):
+        try:
+            c = yf.Ticker(sym).history(period="5d")["Close"].dropna()
+            return sym, {"price": r(c.iloc[-1], 2), "prev": r(c.iloc[-2], 2)}
+        except Exception:
+            return sym, None
+    with ThreadPoolExecutor(6) as ex:
+        tape = {s: q for s, q in ex.map(quote, TAPE) if q}
+    return {"updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": r(fx, 4), "top10": top, "tickers": T, "tape": tape, "tape_names": TAPE}
 
 
 if __name__ == "__main__":

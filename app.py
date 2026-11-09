@@ -15,4 +15,4 @@ def data():
 safe = lambda o: json.dumps(o).replace("</", "<\\/")
 html = pathlib.Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 html = html.replace('<script src="data.js"></script>', f"<script>window.DATA={safe(data())}</script>")
-components.html(html, height=3200, scrolling=True)
+components.html(html, height=900, scrolling=True)
