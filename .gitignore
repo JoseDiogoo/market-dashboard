@@ -1,5 +1,4 @@
-data.js
-config.js
 __pycache__/
 .streamlit/secrets.toml
 .playwright-mcp/
+*.log

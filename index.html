@@ -45,22 +45,42 @@ ul.t{margin:4px 0 0;padding-left:18px;color:var(--t2)}ul.t li{margin:4px 0}
 .cap{font-size:11px;color:var(--mut)}
 svg text{fill:var(--mut);font:11px system-ui}
 #ct{position:fixed;pointer-events:none;background:#111827;color:#fff;border-radius:8px;padding:4px 8px;font-size:12px;display:none;z-index:70}
-@media(max-width:820px){.hero{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -14px 16px;padding:2px 14px;scrollbar-width:none}.hero::-webkit-scrollbar{display:none}.hc{flex:0 0 78%;scroll-snap-align:start;padding:14px}.hc .tk{font-size:22px}.wrap{padding:0 14px 50px}#q{max-width:none;order:3;flex-basis:100%;margin-left:0}.grid{grid-template-columns:1fr}.sec{margin:10px 12px}#dr{width:100%}select{width:100%}.bar{align-items:stretch}.pills{flex-basis:100%}}
+.regs{display:flex;gap:8px;margin:0 0 12px}.regs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;font:600 14px system-ui;color:var(--t2);cursor:pointer;min-height:44px}.regs button.on{border-color:var(--bl);color:var(--bl);background:var(--bl-bg)}
+.views{display:flex;gap:6px;margin:0 0 18px;overflow-x:auto;scrollbar-width:none}.views button{border:0;background:none;font:700 15px system-ui;color:var(--mut);padding:10px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:44px}.views button.on{background:var(--t1);color:#fff}
+.xf{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.xf input,.xf select{width:100%;min-height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px 12px;font:14px system-ui;color:var(--t1)}.xf label{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px;min-height:42px}
+.xt{padding:0;overflow:hidden}.xt table{width:100%;border-collapse:collapse}.xt th{position:sticky;top:0;background:#fafbfc;font:600 12px system-ui;color:var(--mut);text-align:right;padding:10px 8px;cursor:pointer;white-space:nowrap;border-bottom:1px solid var(--line)}.xt th:first-child,.xt td:first-child{text-align:left}
+.xt td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right;font-size:13px;white-space:nowrap}.xt tbody tr{cursor:pointer}.xt tbody tr:hover{background:#f8fafc}.tiny{font-size:10px;padding:1px 7px;margin-left:6px}
+.fb{display:flex;align-items:center;gap:10px;margin:8px 0}.fb span:first-child{width:104px;font-size:13px}.fb .tr{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}.fb .tr i{display:block;height:100%;border-radius:99px}.fb b{width:30px;text-align:right}
+.rg{position:relative;height:8px;background:var(--line);border-radius:99px;margin:10px 0 4px}.rg i{position:absolute;top:-4px;width:4px;height:16px;border-radius:2px;background:var(--bl)}
+.m p{margin:6px 0;color:var(--t2)}.m h4{margin:16px 0 2px;font-size:15px}
+@media(max-width:820px){.hm{display:none}.xt td,.xt th{padding:10px 6px}.hero{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -14px 16px;padding:2px 14px;scrollbar-width:none}.hero::-webkit-scrollbar{display:none}.hc{flex:0 0 78%;scroll-snap-align:start;padding:14px}.hc .tk{font-size:22px}.wrap{padding:0 14px 50px}#q{max-width:none;order:3;flex-basis:100%;margin-left:0}.grid{grid-template-columns:1fr}.sec{margin:10px 12px}#dr{width:100%}select{width:100%}.bar{align-items:stretch}.pills{flex-basis:100%}}
 </style></head><body><div class="wrap">
-<header><div class="brand">Radar<span>.</span>Invest</div><span id="live">a ligar…</span><input id="q" placeholder="Procurar empresa ou ticker (ex.: MCD)" autocomplete="off"></header>
+<header><div class="brand">Radar<span>.</span>Invest</div><span id="live">a ligar…</span><input id="q" placeholder="Procurar entre milhares de ações (ex.: Nestlé, 7203.T)" autocomplete="off"></header>
 <div class="note">Ferramenta informativa, não é aconselhamento financeiro. Metas e zonas de compra são estimativas calculadas a partir de dados públicos e podem falhar. Confirma sempre antes de investir.</div>
-<div class="hero" id="hero"></div>
+<div class="regs" id="regs"><button data-r="all" class="on">🌍 Todas</button><button data-r="us">🇺🇸 Ações EUA</button><button data-r="eu">🇪🇺 Ações Europa</button></div>
+<nav class="views"><button data-v="1" class="on">Oportunidades</button><button data-v="2">Explorar mundo <span id="nuni"></span></button><button data-v="3">Metodologia</button></nav>
+<div id="v1"><div class="hero" id="hero"></div>
 <div class="bar"><div class="pills" id="pills"></div><select id="sort" aria-label="Ordenar"><option value="rank">Ordenar: Recomendação</option><option value="upside">Ordenar: Potencial de subida</option><option value="score">Ordenar: Qualidade</option><option value="dy">Ordenar: Dividendo</option></select></div>
-<div class="grid" id="grid"></div>
+<div class="grid" id="grid"></div></div>
+<div id="v2" hidden><div class="xf" id="xf"></div><div class="sub" id="xc" style="margin:8px 2px"></div><div class="card xt"><table id="xt"></table></div><button class="pill" id="xm" style="margin:14px auto;display:block">Mostrar mais</button></div>
+<div id="v3" hidden><div class="sec" id="meth" style="margin:0"></div></div>
 </div>
 <div id="ov"></div><aside id="dr" aria-hidden="true"></aside><div id="ct"></div>
 <script src="data.js"></script>
 <script>
+if(!window.DATA||!window.DATA.rows||!window.DATA.order){document.body.innerHTML='<div style="padding:40px;font:16px system-ui">Dados antigos ou em falta: a base está a ser atualizada. Recarrega a página dentro de alguns minutos.</div>';throw new Error("dados antigos")}
 const D=window.DATA,T=D.tickers,$=s=>document.querySelector(s);
+const R=D.rows.map(a=>{const o={};D.cols.forEach((c,i)=>o[c]=a[i]);return o}),ROW=Object.fromEntries(R.map(r=>[r.s,r])),PAIS=D.pais,EXI=D.exinfo||{};
+let REG='all';
+const regOf=k=>ROW[k]?(EXI[ROW[k].ex]||{}).r:(k.includes('.')?'eu':'us');
+const exName=k=>ROW[k]?((EXI[ROW[k].ex]||{}).n||ROW[k].ex):(k.includes('.')?'Europa':'EUA');
+const brk=k=>`<span class="chip b tiny" style="margin-left:0" title="Bolsa normalmente acessível em XTB, Trading 212 e DEGIRO. A disponibilidade de cada ação depende da corretora: confirma antes de comprar.">${exName(k)} · ${(T[k]||ROW[k]).cur} · XTB / T212</span>`;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const n=(v,d=0)=>v==null?"–":Number(v).toFixed(d);
-const usd=v=>v==null?"–":"$"+Number(v).toLocaleString("en-US",{minimumFractionDigits:v<100?2:0,maximumFractionDigits:v<100?2:0});
-const eur=v=>D.eurusd&&v!=null?"€"+(v/D.eurusd).toLocaleString("en-US",{maximumFractionDigits:v/D.eurusd<100?2:0,minimumFractionDigits:v/D.eurusd<100?2:0}):"";
+const SYM={USD:"$",EUR:"€",GBP:"£",JPY:"¥",CNY:"¥",INR:"₹",KRW:"₩",CAD:"C$",AUD:"A$",HKD:"HK$",BRL:"R$",TWD:"NT$"};
+const usd=(v,c="USD")=>{if(v==null)return"–";const s=Number(v).toLocaleString("en-US",{minimumFractionDigits:Math.abs(v)>=100?0:2,maximumFractionDigits:Math.abs(v)>=100?0:2});return c=="GBp"?s+"p":SYM[c]!=null?SYM[c]+s:c+" "+s};
+const fxOf=k=>(ROW[k]&&ROW[k].fx)||1;
+const eur=(v,k)=>{const f=fxOf(k);if(!D.eurusd||v==null||!f)return"";const e=v*f/D.eurusd;return "€"+e.toLocaleString("en-US",{maximumFractionDigits:e<100?2:0,minimumFractionDigits:e<100?2:0})};
 const sg=(v,d=0)=>v==null?"–":`<span class="${v>=0?"up":"dn"}">${v>=0?"+":""}${v.toFixed(d)}%</span>`;
 const CATS=[["top","Top 10 oportunidades"],["g","Crescimento e tecnologia"],["d","Dividendos e defensivas"],["v","Valor com desconto"]];
 let cat="top",sort="rank",rng="1A",q="";
@@ -74,31 +94,32 @@ const zoneTag=t=>!t.buy_below?`<span class="chip b">Sem meta fiável</span>`:t.p
 const consBar=c=>{const t=c.total||1;return `<div class="cb"><i style="width:${100*c.strongBuy/t}%;background:#047857"></i><i style="width:${100*c.buy/t}%;background:#34d399"></i><i style="width:${100*c.hold/t}%;background:#fbbf24"></i><i style="width:${100*(c.sell+c.strongSell)/t}%;background:#ef4444"></i></div>`};
 
 // ---------- destaques
-function hero(){const h=D.highlights,B=[["Ação #1 do mês",h.pick,k=>`Meta <b>${usd(T[k].target)}</b> (${sg(T[k].upside)})`],["Melhor dividendo seguro",h.dividend,k=>`<b>${n(T[k].dy,1)}%</b> ao ano · risco ${T[k].risk.toLowerCase()}`],["Maior desconto face ao alvo",h.discount,k=>`<b>${sg(T[k].upside)}</b> até à meta ${usd(T[k].target)}`]];
+function hl(){const el=D.order.filter(k=>(REG=='all'||regOf(k)==REG)&&T[k].cons.total>=5),pick=el[0],dv=el.filter(k=>(T[k].dy||0)>=2&&T[k].risk!='Alto'&&(T[k].payout||0)<90&&(T[k].fcfy||0)>0).sort((a,b)=>T[b].dy-T[a].dy)[0],ds=el.filter(k=>k!=pick&&T[k].score>=55&&(T[k].cons.buy_pct||0)>=50&&T[k].upside).sort((a,b)=>T[b].upside-T[a].upside)[0];return{pick,dividend:dv,discount:ds}}
+function hero(){const h=hl(),B=[["Ação #1 do mês",h.pick,k=>`Meta <b>${usd(T[k].target,T[k].cur)}</b> (${sg(T[k].upside)})`],["Melhor dividendo seguro",h.dividend,k=>`<b>${n(T[k].dy,1)}%</b> ao ano · risco ${T[k].risk.toLowerCase()}`],["Maior desconto face ao alvo",h.discount,k=>`<b>${sg(T[k].upside)}</b> até à meta ${usd(T[k].target,T[k].cur)}`]];
 $("#hero").innerHTML=B.filter(b=>b[1]).map(([l,k,f])=>`<div class="hc" data-k="${k}"><div class="hl">${l}</div><div class="tk">${k}</div><div class="sub">${esc(T[k].name)}</div><div class="big">${f(k)}</div></div>`).join("")}
 
 // ---------- lista
-function list(){let ks=D.order.slice();
+function list(){let ks=D.order.filter(k=>REG=='all'||regOf(k)==REG);
 if(cat=="top")ks=ks.slice(0,10);else if(cat=="v")ks=ks.filter(k=>(T[k].upside||0)>=10&&T[k].drawdown<=-8).sort((a,b)=>T[b].upside-T[a].upside);else ks=ks.filter(k=>T[k].cat==cat);
-if(q){const u=q.toUpperCase();ks=D.order.filter(k=>k.includes(u)||T[k].name.toUpperCase().includes(u))}
+
 if(sort!="rank")ks.sort((a,b)=>(T[b][sort]??-1e9)-(T[a][sort]??-1e9));return ks}
 function grid(){$("#pills").innerHTML=CATS.map(([k,l])=>`<button class="pill ${k==cat&&!q?"on":""}" data-c="${k}">${l}</button>`).join("");
 const ks=list();$("#grid").innerHTML=ks.map(k=>{const t=T[k],c=t.cons;return `<div class="card" data-k="${k}">
-<div class="row"><div class="row" style="justify-content:flex-start;gap:10px">${av(k)}<div><div class="nm">${esc(t.name)}</div><div class="sub">${k}</div></div></div>${riskChip(t.risk)}</div>
-<div class="row" style="margin:12px 0 8px"><div><span class="price" data-px="${k}">${usd(t.price)}</span> <span class="sub">${eur(t.price)}</span></div><span data-d1="${k}">${sg(t.d1,1)}</span></div>
-<div class="kv"><span>Comprar abaixo de</span><b>${usd(t.buy_below)}</b></div>
-<div class="kv"><span>Meta dos analistas</span><b>${usd(t.target)} <span data-up="${k}">${sg(t.upside)}</span></b></div>
+<div class="row"><div class="row" style="justify-content:flex-start;gap:10px">${av(k)}<div><div class="nm">${esc(t.name)}</div><div class="sub">${k} · ${exName(k)} · ${t.cur}</div></div></div>${riskChip(t.risk)}</div>
+<div class="row" style="margin:12px 0 8px"><div><span class="price" data-px="${k}">${usd(t.price,t.cur)}</span> <span class="sub">${eur(t.price,k)}</span></div><span data-d1="${k}">${sg(t.d1,1)}</span></div>
+<div class="kv"><span>Comprar abaixo de</span><b>${usd(t.buy_below,t.cur)}</b></div>
+<div class="kv"><span>Meta dos analistas</span><b>${usd(t.target,t.cur)} <span data-up="${k}">${sg(t.upside)}</span></b></div>
 <div class="kv"><span>Wall Street</span><b>${c.buy_pct==null?"–":c.buy_pct+"% compra"} <span class="sub">(${c.total})</span></b></div>${consBar(c)}
-<div class="row" style="margin-top:8px"><span data-zone="${k}">${zoneTag(t)}</span><span class="sub">Qualidade ${t.score}/100</span></div></div>`}).join("")||'<p class="sub">Sem resultados.</p>'}
+<div style="margin-top:8px">${brk(k)}</div><div class="row" style="margin-top:8px"><span data-zone="${k}">${zoneTag(t)}</span><span class="sub">Qualidade ${t.score}/100</span></div></div>`}).join("")||'<p class="sub">Sem resultados.</p>'}
 $("#pills").onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;q="";$("#q").value="";grid()}};
-$("#sort").onchange=e=>{sort=e.target.value;grid()};$("#q").oninput=e=>{q=e.target.value.trim();grid()};
+$("#sort").onchange=e=>{sort=e.target.value;grid()};$("#q").oninput=e=>{setView(2);X.q=e.target.value.trim();X.n=100;$("#xq").value=X.q;xrender()};
 $("#grid").onclick=e=>{const c=e.target.closest("[data-k]");if(c)location.hash=c.dataset.k};$("#hero").onclick=$("#grid").onclick;
 
 // ---------- gráfico
 const PW=()=>Math.min(560,($("#dr").clientWidth||innerWidth)-64);
 function chart(t){const h=t.hist.slice(-RN[rng]-1),W=PW(),H=220,m={l:44,r:10,t:10,b:20};
 const pmin=Math.min(...h.map(x=>x[1])),pmax=Math.max(...h.map(x=>x[1]));
-const L=[[t.target,"Meta 1 "+usd(t.target),"#059669"],[t.buy_below,"Comprar abaixo "+usd(t.buy_below),"#b45309"],[t.dcf_ok?t.dcf:null,"Meta 2 "+usd(t.dcf),"#2563eb"]].filter(l=>l[0]&&l[0]>=pmin*.7&&l[0]<=pmax*1.5);
+const L=[[t.target,"Meta 1 "+usd(t.target,t.cur),"#059669"],[t.buy_below,"Comprar abaixo "+usd(t.buy_below,t.cur),"#b45309"],[t.dcf_ok?t.dcf:null,"Meta 2 "+usd(t.dcf,t.cur),"#2563eb"]].filter(l=>l[0]&&l[0]>=pmin*.7&&l[0]<=pmax*1.5);
 const vals=[pmin,pmax,...L.map(l=>l[0])],lo=Math.min(...vals)*.97,hi=Math.max(...vals)*1.03;
 const x=i=>m.l+i/(h.length-1)*(W-m.l-m.r),y=v=>H-m.b-(v-lo)/(hi-lo)*(H-m.t-m.b),id="c"+Math.random().toString(36).slice(2,7);
 let g=[0,1,2,3].map(i=>{const v=lo+(hi-lo)*i/3;return `<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="#eef0f3"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end">${v>=100?v.toFixed(0):v.toFixed(1)}</text>`}).join("");
@@ -106,7 +127,7 @@ g+=L.map(([v,l,c])=>`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" s
 const pts=h.map((p,i)=>x(i).toFixed(1)+","+y(p[1]).toFixed(1));
 g+=`<polygon points="${m.l},${H-m.b} ${pts.join(" ")} ${x(h.length-1)},${H-m.b}" fill="#2563eb14"/><polyline points="${pts.join(" ")}" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round"/><circle cx="${x(h.length-1)}" cy="${y(t.price)}" r="4.5" fill="#2563eb" stroke="#fff" stroke-width="2"/>
 <text x="${m.l}" y="${H-4}">${h[0][0].slice(0,7)}</text><text x="${W-m.r}" y="${H-4}" text-anchor="end">${h.at(-1)[0].slice(0,7)}</text><line id="${id}" y1="${m.t}" y2="${H-m.b}" stroke="#9ca3af" display="none"/>`;
-setTimeout(()=>{const s=document.getElementById(id)?.closest("svg");if(!s)return;s.style.touchAction="pan-y";s.onpointermove=e=>{const b=s.getBoundingClientRect(),i=Math.max(0,Math.min(h.length-1,Math.round(((e.clientX-b.left)*W/b.width-m.l)/(W-m.l-m.r)*(h.length-1))));const l=document.getElementById(id);l.setAttribute("x1",x(i));l.setAttribute("x2",x(i));l.removeAttribute("display");const c=$("#ct");c.style.display="block";c.style.left=Math.min(e.clientX+12,innerWidth-130)+"px";c.style.top=e.clientY-40+"px";c.textContent=h[i][0]+" · "+usd(h[i][1])};
+setTimeout(()=>{const s=document.getElementById(id)?.closest("svg");if(!s)return;s.style.touchAction="pan-y";s.onpointermove=e=>{const b=s.getBoundingClientRect(),i=Math.max(0,Math.min(h.length-1,Math.round(((e.clientX-b.left)*W/b.width-m.l)/(W-m.l-m.r)*(h.length-1))));const l=document.getElementById(id);l.setAttribute("x1",x(i));l.setAttribute("x2",x(i));l.removeAttribute("display");const c=$("#ct");c.style.display="block";c.style.left=Math.min(e.clientX+12,innerWidth-130)+"px";c.style.top=e.clientY-40+"px";c.textContent=h[i][0]+" · "+usd(h[i][1],t.cur)};
 s.onpointerleave=()=>{$("#ct").style.display="none";document.getElementById(id)?.setAttribute("display","none")}});
 return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Preço de ${esc(t.name)} e metas">${g}</svg>`}
 
@@ -114,31 +135,32 @@ return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Preço 
 const GRADES=[["strongBuy","Compra Forte","#047857"],["buy","Compra","#34d399"],["hold","Manter","#fbbf24"],["sell","Vender","#f87171"],["strongSell","Venda forte","#ef4444"]];
 function tile(v,label,desc){return `<div class="tile"><b>${v}</b><span>${label}<br>${desc}</span></div>`}
 function open(k){const t=T[k],c=t.cons,s=t.tese,fromBuy=t.target&&t.buy_below?(t.target/t.buy_below-1)*100:null;
-const dd=t.drawdown<=-8?`Está ${Math.abs(t.drawdown).toFixed(0)}% abaixo do máximo dos últimos 12 meses (${usd(t.high)}).`:`Está perto do máximo dos últimos 12 meses: o preço já subiu bastante, por isso a margem de erro é menor.`;
-const vt=!t.buy_below?["a","Não há dados suficientes para calcular uma zona de compra fiável."]:t.price<=t.buy_below?["g",`Zona de compra: o preço atual (${usd(t.price)}) está abaixo de ${usd(t.buy_below)}, 15% abaixo do preço justo estimado.`]:["a",`Ainda acima da zona de compra. Uma entrada com margem de segurança seria abaixo de ${usd(t.buy_below)} (${n((t.buy_below/t.price-1)*100)}% face ao preço atual).`];
+const dd=t.drawdown<=-8?`Está ${Math.abs(t.drawdown).toFixed(0)}% abaixo do máximo dos últimos 12 meses (${usd(t.high,t.cur)}).`:`Está perto do máximo dos últimos 12 meses: o preço já subiu bastante, por isso a margem de erro é menor.`;
+const vt=!t.buy_below?["a","Não há dados suficientes para calcular uma zona de compra fiável."]:t.price<=t.buy_below?["g",`Zona de compra: o preço atual (${usd(t.price,t.cur)}) está abaixo de ${usd(t.buy_below,t.cur)}, 15% abaixo do preço justo estimado.`]:["a",`Ainda acima da zona de compra. Uma entrada com margem de segurança seria abaixo de ${usd(t.buy_below,t.cur)} (${n((t.buy_below/t.price-1)*100)}% face ao preço atual).`];
 const ri=["Baixo","Médio","Alto"].indexOf(t.risk);
-$("#dr").innerHTML=`<div class="dh"><button class="back" id="bk" aria-label="Voltar">←</button><div class="row" style="justify-content:flex-start;gap:10px">${av(k)}<div><div class="nm">${esc(t.name)}</div><div class="sub">${k} · ${esc(t.sector||"")}</div></div></div></div>
-<div class="sec"><div class="row"><div><span class="price" data-px="${k}" style="font-size:30px">${usd(t.price)}</span> <span class="sub">${eur(t.price)}</span></div><span data-d1="${k}" style="font-weight:700">${sg(t.d1,1)}</span></div>
-<div class="verdict ${vt[0]}" style="margin-top:12px">${vt[1]}</div></div>
+$("#dr").innerHTML=`<div class="dh"><button class="back" id="bk" aria-label="Voltar">←</button><div class="row" style="justify-content:flex-start;gap:10px">${av(k)}<div><div class="nm">${esc(t.name)}</div><div class="sub">${k} · ${PAIS[(ROW[k]||{}).ex]||""} · ${esc(t.sector||"")}</div></div></div></div>
+<div class="sec"><div class="row"><div><span class="price" data-px="${k}" style="font-size:30px">${usd(t.price,t.cur)}</span> <span class="sub">${eur(t.price,k)}</span></div><span data-d1="${k}" style="font-weight:700">${sg(t.d1,1)}</span></div>
+<div class="verdict ${vt[0]}" style="margin-top:12px">${vt[1]}</div><div style="margin-top:10px">${brk(k)}</div></div>
 <div class="sec plan"><h3>Plano de investimento</h3>
-<div class="kv"><span>Comprar abaixo de</span><b>${usd(t.buy_below)}</b></div>
-<div class="kv"><span>Meta 1 · Wall Street</span><b>${usd(t.target)} <span data-up="${k}">${sg(t.upside)}</span></b></div>
-<div class="kv"><span>Meta 2 · Valor fundamental (DCF)</span><b>${t.dcf_ok?usd(t.dcf)+" "+sg(t.dcf_up):'<span class="sub">n/d</span>'}</b></div>
-<div class="kv"><span>Intervalo dos analistas</span><b>${usd(t.tlow)} – ${usd(t.thigh)}</b></div>
+<div class="kv"><span>Comprar abaixo de</span><b>${usd(t.buy_below,t.cur)}</b></div>
+<div class="kv"><span>Meta 1 · Wall Street</span><b>${usd(t.target,t.cur)} <span data-up="${k}">${sg(t.upside)}</span></b></div>
+<div class="kv"><span>Meta 2 · Valor fundamental (DCF)</span><b>${t.dcf_ok?usd(t.dcf,t.cur)+" "+sg(t.dcf_up):'<span class="sub">n/d</span>'}</b></div>
+<div class="kv"><span>Intervalo dos analistas</span><b>${usd(t.tlow,t.cur)} – ${usd(t.thigh,t.cur)}</b></div>
 ${fromBuy!=null?`<div class="kv"><span>Lucro até à Meta 1 se comprares na zona de compra</span><b>${sg(fromBuy)}</b></div>`:""}
 <p class="cap">Zona de compra = preço justo −15% (margem de segurança). Preço justo = média da meta dos analistas e do DCF (só se o DCF for plausível). ${t.dcf_ok?"":"O DCF não é mostrado: o modelo simples não se aplica a esta empresa (financeira, caixa livre fraco ou crescimento muito acima do que assume)."}</p></div>
 <div class="sec"><div class="tabs">${Object.keys(RN).map(r=>`<button class="${r==rng?"on":""}" data-r="${r}">${r}</button>`).join("")}</div>${chart(t)}<p class="cap">Linha azul = preço · verde = Meta 1 · âmbar = zona de compra${t.dcf_ok?" · azul tracejado = Meta 2":""}</p></div>
 <div class="sec"><h3>O que dizem os analistas</h3><div class="row"><b style="font-size:20px">${c.buy_pct==null?"–":c.buy_pct+"% recomendam compra"}</b><span class="chip ${c.label&&c.label.startsWith("Compra")?"g":"a"}">${c.label||"–"}</span></div>
 ${consBar(c)}<div class="cap">${GRADES.map(([key,l,col])=>c[key]?`<span style="color:${col}">●</span> ${l} ${c[key]}`:"").filter(Boolean).join(" · ")} · ${c.total} analistas</div>
-${c.firms.length?`<div style="margin-top:8px">${c.firms.map(f=>`<div class="kv"><span>${esc(f.f)}</span><b>${esc(gr(f.g))}${f.pt?" · alvo "+usd(f.pt):""}</b></div>`).join("")}</div><p class="cap">Últimas revisões (≤120 dias).</p>`:""}</div>
+${c.firms.length?`<div style="margin-top:8px">${c.firms.map(f=>`<div class="kv"><span>${esc(f.f)}</span><b>${esc(gr(f.g))}${f.pt?" · alvo "+usd(f.pt,t.cur):""}</b></div>`).join("")}</div><p class="cap">Últimas revisões (≤120 dias).</p>`:""}</div>
+<div class="sec"><h3>Fatores estatísticos vs setor</h3>${ROW[k]?factorsHTML(ROW[k])+sectorHTML(ROW[k]):'<p class="cap">Fora do universo estatístico.</p>'}</div>
 <div class="sec"><h3>Nível de risco</h3><div class="risk">${[0,1,2].map(i=>`<i style="${i<=ri?`background:${["#34d399","#fbbf24","#ef4444"][ri]}`:""}"></i>`).join("")}</div>
-<div class="row" style="margin-top:6px"><b>${t.risk=="Baixo"?"Baixo / defensiva":t.risk=="Médio"?"Médio":"Alto / volátil"}</b><span class="sub">oscila cerca de ±${t.vol}% por ano</span></div></div>
+<div class="row" style="margin-top:6px"><b>${t.risk=="Baixo"?"Baixo / defensiva":t.risk=="Médio"?"Médio":"Alto / volátil"}</b><span class="sub">oscila cerca de ±${t.vol}% por ano</span></div>${riskHTML(t,k)}</div>
 <div class="sec"><h3>Tese de investimento</h3>
 <b>O que faz</b><p style="margin:4px 0 12px;color:var(--t2)">${esc(s.faz)}</p>
 <b>Porque está barata agora</b><ul class="t"><li>${dd}</li>${s.barata.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-<b style="display:block;margin-top:12px">Catalisadores (próximos 6–18 meses)</b><ul class="t">${s.cat.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-<b style="display:block;margin-top:12px">Riscos a vigiar</b><ul class="t">${s.riscos.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-<p class="cap">Contexto geral escrito à mão; confirma a causa da queda recente nas notícias abaixo.</p></div>
+${s.cat.length?`<b style="display:block;margin-top:12px">Catalisadores (próximos 6–18 meses)</b><ul class="t">${s.cat.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+${s.riscos.length?`<b style="display:block;margin-top:12px">Riscos a vigiar</b><ul class="t">${s.riscos.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+<p class="cap">${s.cat.length?"Contexto geral escrito à mão; confirma a causa da queda recente nas notícias abaixo.":"Sem tese escrita para esta empresa: consulta o relatório anual e as notícias abaixo."}</p></div>
 <div class="sec"><h3>Números em linguagem simples</h3><div class="tiles">
 ${tile(t.fpe?n(t.fpe,1)+"x":"–","Preço / lucro esperado","Quanto pagas por cada $1 de lucro")}
 ${tile(t.dy?n(t.dy,1)+"%":"0%","Dividendo","Pago aos acionistas por ano")}
@@ -152,15 +174,75 @@ $("#dr").classList.add("on");$("#ov").classList.add("on");document.body.style.ov
 $("#bk").onclick=()=>location.hash=""}
 function close(){$("#dr").classList.remove("on");$("#ov").classList.remove("on");document.body.style.overflow="";delete $("#dr").dataset.k}
 $("#ov").onclick=()=>location.hash="";addEventListener("keydown",e=>e.key=="Escape"&&(location.hash=""));
-$("#dr").onclick=e=>{const b=e.target.closest("[data-r]");if(b){rng=b.dataset.r;const y=$("#dr").scrollTop;open($("#dr").dataset.k);$("#dr").scrollTop=y}};
-function route(){const k=decodeURIComponent(location.hash.slice(1));if(T[k]){const fresh=$("#dr").dataset.k!=k;open(k);if(fresh)$("#dr").scrollTop=0}else close()}
+$("#dr").onclick=e=>{const b=e.target.closest("[data-r]");if(b&&T[$("#dr").dataset.k]){rng=b.dataset.r;const y=$("#dr").scrollTop;open($("#dr").dataset.k);$("#dr").scrollTop=y}};
+function route(){const k=decodeURIComponent(location.hash.slice(1));if(T[k]){const fresh=$("#dr").dataset.k!=k;open(k);if(fresh)$("#dr").scrollTop=0}else if(ROW[k])openLite(k);else close()}
 addEventListener("hashchange",route);
+
+
+// ---------- explorar mundo
+const SECPT={"Technology":"Tecnologia","Financial Services":"Financeiras","Healthcare":"Saúde","Consumer Cyclical":"Consumo cíclico","Industrials":"Indústria","Communication Services":"Comunicações","Consumer Defensive":"Consumo defensivo","Energy":"Energia","Basic Materials":"Materiais","Real Estate":"Imobiliário","Utilities":"Utilities"};
+const capf=m=>m>=1e6?(m/1e6).toFixed(2)+"T":m>=1e3?(m/1e3).toFixed(m>=1e4?0:1)+"B":m.toFixed(0)+"M";
+const X={q:"",sec:"",pais:"",cap:2000,sc:0,dy:0,deep:false,sort:"sc1",dir:-1,n:100};
+const XC=[["s","Empresa",0],["pais","País",1],["sec","Setor",1],["px","Preço",0],["chg","1D",1],["mcap","Cap. (USD)",1],["fpe","P/E f.",1],["pb","P/B",1],["dy","Div.",1],["ret","12m",0],["sc1","Score",0]];
+function xfilters(){const secs=[...new Set(R.map(r=>r.sec))].sort(),paises=[...new Set(Object.values(PAIS))].sort();
+$("#xf").innerHTML=`<input id="xq" placeholder="Procurar nome ou ticker" value="${esc(X.q)}"><select id="xs"><option value="">Todos os setores</option>${secs.map(s=>`<option value="${s}">${SECPT[s]||s}</option>`).join("")}</select>
+<select id="xp"><option value="">Todos os países</option>${paises.map(p=>`<option>${p}</option>`).join("")}</select>
+<select id="xcap"><option value="2000">Cap. ≥ $2B</option><option value="10000">Cap. ≥ $10B</option><option value="50000">Cap. ≥ $50B</option><option value="200000">Cap. ≥ $200B</option></select>
+<select id="xsc"><option value="0">Score: todos</option><option value="50">Score ≥ 50</option><option value="65">Score ≥ 65</option><option value="75">Score ≥ 75</option></select>
+<select id="xdy"><option value="0">Dividendo: todos</option><option value="2">Dividendo ≥ 2%</option><option value="4">Dividendo ≥ 4%</option></select>
+<label><input type="checkbox" id="xd" style="width:auto;min-height:0"> Só com análise completa</label>`;
+$("#xf").oninput=$("#xf").onchange=e=>{X.q=$("#xq").value.trim();X.sec=$("#xs").value;X.pais=$("#xp").value;X.cap=+$("#xcap").value;X.sc=+$("#xsc").value;X.dy=+$("#xdy").value;X.deep=$("#xd").checked;X.n=100;xrender()}}
+function xlist(){const u=X.q.toUpperCase();let a=R.filter(r=>(REG=='all'||(EXI[r.ex]||{}).r==REG)&&r.mcap>=X.cap&&(!X.sec||r.sec==X.sec)&&(!X.pais||PAIS[r.ex]==X.pais)&&(r.sc1||0)>=X.sc&&(r.dy||0)>=X.dy&&(!X.deep||r.dp)&&(!u||r.s.toUpperCase().includes(u)||r.name.toUpperCase().includes(u)));
+const k=X.sort,d=X.dir;return a.sort((x,y)=>{const p=k=="pais"?PAIS[x.ex]:x[k],q=k=="pais"?PAIS[y.ex]:y[k];if(p==null&&q==null)return 0;if(p==null)return 1;if(q==null)return -1;return d*(p>q?1:p<q?-1:0)})}
+function xrender(){const a=xlist();$("#xc").textContent=`${a.length.toLocaleString("pt-PT")} de ${R.length.toLocaleString("pt-PT")} ações · preços do último negócio (diferidos); as ações com análise completa atualizam ao vivo`;
+$("#xt").innerHTML=`<thead><tr>${XC.map(([k,l,h])=>`<th class="${h?"hm":""}" data-s="${k}">${l}${X.sort==k?(X.dir>0?" ↑":" ↓"):""}</th>`).join("")}</tr></thead><tbody>${a.slice(0,X.n).map(r=>`<tr data-k="${esc(r.s)}"><td><b>${esc(r.s)}</b>${r.dp?'<span class="chip g tiny">completa</span>':""}<br><span class="sub">${esc(r.name)}</span></td><td class="hm">${PAIS[r.ex]||""}</td><td class="hm">${SECPT[r.sec]||r.sec}</td><td>${usd(r.px,r.cur)}</td><td class="hm">${sg(r.chg,1)}</td><td class="hm">${capf(r.mcap)}</td><td class="hm">${n(r.fpe,1)}</td><td class="hm">${n(r.pb,1)}</td><td class="hm">${r.dy==null?"–":n(r.dy,1)+"%"}</td><td>${sg(r.ret,0)}</td><td><b>${r.sc1??"–"}</b></td></tr>`).join("")}</tbody>`;
+$("#xm").style.display=a.length>X.n?"block":"none"}
+$("#xt").onclick=e=>{const th=e.target.closest("th[data-s]"),tr=e.target.closest("tbody tr");if(th){const k=th.dataset.s;X.dir=X.sort==k?-X.dir:(k=="s"||k=="pais"||k=="sec"?1:-1);X.sort=k;X.n=100;xrender()}else if(tr)location.hash=tr.dataset.k};
+$("#xm").onclick=()=>{X.n+=200;xrender()};
+function setView(v){document.querySelectorAll(".views button").forEach(b=>b.classList.toggle("on",b.dataset.v==v));[1,2,3].forEach(i=>$("#v"+i).hidden=i!=v);if(v==2&&!$("#xq")){xfilters();xrender()}}
+$("#regs").onclick=e=>{const b=e.target.closest("[data-r]");if(!b)return;REG=b.dataset.r;document.querySelectorAll("#regs button").forEach(x=>x.classList.toggle("on",x==b));hero();grid();if($("#xq")){X.n=100;xrender()}};
+$(".views").onclick=e=>{const b=e.target.closest("[data-v]");if(b)setView(b.dataset.v)};
+$("#nuni").textContent="("+R.length.toLocaleString("pt-PT")+")";
+
+// ---------- estatística: fatores e comparação com o setor
+const FAC=[["Valor","fv","Quão barata está face ao lucro e aos ativos, comparada com o setor (P/E projetado, P/B, rendimento dos lucros)."],["Crescimento","fg","Crescimento esperado dos lucros por ação face ao último ano."],["Momentum","fm","Retorno de 12 meses e distância à média de 200 dias."],["Analistas","fa","Avaliação média dos analistas (mais perto de Compra = percentil mais alto)."],["Rendimento","fi","Dividendo face ao setor (limitado a 12% para evitar armadilhas)."]];
+const fcol=v=>v>=66?"#059669":v>=33?"#d97706":"#9ca3af";
+function factorsHTML(r){return FAC.map(([l,k,tip])=>`<div class="fb" title="${esc(tip)}"><span>${l}</span><div class="tr"><i style="width:${r[k]??0}%;background:${fcol(r[k]??0)}"></i></div><b>${r[k]??"–"}</b></div>`).join("")+`<p class="cap">Percentil no setor (${SECPT[r.sec]||r.sec}, ${(D.sector_stats[r.sec]||{}).n||"?"} empresas): 80 = melhor do que 80% das empresas do mesmo setor. Os percentis são robustos a valores extremos.</p>`}
+function sectorHTML(r){const S=D.sector_stats[r.sec];if(!S)return"";
+const row=(l,v,q,lowGood,u="")=>{if(v==null||!q)return"";const tag=lowGood?(v<q[0]?["Abaixo do setor (mais barata)","g"]:v>q[2]?["Acima do setor (mais cara)","a"]:["Em linha","b"]):(v>q[2]?["Acima do setor","g"]:v<q[0]?["Abaixo do setor","a"]:["Em linha","b"]);
+return `<div class="kv"><span>${l}</span><b>${n(v,1)}${u} <span class="chip ${tag[1]} tiny">${tag[0]}</span></b></div><div class="cap" style="text-align:right">setor: P25 ${n(q[0],1)}${u} · mediana ${n(q[1],1)}${u} · P75 ${n(q[2],1)}${u}</div>`};
+return row("P/E projetado",r.fpe,S.fpe,true,"x")+row("Preço / valor contabilístico",r.pb,S.pb,true,"x")+row("Dividendo",r.dy,S.dy,false,"%")+row("Retorno 12 meses",r.ret,S.ret,false,"%")}
+function rangeHTML(r){if(!r.hi||!r.lo||r.hi==r.lo)return"";const p=Math.max(0,Math.min(100,(r.px-r.lo)/(r.hi-r.lo)*100));return `<div class="rg"><i style="left:calc(${p}% - 2px)"></i></div><div class="row cap"><span>Mín. 52s ${usd(r.lo,r.cur)}</span><b>${p.toFixed(0)}% do intervalo</b><span>Máx. ${usd(r.hi,r.cur)}</span></div>`}
+function openLite(k){const r=ROW[k];
+$("#dr").innerHTML=`<div class="dh"><button class="back" id="bk" aria-label="Voltar">←</button><div><div class="nm">${esc(r.name)}</div><div class="sub">${esc(k)} · ${PAIS[r.ex]||r.ex} · ${SECPT[r.sec]||r.sec}</div></div></div>
+<div class="sec"><div class="row"><div><span class="price" style="font-size:30px">${usd(r.px,r.cur)}</span> <span class="sub">${eur(r.px,k)}</span></div><span style="font-weight:700">${sg(r.chg,1)}</span></div>
+<div style="margin-top:8px">${brk(k)}</div><div class="row" style="margin-top:10px"><div><div class="hl">Score estatístico</div><b style="font-size:28px">${r.sc1??"–"}</b><span class="sub">/100</span></div><div class="sub" style="max-width:260px;text-align:right">Último negócio: ${r.tm?new Date(r.tm*60000).toLocaleString("pt-PT",{dateStyle:"short",timeStyle:"short"}):"?"}<br>Cap. ${capf(r.mcap)} USD · Yahoo: ${r.rat?"nota média "+r.rat+" (1 = compra forte, 5 = venda)":"sem nota de analistas"}</div></div></div>
+<div class="sec"><h3>Fatores estatísticos</h3>${factorsHTML(r)}</div>
+<div class="sec"><h3>Comparação com o setor</h3>${sectorHTML(r)}<h3 style="margin-top:14px">Posição no intervalo de 52 semanas</h3>${rangeHTML(r)}</div>
+<div class="sec"><p class="cap">Esta ação tem análise estatística de screening, mas não tem análise completa (metas, DCF, consenso, risco, tese). A análise completa é feita para as ${D.meta.n_deep} melhores classificadas com capitalização ≥ ${D.meta.deep_min_usd/1e9} mil milhões USD e para as ações curadas. Para a incluir sempre, adiciona o ticker a <b>tese.py → UNIVERSE</b>.</p>
+<a class="pill" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://finance.yahoo.com/quote/${encodeURIComponent(k)}">Ver no Yahoo Finance</a></div>`;
+$("#dr").classList.add("on");$("#ov").classList.add("on");document.body.style.overflow="hidden";$("#dr").dataset.k=k;$("#dr").scrollTop=0;$("#bk").onclick=()=>location.hash=""}
+function riskHTML(t,k){const s=t.rs||{};if(!s.vol)return"";const f=s.fan||{};const cell=(l,v)=>v==null?"":`<div class="kv"><span>${l}</span><b>${usd(v,t.cur)} ${sg((v/t.price-1)*100)}</b></div>`;
+return `<div class="tiles" style="margin:8px 0">${tile(n(s.vol)+"%","Volatilidade anual","Quanto o preço oscila num ano")}${tile(n(s.maxdd)+"%","Maior queda (12m)","Do máximo ao mínimo seguinte")}${tile(s.beta==null?"–":n(s.beta,2),"Beta vs S&P 500","1 = acompanha o mercado")}${tile(n(s.var95,1)+"%","Pior dia típico (VaR 95%)","Em 1 de cada 20 dias perde pelo menos isto")}${tile(s.sharpe==null?"–":n(s.sharpe,2),"Rácio de Sharpe","Retorno por unidade de risco")}${tile(s.ptouch==null?"–":n(s.ptouch)+"%","Prob. de tocar a Meta 1","Em 12 meses, segundo o modelo")}</div>
+<h3 style="margin-top:12px">Cenários a 12 meses (modelo)</h3>${cell("Pessimista (1 em 20)",f["5"])}${cell("Abaixo do central",f["25"])}${cell("Central",f["50"])}${cell("Acima do central",f["75"])}${cell("Otimista (1 em 20)",f["95"])}
+<p class="cap">Modelo lognormal com volatilidade histórica de 12 meses e retorno esperado ${n(s.mu,1)}% (CAPM: ${D.meta.rf*100}% + beta × ${D.meta.erp*100}%). É uma ilustração estatística, não uma previsão.</p>`}
+function qcText(){const a=D.audit||{};const L=x=>Array.isArray(x)?x.length:(x??0);
+return `Removidos antes da análise: ${L(a.receipts_removed)} recibos de depósito/BDRs, ${L(a.duplicates_removed)} cotações duplicadas da mesma empresa (fica a mais líquida) e ${L(a.stale_removed)} sem negociação há mais de 10 dias. Verificações finais sobre ${L(a.universe)} ações: ${L(a.dup_symbols)} símbolos duplicados, ${L(a.dup_names_left)} nomes duplicados, ${L(a.targets_dropped)} alvos de analistas descartados por incoerência com o preço, ${L(a.price_mismatch)} preços divergentes (&gt;5%) entre o screener e a análise completa. Mediana da idade do último negócio no universo: ${a.median_price_age_h??"?"} h.`}
+function methodHTML(){const m=D.meta;return `<div class="m"><h3>Como funciona</h3>
+<h4>1. Universo</h4><p>${m.n_universe.toLocaleString("pt-PT")} ações de ${m.n_exch} bolsas, com capitalização ≥ ${m.min_usd/1e9} mil milhões USD (convertida ao câmbio atual). Só bolsas normalmente acessíveis em corretoras europeias comuns (XTB, Trading 212, DEGIRO): EUA e Europa Ocidental e Nórdica. Empresas globais cotadas em Nova Iorque (ADRs) estão incluídas. A disponibilidade de cada ação individual depende da corretora: confirma na tua antes de comprar.</p>
+<h4>2. Fatores (percentis dentro do setor)</h4><p>Cada ação é comparada apenas com empresas do mesmo setor, porque um P/E de 15 é barato em tecnologia e caro em utilities. Cinco fatores: <b>Valor</b> (P/E projetado, P/B, rendimento dos lucros), <b>Crescimento</b> (lucro por ação esperado vs. último ano), <b>Momentum</b> (retorno 12m e preço vs. média de 200 dias), <b>Analistas</b> (nota média) e <b>Rendimento</b> (dividendo, limitado a 12%). Usamos percentis (0–100) em vez de valores brutos para neutralizar valores extremos.</p>
+<h4>3. Score estatístico</h4><p>Média ponderada dos percentis disponíveis (Valor 30%, Analistas 25%, Crescimento 20%, Momentum 15%, Rendimento 10%). Exige pelo menos 3 fatores com dados.</p>
+<h4>4. Análise completa</h4><p>As ${m.n_deep} melhores por score com capitalização ≥ ${m.deep_min_usd/1e9} mil milhões USD, mais as ações curadas, recebem dados detalhados: rácios, DCF, metas e consenso de analistas, notícias e risco.</p>
+<h4>5. Metas e zona de compra</h4><p>Meta 1 = preço-alvo médio dos analistas. Meta 2 = DCF simples (fluxo de caixa livre a 10 anos, crescimento limitado a 8%, desconto 9%, só quando a moeda das demonstrações é a do preço). Preço justo = média das duas (o DCF só entra se estiver entre 0,5× e 2× o preço). Zona de compra = preço justo − 15%.</p>
+<h4>6. Risco e cenários</h4><p>Volatilidade, queda máxima, VaR 95%, beta face ao S&amp;P 500 e Sharpe calculados com 12 meses de preços. Os cenários usam um modelo lognormal com retorno esperado CAPM (${m.rf*100}% + beta × ${m.erp*100}%).</p>
+<h4>Controlo de qualidade</h4><p>${qcText()}</p><h4>Limitações</h4><p>Os dados vêm do Yahoo Finance (gratuito, pode ter erros ou atrasos). Percentis só comparam com o universo acima, não com o mercado inteiro. Rácios de bancos e empresas com demonstrações noutra moeda podem ser menos fiáveis. Isto é informação, não aconselhamento financeiro. Atualizado em ${esc(D.updated)}.</p></div>`}
+$("#meth").innerHTML=methodHTML();
 
 // ---------- tempo real (Yahoo WebSocket, não oficial)
 let ws,retry=0,last=0;const live=m=>$("#live").textContent=m;
 for(const k in T){const t=T[k];t.prev=t.d1!=null?t.price/(1+t.d1/100):null}
 function paint(s,p){const t=T[s];if(!t)return;t.price=p;if(t.prev)t.d1=(p/t.prev-1)*100;if(t.target)t.upside=(t.target/p-1)*100;
-document.querySelectorAll(`[data-px="${s}"]`).forEach(e=>{e.textContent=usd(p);e.style.color="#2563eb";setTimeout(()=>e.style.color="",300)});
+document.querySelectorAll(`[data-px="${s}"]`).forEach(e=>{e.textContent=usd(p,t.cur);e.style.color="#2563eb";setTimeout(()=>e.style.color="",300)});
 document.querySelectorAll(`[data-d1="${s}"]`).forEach(e=>e.innerHTML=sg(t.d1,1));document.querySelectorAll(`[data-up="${s}"]`).forEach(e=>e.innerHTML=sg(t.upside));
 document.querySelectorAll(`[data-zone="${s}"]`).forEach(e=>e.innerHTML=zoneTag(t))}
 function dec(b64){const b=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));let i=0,id,px;const vi=()=>{let r=0,s=0,x;do{x=b[i++];r|=(x&127)<<s;s+=7}while(x&128&&i<b.length);return r};
@@ -170,6 +252,6 @@ ws.onopen=()=>{retry=0;live("ligado · à espera de negócios");ws.send(JSON.str
 ws.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.type!="pricing")return;const[id,px]=dec(m.message);if(id&&px>0){paint(id,px);last=Date.now();live("● ao vivo · "+new Date().toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit",second:"2-digit"}))}}catch(_){}};
 ws.onclose=()=>{live("a reconectar…");setTimeout(connect,Math.min(30000,1000*2**retry++))};ws.onerror=()=>ws.close()}
 setInterval(()=>{if(last&&Date.now()-last>90000)live("sem negócios há mais de 90 s (mercado fechado?)")},15000);
-addEventListener("resize",()=>{clearTimeout(window._rz);window._rz=setTimeout(()=>{const k=$("#dr").dataset.k;if(k){const y=$("#dr").scrollTop;open(k);$("#dr").scrollTop=y}},250)});
+addEventListener("resize",()=>{clearTimeout(window._rz);window._rz=setTimeout(()=>{const k=$("#dr").dataset.k;if(k&&T[k]){const y=$("#dr").scrollTop;open(k);$("#dr").scrollTop=y}},250)});
 hero();grid();route();connect();
 </script></body></html>
