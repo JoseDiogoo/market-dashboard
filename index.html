@@ -37,9 +37,6 @@ dl{margin:0}dt{font-weight:700;margin-top:8px}dd{margin:2px 0 0;color:var(--t2)}
 <h2>🏆 Top 10 oportunidades do momento</h2>
 <div class="grid" id="top"></div>
 
-<h2>🍔 Estudo de caso: McDonald's (MCD) — desconto real vs. value trap</h2>
-<div class="card" id="mcd"></div>
-
 <h2>📋 Todas as ações analisadas <span class="mut" style="font-size:12px">(clica numa linha para a ficha completa · cabeçalho ordena)</span></h2>
 <div class="card scroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
 
@@ -123,21 +120,6 @@ function checks(t){return[
 ["Gera caixa (FCF positivo)",t.fcfy==null?null:t.fcfy>0,n(t.fcfy,1,"% FCF yield")],
 ["Analistas veem subida (alvo > preço)",t.upside==null?null:t.upside>0,sg(t.upside)]]}
 const chk=c=>c.map(([l,ok,v])=>`<tr><td>${ok==null?"?":ok?'<span class="ok">✓</span>':'<span class="bad">✗</span>'} ${l}</td><td>${v}</td></tr>`).join("");
-
-// ---- Estudo de caso MCD
-(function(){const t=T.MCD;if(!t){$("#mcd").textContent="MCD não está no universo.";return}
-const h=t.hist,im=h.reduce((a,p,j)=>p[1]<h[a][1]?j:a,0),low=h[im];
-$("#mcd").innerHTML=`<div class="cols"><div>${chart(t,{mark:true})}</div><div>
-<div class="big">${low[1].toFixed(0)}$ <span class="mut">${eur(low[1])}</span> → ${t.price.toFixed(0)}$ <span class="mut">${eur(t.price)}</span></div>
-<div>A ação tocou o mínimo de 52 semanas a <b>${low[0]}</b> e já subiu <b class="up">+${t.bounce.toFixed(0)}%</b> desde aí, mas ainda está ${sg(t.drawdown,0)} do máximo.</div>
-<h3>A lição</h3><ol style="padding-left:18px;margin:0">
-<li><b>O preço caiu, o negócio não.</b> Na queda, o McDonald's continuava com margem operacional de ${n(t.om,0,"%")} e lucros ${t.eg>=0?"a crescer":"a cair"} (${n(t.eg,1,"%")}). O mercado reagiu a ruído de curto prazo (sentimento, consumo); os números do negócio não pioraram.</li>
-<li><b>O moat segurou a ação.</b> Marca global, escala e um modelo de franchising (as lojas pagam renda e royalties), que gera caixa previsível e dividendos há décadas. Esse fosso explica porque os investidores voltaram.</li>
-<li><b>Só se sabe que foi desconto depois.</b> Por isso usa a checklist <i>antes</i>, não o gráfico.</li></ol></div></div>
-<h3>Desconto real ou value trap? A checklist aplicada ao MCD (dados de hoje)</h3>
-<div class="scroll"><table style="max-width:560px"><tbody>${chk(checks(t))}</tbody></table></div>
-<p class="mut" style="font-size:13px">Uma <b>armadilha de valor</b> falha vários destes testes: parece barata (P/E baixo, longe do máximo), mas os lucros caem, a dívida pesa ou o caixa é negativo. Cuidado extra com a dívida do MCD (${n(t.nd,1,"x")} EBITDA) e o capital próprio negativo, que torna o ROE pouco fiável. <a href="#" id="mcdopen">Ver ficha completa do MCD →</a></p>`;
-$("#mcdopen").onclick=e=>{e.preventDefault();open("MCD")}})();
 
 // ---- Ficha
 function open(k){const t=T[k],th=t.thesis||["–","–","–"];

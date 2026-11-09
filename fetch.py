@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import yfinance as yf
 
 SCREENS = ["undervalued_large_caps", "undervalued_growth_stocks"]  # screeners dinâmicos do Yahoo; universo muda sozinho
-PIN = ["MCD"]  # só o estudo de caso fica fixo
+PIN = []  # ações fixas a incluir sempre (vazio = só screeners)
 ARISTOCRATS = {"MCD", "KO", "JNJ", "PG", "PEP"}  # ponytail: lista manual, yfinance não expõe isto
 CYC_WORDS = ("semiconductor", "homebuilder", "residential construction", "oil", "gas", "steel", "gold", "copper", "airlines", "cruise", "auto")
 
