@@ -309,6 +309,19 @@ def risk_stats(h, p, tgt):
     return {"vol": r(vol * 100, 0), "maxdd": r(dd, 0), "sharpe": r(sharpe, 2), "var95": r(var95, 1), "beta": r(beta, 2), "mu": r(mu * 100, 1), "fan": fan, "ptouch": r(ptouch, 0)}
 
 
+def atr14(hd):
+    """Average True Range de 14 dias (Wilder) em unidades de preço; None se faltarem máximos/mínimos."""
+    try:
+        d = hd[["High", "Low", "Close"]].dropna()
+        pc = d["Close"].shift(1)
+        tr = pd.concat([d["High"] - d["Low"], (d["High"] - pc).abs(), (d["Low"] - pc).abs()], axis=1).max(axis=1).dropna()
+        if len(tr) < 30:
+            return None
+        return float(tr.ewm(alpha=1 / 14, adjust=False).mean().iloc[-1])
+    except Exception:
+        return None
+
+
 def levels(h, p, w=8, tol=0.025):
     """Suportes/resistências: pivôs (mínimos/máximos locais em ±w dias) agrupados a ±2,5%. n = nº de vezes que o preço reagiu ali."""
     v = h.values.astype(float)
@@ -343,7 +356,9 @@ def deep(sym):
         time.sleep(0.4)  # ritmo suave para não ser limitado
         t = yf.Ticker(sym)
         i = retry(lambda: t.info)
-        h = retry(lambda: t.history(period="1y"))["Close"].dropna()
+        hd = retry(lambda: t.history(period="1y"))
+        h = hd["Close"].dropna()
+        atr = atr14(hd)
         if len(h) < 30:
             return sym, None
         cur, fcur = i.get("currency"), i.get("financialCurrency")
@@ -413,7 +428,7 @@ def deep(sym):
             "dcf": r(dcfv), "dcf_ok": dcf_ok, "dcf_up": r((dcfv / p - 1) * 100, 1) if dcfv else None, "fair": r(fair), "buy_below": r(buy_below),
             "zone": "buy" if buy_below and p <= buy_below else "wait", "cons": co, "risk": risk, "vol": rs.get("vol"), "rs": rs,
             "dy": r(dy, 2), "payout": r(pct(i.get("payoutRatio")), 0), "pe": r(cl(i.get("trailingPE")), 1), "fpe": r(cl(fpe), 1), "eve": r(cl(eve), 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1),
-            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "q": q, "sr": levels(h, p), "sim": sim,
+            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "q": q, "sr": levels(h, p), "sim": sim, "atr": r(atr, 2),
             "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "news": nws, "senti": senti, "drop": dropv}
         auto = tese_auto.gen(i, {**out, "cat": None})
         if sym in TESE:  # curadas: texto escrito à mão + saúde financeira automática

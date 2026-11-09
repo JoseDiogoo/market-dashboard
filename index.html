@@ -119,16 +119,26 @@ h3{letter-spacing:-.01em}
 @media(max-width:520px){.scs{gap:6px}.sc b{font-size:16px}.sc em{font-size:10px}.pfin{flex-direction:column;align-items:stretch}}
 .yt{scrollbar-width:thin;scrollbar-color:var(--line) transparent}.yt::-webkit-scrollbar{height:6px}.yt::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}.yt::-webkit-scrollbar-track{background:transparent}@media(max-width:520px){.peer td,.peer th{padding:6px 4px;font-size:11px}.peer td:first-child{white-space:normal;max-width:66px;line-height:1.2;font-size:10.5px}.peer th .sub{display:none}.peer .win{width:14px;height:14px;line-height:14px;margin-left:2px}}
 @media(max-width:520px){.sens th,.sens td{padding:6px 4px}.sens th:first-child,.sens td:first-child{white-space:normal;max-width:78px;font-size:10.5px}}
+
+.views button.hot{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04101c;font-weight:800;box-shadow:0 6px 20px var(--glow1)}.views button.hot.on{box-shadow:0 0 0 2px var(--t1),0 6px 22px var(--glow1)}
+.plcap{margin:6px 0 12px}.plcap label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--t2)}.plv{font-size:30px;font-weight:800;color:var(--t1);letter-spacing:-.03em}.plcap input[type=range]{width:100%;accent-color:var(--acc);height:32px;touch-action:pan-y}.plcap input[type=number]{width:110px;background:var(--card2);color:var(--t1);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.plprof{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pp{text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--t1);cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0}.pp span{font-size:11.5px;color:var(--mut);line-height:1.35}.pp.on{border-color:var(--acc);background:var(--accbg);box-shadow:0 0 0 1px var(--acc) inset}
+.plimp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}.imp{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0}.imp span{font-size:12px;color:var(--t2);font-weight:600}.imp b{font-size:26px;letter-spacing:-.03em}.imp em{font-style:normal;font-size:11.5px;color:var(--mut);line-height:1.4}.imp.g b{color:var(--up)}.imp.b b{color:var(--acc2)}.imp.a b{color:var(--am)}.imp.r b{color:var(--dn)}
+.otbl{margin-top:6px}.oh,.orow{display:grid;grid-template-columns:1.7fr .9fr 1.1fr 1.5fr 1.5fr 1.4fr .9fr;gap:12px;align-items:start}.oh{font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:8px 6px;border-bottom:1px solid var(--line)}.orow{padding:14px 6px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.45;cursor:pointer;border-radius:10px}.orow:hover{background:var(--card2)}.oc{min-width:0}.oc small{display:block;color:var(--mut);font-size:11px}
+.how .stp{display:flex;gap:12px;margin:12px 0}.how .stp i{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accbg);color:var(--acc);font-style:normal;font-weight:800;display:flex;align-items:center;justify-content:center}.how p{margin:4px 0 0;font-size:13px;line-height:1.55;color:var(--t2)}
+@media(max-width:900px){.plimp{grid-template-columns:1fr}.oh{display:none}.orow{grid-template-columns:1fr 1fr;gap:10px 14px;padding:16px 10px;background:var(--card2);border:1px solid var(--line);border-radius:14px;margin:10px 0}.orow .oc:first-child{grid-column:1/-1}.orow .oc:nth-child(4),.orow .oc:nth-child(5),.orow .oc:nth-child(6){grid-column:1/-1}.orow .oc:not(:first-child):before{content:attr(data-l);display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-weight:700;margin-bottom:2px}}
+@media(max-width:520px){.plprof{grid-template-columns:1fr}.pp{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 8px}.plv{font-size:26px}.imp b{font-size:22px}}
 </style></head><body><div class="wrap">
 <div class="vbar"><i></i>Versão Pro Institutional (Live Multi-API)</div>
 <header class="top"><div class="brand"><span class="logo">◆</span>Radar<span>.</span>Invest</div><input id="q" placeholder="Procurar entre milhares de ações (ex.: Nestlé, SAP)" autocomplete="off"><span id="live" class="livepill" title="Estado das fontes de dados">a ligar…</span><button class="ibtn" id="theme" aria-label="Alternar tema claro/escuro">◐</button></header>
 <section class="hero2" id="hero2"><div class="hcopy"><h1>Onde investir <em>hoje</em>?</h1><p id="hsub"></p><div class="idxs" id="idxs"></div></div><div class="feat" id="feat"></div><div class="mini" id="mini"></div></section>
 <div class="ctl"><div class="regs" id="regs"><button data-r="all" class="on">🌍 Todas</button><button data-r="us">🇺🇸 EUA</button><button data-r="eu">🇪🇺 Europa</button></div>
-<nav class="views"><button data-v="1" class="on">Oportunidades</button><button data-v="4">Mercado</button><button data-v="5">💼 Carteira</button><button data-v="2">Explorar <span id="nuni"></span></button><button data-v="3">Metodologia</button></nav></div>
+<nav class="views"><button data-v="6" class="hot">🎯 Plano de Ação</button><button data-v="1" class="on">Oportunidades</button><button data-v="4">Mercado</button><button data-v="5">💼 Carteira</button><button data-v="2">Explorar <span id="nuni"></span></button><button data-v="3">Metodologia</button></nav></div>
 <div id="v1"><div class="bar"><div class="pills" id="pills"></div><select id="sort" aria-label="Ordenar"><option value="rank">Ordenar: Melhor oportunidade</option><option value="upside">Ordenar: Potencial de subida</option><option value="score">Ordenar: Qualidade</option><option value="dy">Ordenar: Dividendo</option></select></div>
 <div class="sub" id="ord" style="margin:0 2px 12px"></div><div class="grid" id="grid"></div></div>
 <div id="v2" hidden><div class="xf" id="xf"></div><div class="sub" id="xc" style="margin:8px 2px"></div><div class="xt"><table id="xt"></table></div><button class="pill" id="xm" style="margin:14px auto;display:block">Mostrar mais</button></div>
 <div id="v3" hidden><div class="sec" id="meth" style="margin:0"></div></div>
+<div id="v6" hidden></div>
 <div id="v5" hidden></div>
 <div id="v4" hidden><div class="mk" id="mkt"></div></div>
 <div class="note">Ferramenta informativa, não é aconselhamento financeiro. Metas e zonas de compra são estimativas calculadas a partir de dados públicos e podem falhar. Confirma sempre antes de investir.</div>
@@ -210,13 +220,14 @@ $("#grid").onclick=e=>{const c=e.target.closest("[data-k]");if(c)location.hash=c
 const PW=()=>Math.min(560,($("#dr").clientWidth||innerWidth)-64);
 function chart(t){const h=t.hist.slice(-RN[rng]-1),W=PW(),H=220,m={l:44,r:10,t:10,b:20};
 const pmin=Math.min(...h.map(x=>x[1])),pmax=Math.max(...h.map(x=>x[1]));
-const L=[[t.target,"Meta 1 "+usd(t.target,t.cur),"var(--up)"],[t.buy_below,"Comprar abaixo "+usd(t.buy_below,t.cur),"var(--am)"],[t.dcf_ok?t.dcf:null,"Meta 2 "+usd(t.dcf,t.cur),"var(--acc2)"]].filter(l=>l[0]&&l[0]>=pmin*.7&&l[0]<=pmax*1.5);
+const PLN=planLevels(t),L=(PLN?[[PLN.entry2||PLN.entry1,"Entrada até "+usd(PLN.entry2||PLN.entry1,t.cur),"var(--up)",""],[PLN.t1,"Meta 1 "+usd(PLN.t1,t.cur),"var(--am)",""],[PLN.t2,"Meta 2 "+usd(PLN.t2,t.cur),"var(--acc2)",""],[PLN.stop,"Cautela "+usd(PLN.stop,t.cur),"var(--dn)","2 4"]]:[[t.target,"Meta 1 "+usd(t.target,t.cur),"var(--up)",""],[t.buy_below,"Comprar abaixo "+usd(t.buy_below,t.cur),"var(--am)",""],[t.dcf_ok?t.dcf:null,"Meta 2 "+usd(t.dcf,t.cur),"var(--acc2)",""]]).filter(l=>l[0]&&l[0]>=pmin*.6&&l[0]<=pmax*1.6);
 const SR=[...((t.sr&&t.sr.sup)||[]).map(x=>({...x,c:"var(--up)"})),...((t.sr&&t.sr.res)||[]).map(x=>({...x,c:"var(--dn)"}))].filter(x=>x.p>=pmin*.8&&x.p<=pmax*1.25);
 const vals=[pmin,pmax,...L.map(l=>l[0]),...SR.map(x=>x.p)],lo=Math.min(...vals)*.97,hi=Math.max(...vals)*1.03;
 const x=i=>m.l+i/(h.length-1)*(W-m.l-m.r),y=v=>H-m.b-(v-lo)/(hi-lo)*(H-m.t-m.b),id="c"+Math.random().toString(36).slice(2,7);
 let g=[0,1,2,3].map(i=>{const v=lo+(hi-lo)*i/3;return `<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end">${v>=100?v.toFixed(0):v.toFixed(1)}</text>`}).join("");
-g+=SR.map(x=>`<rect x="${m.l}" width="${W-m.l-m.r}" y="${y(x.p*1.008)}" height="${Math.max(3,y(x.p*.992)-y(x.p*1.008))}" fill="${x.c}" opacity="${x.n>1?.2:.1}"/><text x="${m.l+4}" y="${y(x.p*1.008)-2}" style="fill:${x.c};font-size:10px;font-weight:700">${x.c.includes("up")?"Suporte":"Resistência"} ${x.n>1?"×"+x.n:""}</text>`).join("");
-g+=L.map(([v,l,c])=>`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-width="1.6" stroke-dasharray="5 4"/><text x="${W-m.r}" y="${y(v)-5}" text-anchor="end" style="fill:${c};font-weight:700">${l}</text>`).join("");
+g+=SR.map(x=>`<rect x="${m.l}" width="${W-m.l-m.r}" y="${y(x.p*1.008)}" height="${Math.max(3,y(x.p*.992)-y(x.p*1.008))}" fill="${x.c}" opacity="${x.n>1?.2:.1}"/>${x.n>1?`<text x="${m.l+4}" y="${y(x.p*1.008)-2}" style="fill:${x.c};font-size:10px;font-weight:700;opacity:.9">${x.c.includes("up")?"Suporte":"Resistência"} ×${x.n}</text>`:""}`).join("");
+const LY=(()=>{const o=L.map((l,i)=>[i,y(l[0])-5]).sort((a,b)=>a[1]-b[1]),r={};let last=-99;o.forEach(([i,yy])=>{yy=Math.max(yy,last+13);r[i]=yy;last=yy});return r})();
+g+=L.map(([v,l,c,da],i)=>`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-width="1.6" stroke-dasharray="${da||"5 4"}"/><text x="${W-m.r}" y="${LY[i]}" text-anchor="end" style="fill:${c};font-weight:700;paint-order:stroke;stroke:var(--card);stroke-width:3px">${l}</text>`).join("");
 const pts=h.map((p,i)=>x(i).toFixed(1)+","+y(p[1]).toFixed(1));
 g+=`<polygon points="${m.l},${H-m.b} ${pts.join(" ")} ${x(h.length-1)},${H-m.b}" fill="var(--accbg)"/><polyline points="${pts.join(" ")}" fill="none" stroke="var(--acc)" stroke-width="2.2" stroke-linejoin="round"/><circle cx="${x(h.length-1)}" cy="${y(t.price)}" r="4.5" fill="var(--acc)" stroke="var(--card)" stroke-width="2"/>
 <text x="${m.l}" y="${H-4}">${h[0][0].slice(0,7)}</text><text x="${W-m.r}" y="${H-4}" text-anchor="end">${h.at(-1)[0].slice(0,7)}</text><line id="${id}" y1="${m.t}" y2="${H-m.b}" stroke="var(--mut)" display="none"/>`;
@@ -238,11 +249,12 @@ $("#dr").innerHTML=`<div class="dh"><button class="back" id="bk" aria-label="Vol
 <div class="kv"><span>Comprar abaixo de</span><b>${usd(t.buy_below,t.cur)}</b></div>
 <div class="kv"><span>Meta 1 · Wall Street</span><b>${usd(t.target,t.cur)} <span data-up="${k}">${sg(t.upside)}</span></b></div>
 <div class="kv"><span>Meta 2 · Valor fundamental (DCF)</span><b>${t.dcf_ok?usd(t.dcf,t.cur)+" "+sg(t.dcf_up):'<span class="sub">n/d</span>'}</b></div>
+${(()=>{const p=planLevels(t);return p?`<div class="kv"><span>Plano · Entrada</span><b>${p.inZone?"já, até ":"limite "}${usd(p.entry2||p.entry1,t.cur)}</b></div><div class="kv"><span>Plano · Meta 1 (reduzir 50%)</span><b>${usd(p.t1,t.cur)} <span class="up">+${(p.gain1*100).toFixed(0)}%</span></b></div><div class="kv"><span>Plano · Meta 2 (preço justo)</span><b>${usd(p.t2,t.cur)} <span class="up">+${(p.gain2*100).toFixed(0)}%</span></b></div><div class="kv"><span>Plano · Cautela (reavaliar)</span><b style="color:var(--dn)">${usd(p.stop,t.cur)} −${(p.loss*100).toFixed(0)}%</b></div>`:""})()}
 <div class="kv"><span>Intervalo dos analistas</span><b>${usd(t.tlow,t.cur)} – ${usd(t.thigh,t.cur)}</b></div>
 ${fromBuy!=null?`<div class="kv"><span>Lucro até à Meta 1 se comprares na zona de compra</span><b>${sg(fromBuy)}</b></div>`:""}
 <p class="cap">Zona de compra = preço justo −15% (margem de segurança). Preço justo = média da meta dos analistas e do DCF (só se o DCF for plausível). ${t.dcf_ok?"":"O DCF não é mostrado: o modelo simples não se aplica a esta empresa (financeira, caixa livre fraco ou crescimento muito acima do que assume)."}</p></div>
 ${simHTML(t,k)}
-<div class="sec"><div class="tabs">${Object.keys(RN).map(r=>`<button class="${r==rng?"on":""}" data-r="${r}">${r}</button>`).join("")}</div>${chart(t)}<p class="cap">Linha azul = preço · verde = Meta 1 · âmbar = zona de compra${t.dcf_ok?" · azul tracejado = Meta 2":""} · faixas verdes = suportes, vermelhas = resistências</p>${srHTML(t)}</div>
+<div class="sec"><div class="tabs">${Object.keys(RN).map(r=>`<button class="${r==rng?"on":""}" data-r="${r}">${r}</button>`).join("")}</div>${chart(t)}<p class="cap">Linha azul = preço · verde = entrada · dourada = Meta 1 · azul-claro = Meta 2 · vermelha tracejada = cautela (2×ATR / suporte) · faixas verdes = suportes, vermelhas = resistências</p>${srHTML(t)}</div>
 <div class="sec"><h3>O que dizem os analistas</h3><div class="row"><b style="font-size:20px">${c.buy_pct==null?"–":c.buy_pct+"% recomendam compra"}</b><span class="chip ${c.label&&c.label.startsWith("Compra")?"g":"a"}">${c.label||"–"}</span></div>
 ${consBar(c)}<div class="cap">${GRADES.map(([key,l,col])=>c[key]?`<span style="color:${col}">●</span> ${l} ${c[key]}`:"").filter(Boolean).join(" · ")} · ${c.total} analistas</div>
 ${c.firms.length?`<div style="margin-top:8px">${c.firms.map(f=>`<div class="kv"><span>${esc(f.f)}</span><b>${esc(gr(f.g))}${f.pt?" · alvo "+usd(f.pt,t.cur):""}</b></div>`).join("")}</div><p class="cap">Últimas revisões (≤120 dias).</p>`:""}</div>
@@ -297,7 +309,7 @@ $("#xt").innerHTML=`<thead><tr>${XC.map(([k,l,h])=>`<th class="${h?"hm":""}" dat
 $("#xm").style.display=a.length>X.n?"block":"none"}
 $("#xt").onclick=e=>{const th=e.target.closest("th[data-s]"),tr=e.target.closest("tbody tr");if(th){const k=th.dataset.s;X.dir=X.sort==k?-X.dir:(k=="s"||k=="pais"||k=="sec"?1:-1);X.sort=k;X.n=100;xrender()}else if(tr)location.hash=tr.dataset.k};
 $("#xm").onclick=()=>{X.n+=200;xrender()};
-function setView(v){document.querySelectorAll(".views button").forEach(b=>b.classList.toggle("on",b.dataset.v==v));[1,2,3,4,5].forEach(i=>$("#v"+i).hidden=i!=v);if(v==5)pfRender();$("#hero2").hidden=v!=1;if(v==4)market();if(v==2&&!$("#xq")){xfilters();xrender()}}
+function setView(v){document.querySelectorAll(".views button").forEach(b=>b.classList.toggle("on",b.dataset.v==v));[1,2,3,4,5,6].forEach(i=>$("#v"+i).hidden=i!=v);if(v==5)pfRender();if(v==6)planRender();$("#hero2").hidden=v!=1;if(v==4)market();if(v==2&&!$("#xq")){xfilters();xrender()}}
 $("#regs").onclick=e=>{const b=e.target.closest("[data-r]");if(!b)return;REG=b.dataset.r;document.querySelectorAll("#regs button").forEach(x=>x.classList.toggle("on",x==b));hero();grid();if($("#xq")){X.n=100;xrender()}if(!$("#v4").hidden)market()};
 $(".views").onclick=e=>{const b=e.target.closest("[data-v]");if(b)setView(b.dataset.v)};
 $("#nuni").textContent="("+R.length.toLocaleString("pt-PT")+")";
@@ -517,6 +529,76 @@ $("#pfeq").onclick=()=>{PF.w={};pfSave();pfRender()};
 $("#pfq").onclick=()=>{PF.sel=D.order.filter(k=>T[k].elite).slice(0,3);PF.w={};pfSave();pfRender()};
 document.querySelectorAll(".pw").forEach(i=>i.onchange=()=>{PF.w[i.dataset.k]=clamp(+i.value||0,0,100);pfSave();pfRender()});
 document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{PF.sel=PF.sel.filter(x=>x!=b.dataset.rm);delete PF.w[b.dataset.rm];pfSave();pfRender()})}
+
+// ================= Plano de Ação: carteira pronta a executar (capital + perfil → ordens) =================
+// Níveis por ação: entrada, Meta 1 (conservadora: 1.ª resistência técnica antes do preço justo), Meta 2 (preço justo), cautela (2×ATR ou abaixo do suporte)
+function planLevels(t){const p=t.price;if(!fin(p)||p<=0)return null;
+const atr=fin(t.atr)&&t.atr>0?t.atr:p*((t.vol||30)/100)/Math.sqrt(252)*.9;
+const sup=(t.sr&&t.sr.sup)||[],res=(t.sr&&t.sr.res)||[];
+const inZone=!!(t.buy_below&&p<=t.buy_below),s0=sup.find(x=>x.p<p&&x.p>=p-3.5*atr);
+const entry1=p*1.01;let entry2=null;
+if(!inZone){const c=Math.max(t.buy_below||0,s0?s0.p*1.01:0);if(c>=p*.8&&c<p*.995)entry2=c}
+let t2=fin(t.fair)?t.fair:fin(t.target)?t.target:null;if(!t2||t2<=p*1.03)return null;
+const r0=res.find(x=>x.p>p*1.04&&x.p<=t2*.97);let t1=r0?r0.p:p+.5*(t2-p);t1=Math.max(t1,p*1.05);if(t1>=t2)t1=p+.6*(t2-p);
+const c1=p-2*atr,c2=s0?s0.p*.985:null;let stop=c2?Math.min(c1,c2):c1;stop=clamp(stop,p*.8,p*.95);
+const ref=entry2?(p+entry2)/2:p; // preço médio esperado de entrada
+return{p,atr,inZone,entry1,entry2,t1,t2,stop,s0,r0,ref,loss:(ref-stop)/ref,gain1:t1/ref-1,gain2:t2/ref-1,rr:(t1-ref)/Math.max(ref-stop,1e-9),byStop:c2&&c2<c1?"suporte":"2×ATR"}}
+const WHT=k=>k.endsWith(".L")?0:k.includes(".")?.25:.15; // retenção na fonte típica (aprox.): EUA 15% com W-8BEN, Reino Unido 0%, resto da Europa ~25%
+const PROF={bal:["⚖️ Equilibrado","5 empresas de elite: valorização, qualidade e dividendos",5],div:["🛡️ Dividendos & Renda","5 gigantes defensivas focadas no dividendo",5],gro:["🚀 Alto Crescimento & IA","4–5 líderes com maior potencial de subida",5]};
+function planPool(prof){const base=Object.keys(T).filter(k=>{const t=T[k];return t.price>0&&D.eurusd&&fxOf(k)&&t.cons.total>=5&&!(t.q&&t.q.trap)&&planLevels(t)&&(t.q&&t.q.qscore!=null)});
+const sc=k=>{const t=T[k],q=t.q.qscore,pl=planLevels(t),up=clamp(pl.gain2*100,0,60),bp=t.cons.buy_pct||0,cy=(t.q.norm&&(t.q.norm.peak?25:t.q.norm.cyc?12:0))||0,rrb=clamp(pl.rr,0,2)*4;
+if(prof=="bal")return t.elite?100+t.rank:null;
+if(prof=="div")return(t.dy||0)>=1.8&&t.risk!="Alto"&&(t.payout||0)<90&&(t.fcfy||0)>0&&q>=55&&(t.cons.buy_pct||0)>=50?clamp(t.dy,0,7)/7*50+q*.35+(bp/100)*15+rrb-cy:null;
+return(t.cons.total>=10&&bp>65&&q>=50&&((t.rg||0)>=10||(t.eg||0)>=15||t.cat=="g")&&up>=12)?up/60*50+q*.3+bp*.2+rrb-cy:null};
+let c=base.map(k=>[k,sc(k)]).filter(x=>x[1]!=null).sort((a,b)=>b[1]-a[1]);
+if(prof=="bal"&&c.length<5){const more=base.filter(k=>!T[k].elite&&(T[k].q.qscore>=65)&&T[k].cons.total>=10&&(T[k].cons.buy_pct||0)>65).map(k=>[k,T[k].q.qscore+T[k].rank*.5]).sort((a,b)=>b[1]-a[1]);c=c.concat(more.map(x=>[x[0],x[1]-1000]))}
+const out=[],cnt={},maxS=prof=="gro"?3:2;for(const[k]of c){const s=T[k].sector||"x";if((cnt[s]||0)>=maxS)continue;cnt[s]=(cnt[s]||0)+1;out.push(k);if(out.length>=5)break}return out}
+// pesos: inverso da volatilidade (risk parity simples) × inclinação de qualidade; teto 35%, piso 8%
+function planWeights(ks){let w=ks.map(k=>{const t=T[k];return(1/Math.max(12,t.vol||30))*clamp((t.q.qscore||60)/70,.7,1.3)});
+let s=w.reduce((a,b)=>a+b,0);w=w.map(x=>x/s);
+for(let it=0;it<12;it++){const hi=w.map(x=>Math.min(x,.35)),lo=hi.map(x=>Math.max(x,ks.length>3?.08:0));const t=lo.reduce((a,b)=>a+b,0);w=lo.map(x=>x/t)}return w}
+function volOfW(ks,w){const ser=ks.map(retSeries);const days=[...ser[0].keys()].filter(d=>ser.every(m=>m.has(d)));if(days.length<60)return null;
+const pr=days.map(d=>ser.reduce((a,m,i)=>a+w[i]*m.get(d),0)),mn=pr.reduce((a,b)=>a+b,0)/pr.length;return Math.sqrt(pr.reduce((a,b)=>a+(b-mn)**2,0)/(pr.length-1))*Math.sqrt(252)}
+const PL={cap:clamp(+(localStorage.plCap||2000),200,1e6),prof:localStorage.plProf||"bal"};
+const E0=v=>"€"+v.toLocaleString("pt-PT",{maximumFractionDigits:0}),E2=v=>"€"+v.toLocaleString("pt-PT",{minimumFractionDigits:2,maximumFractionDigits:2}),EP=(v,k)=>{const e=eur(v,k);return e||usd(v,T[k].cur)};
+function planCalc(){const ks=planPool(PL.prof);if(!ks.length)return{ks:[]};const w=planWeights(ks);const rows=ks.map((k,i)=>{const t=T[k],pl=planLevels(t),amt=Math.round(PL.cap*w[i]),ep=eurPx(k),sh=amt/ep;return{k,t,pl,w:w[i],amt,sh,whole:Math.floor(sh),div:amt*(t.dy||0)/100*(1-WHT(k)),divg:amt*(t.dy||0)/100}});
+const diff=PL.cap-rows.reduce((a,r)=>a+r.amt,0);rows[0].amt+=diff;rows[0].sh=rows[0].amt/eurPx(rows[0].k);rows[0].whole=Math.floor(rows[0].sh);
+const tot=PL.cap,g1=rows.reduce((a,r)=>a+r.amt*r.pl.gain1,0),g2=rows.reduce((a,r)=>a+r.amt*r.pl.gain2,0),dv=rows.reduce((a,r)=>a+r.div,0),dvg=rows.reduce((a,r)=>a+r.divg,0),ml=rows.reduce((a,r)=>a+r.amt*r.pl.loss,0);
+const vol=volOfW(ks,w),wv=rows.reduce((a,r)=>a+r.w*(r.t.vol||30)/100,0),effN=1/w.reduce((a,x)=>a+x*x,0),secs=new Set(rows.map(r=>r.t.sector)).size;
+return{ks,rows,tot,g1,g2,dv,dvg,ml,vol,wv,effN,secs}}
+function planRender(){const el=$("#v6"),pc=planCalc();
+const chips=[1000,2000,3000,5000,10000].map(v=>`<button class="pill ${PL.cap==v?"on":""}" data-cap="${v}">${E0(v)}</button>`).join("");
+let h=`<div class="box plhd"><h3>🎯 Plano de Ação</h3><p class="cap" style="margin:0 0 10px">Tens <b>${E0(PL.cap)}</b> para investir hoje? Aqui está onde colocar o dinheiro, quanto, a que preço entrar e onde sair. Calculado com os dados de ${esc(D.updated||"")}.</p>
+<div class="plcap"><label>Capital a investir<span class="plv">${E0(PL.cap)}</span></label><input type="range" id="plr" min="500" max="20000" step="100" value="${clamp(PL.cap,500,20000)}"><div class="row" style="justify-content:flex-start;gap:8px;flex-wrap:wrap">${chips}<input type="number" id="pln" min="200" step="100" value="${PL.cap}" aria-label="Capital em euros"></div></div>
+<div class="plprof">${Object.entries(PROF).map(([k,[l,d]])=>`<button class="pp ${PL.prof==k?"on":""}" data-pf="${k}"><b>${l}</b><span>${d}</span></button>`).join("")}</div></div>`;
+if(!pc.ks.length){$("#v6").innerHTML=h+`<div class="box"><p class="sub">Nenhuma ação passa hoje os critérios deste perfil. Experimenta outro perfil.</p></div>`;planBind();return}
+const rk=(pc.vol??pc.wv)*100,lv=rk<18?["Baixo","g"]:rk<28?["Médio","a"]:["Alto","r"];
+h+=`<div class="plimp"><div class="imp g"><span>🎯 Lucro potencial</span><b>+${E0(pc.g1)}</b><em>até à Meta 1 (+${(pc.g1/pc.tot*100).toFixed(1)}%)<br>até à Meta 2: +${E0(pc.g2)} (+${(pc.g2/pc.tot*100).toFixed(1)}%)</em></div>
+<div class="imp b"><span>💰 Dividendos anuais líquidos</span><b>~${E0(pc.dv)}/ano</b><em>yield líquido ${(pc.dv/pc.tot*100).toFixed(1)}% (bruto ${(pc.dvg/pc.tot*100).toFixed(1)}%) · ≈ ${E0(pc.dv/12)}/mês</em></div>
+<div class="imp ${lv[1]}"><span>🛡️ Nível de risco</span><b>${lv[0]}</b><em>volatilidade ${rk.toFixed(0)}% ao ano · ${pc.secs} setores · ${pc.effN.toFixed(1)} posições efetivas<br>perda máx. se todas as cautelas forem atingidas: −${E0(pc.ml)} (−${(pc.ml/pc.tot*100).toFixed(1)}%)</em></div></div>`;
+h+=`<div class="box"><h3>Ordens para lançar na corretora</h3><div class="otbl"><div class="oh"><span>Empresa</span><span>% → €</span><span>Quantidade</span><span>🟢 Entrada</span><span>🎯 Saída (lucro)</span><span>⚠️ Cautela</span><span>💵 Dividendos</span></div>`;
+h+=pc.rows.map(r=>{const{k,t,pl}=r,pe=v=>EP(v,k),loc=v=>t.cur&&t.cur!="EUR"?`<small>${usd(v,t.cur)}</small>`:"";
+const entry=pl.inZone?`<b>🟢 Comprar já</b><br>ordem limite até ${pe(pl.entry1)} ${loc(pl.entry1)}`:`<b>🟡 50% já, 50% à espera</b><br>já: até ${pe(pl.entry1)}<br>depois: limite ${pe(pl.entry2||t.buy_below||pl.p)} ${loc(pl.entry2||pl.p)}`;
+const nd=pl.rr;return`<div class="orow" data-k="${esc(k)}"><div data-l="Empresa" class="oc"><div class="row" style="justify-content:flex-start;gap:10px;flex-wrap:nowrap">${av(k)}<div><b>${esc(t.name.slice(0,24))}</b><br><span class="sub">${esc(k)} · ${exName(k)} · ${t.risk.toLowerCase()}</span></div></div></div>
+<div data-l="% da carteira → montante" class="oc"><b>${(r.w*100).toFixed(0)}% → ${E0(r.amt)}</b></div>
+<div data-l="Quantidade" class="oc"><b>${r.sh.toFixed(2).replace(".",",")} ações</b><br><span class="sub">${r.whole>=1?`ou ${r.whole} inteiras`:"fração: usa compra por valor"} · a ${eur(pl.p,k)||usd(pl.p,t.cur)}</span></div>
+<div data-l="Entrada ideal" class="oc">${entry}</div>
+<div data-l="Meta de saída" class="oc"><b>Meta 1: ${pe(pl.t1)}</b> <span class="up">+${(pl.gain1*100).toFixed(0)}%</span><br><span class="sub">vende/reduz 50% aqui</span><br><b>Meta 2: ${pe(pl.t2)}</b> <span class="up">+${(pl.gain2*100).toFixed(0)}%</span><br><span class="sub">preço justo (médio prazo)</span></div>
+<div data-l="Nível de cautela" class="oc"><b style="color:var(--dn)">${pe(pl.stop)}</b> <span class="dn">−${(pl.loss*100).toFixed(0)}%</span><br><span class="sub">${pl.byStop=="suporte"?"abaixo do suporte":"2× ATR (volatilidade real)"} · risco/retorno ${pl.rr.toFixed(1)}×</span></div>
+<div data-l="Dividendos" class="oc"><b>${E0(r.div)}/ano</b><br><span class="sub">${t.dy?n(t.dy,1)+"% bruto":"sem dividendo"}</span></div></div>`}).join("");
+h+=`</div><p class="cap">Pesos por <b>paridade de risco</b>: ações mais voláteis recebem menos dinheiro e as de maior qualidade mais (teto 35%, piso 8%). Entrada: se o preço está acima da zona de compra, entra com metade e deixa o resto em ordem limite. <b>Meta 1</b> = primeira resistência técnica antes do preço justo (ou metade do caminho); <b>Meta 2</b> = preço justo (média da meta dos analistas e do DCF). <b>Cautela</b> = o mais baixo entre 2× ATR (amplitude média real de 14 dias) e logo abaixo do suporte principal, limitado a −20%: abaixo disto a tese deixa de se aguentar, reavalia. Dividendos líquidos = bruto − retenção típica na fonte (EUA 15%, Reino Unido 0%, resto da Europa ~25%); o imposto final depende do teu país. Valores em € ao câmbio atual; ações cotadas noutras moedas têm risco cambial.</p></div>`;
+h+=`<div class="box how"><h3>Como executar na tua corretora (XTB / Trading 212)</h3>
+<div class="stp"><i>1</i><div><b>Lança as ordens em euros</b><p>Abre a app, pesquisa o ticker e escolhe <b>comprar ações reais</b> (não CFDs). Na Trading 212 usa “Comprar por valor” e escreve o montante em € da tabela; na XTB, numa conta de investimento (ações reais), indica o volume. Muitos títulos aceitam frações; se não, usa as ações inteiras indicadas. Confirma que o ticker existe na tua corretora.</p></div></div>
+<div class="stp"><i>2</i><div><b>Disciplina: compra dentro da zona</b><p>Se a linha diz “Comprar já”, usa uma <b>ordem limite</b> até ao preço indicado (evita pagar mais por uma subida repentina). Se diz “50% já, 50% à espera”, compra metade e deixa o resto em ordem limite no valor indicado: se o preço nunca lá chegar, não persigas, aceita ficar com meia posição.</p></div></div>
+<div class="stp"><i>3</i><div><b>Sai com plano: lucro parcial e proteção</b><p>Ao chegar à <b>Meta 1</b>, vende cerca de 50% (realizas lucro) e sobe o nível de cautela para o teu preço de compra: o resto corre sem risco de perda. Na <b>Meta 2</b> reavalia: se a empresa continua forte, mantém uma parte. Define a <b>cautela</b> como ordem stop (se a corretora permitir em ações reais) ou como alerta de preço; se for atingida, reavalia a tese em vez de esperar que recupere. Gaps de abertura podem executar abaixo do stop.</p></div></div>
+<p class="cap">Plano educativo gerado automaticamente a partir de dados gratuitos do Yahoo Finance (cotações com atraso possível). Metas, zonas e cautelas são estimativas estatísticas, não garantias nem aconselhamento financeiro. Nunca investas dinheiro de que possas precisar a curto prazo.</p></div>`;
+el.innerHTML=h;planBind()}
+function planBind(){const set=c=>{PL.cap=clamp(Math.round(+c||2000),200,1e6);localStorage.plCap=PL.cap;planRender()};
+const r=$("#plr");if(r)r.onchange=()=>set(r.value);const nn=$("#pln");if(nn)nn.onchange=()=>set(nn.value);
+document.querySelectorAll("[data-cap]").forEach(b=>b.onclick=()=>set(b.dataset.cap));
+document.querySelectorAll("[data-pf]").forEach(b=>b.onclick=()=>{PL.prof=b.dataset.pf;localStorage.plProf=PL.prof;planRender()});
+if(r)r.oninput=()=>{const v=document.querySelector(".plv");if(v)v.textContent=E0(+r.value)};
+document.querySelectorAll(".orow").forEach(o=>o.onclick=e=>{if(!e.target.closest("a,button"))location.hash=o.dataset.k})}
 
 hero();grid();route();connect();
 </script></body></html>

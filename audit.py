@@ -103,6 +103,8 @@ dc = [(k, t["dcf"], fetch.dcf(t["sim"]["fcf"], t["sim"]["g"], t["sim"]["sh"], t[
 check("simulador: DCF do front-end = DCF do pipeline (±1%)", all(abs(a / b - 1) < 0.01 for _, a, b in dc), f"{len(dc)} comparados")
 check("simulador: todos têm modo ou ficam sem simulação", all((t.get("sim") or {}).get("mode") in ("dcf", "pe", None) for t in T.values()), f"dcf={sum(1 for t in T.values() if t['sim'].get('mode') == 'dcf')} pe={sum(1 for t in T.values() if t['sim'].get('mode') == 'pe')}")
 check("suportes abaixo e resistências acima do preço", all(all(x["p"] < t["price"] for x in t["sr"].get("sup", [])) and all(x["p"] > t["price"] for x in t["sr"].get("res", [])) for t in T.values()), f"{sum(1 for t in T.values() if t['sr'].get('sup'))} com suportes")
+at = [(k, t.get("atr"), t["price"]) for k, t in T.items()]
+check("ATR 14d presente (≥90%) e plausível (0 < ATR < 25% do preço)", sum(1 for _, a, _p in at if a) >= 0.9 * len(at) and all(a is None or 0 < a < 0.25 * p for _, a, p in at), f"{sum(1 for _, a, _p in at if a)}/{len(at)}")
 print("INFO notícias de mercado:", len(D["mnews"]["items"]), D["mnews"]["sources"], "| insiders com dados:", sum(1 for t in T.values() if t["q"].get("insiders")), "| cíclicas:", sum(1 for t in T.values() if t["q"]["norm"].get("cyc")))
 print("\nresumo:", D["audit"])
 sys.exit(1 if bad else 0)
