@@ -49,7 +49,6 @@ dl{margin:0}dt{font-weight:700;margin-top:8px}dd{margin:2px 0 0;color:var(--t2)}
 
 <aside id="drawer"><button id="x" aria-label="Fechar">×</button><div id="d"></div></aside>
 <div id="ctip"></div>
-<script src="config.js" onerror="void 0"></script>
 <script src="data.js"></script>
 <script>
 const D=window.DATA,T=D.tickers,$=s=>document.querySelector(s);
@@ -161,17 +160,23 @@ $("#drawer").classList.add("open");$("#drawer").scrollTop=0}
 $("#x").onclick=()=>$("#drawer").classList.remove("open");addEventListener("keydown",e=>e.key=="Escape"&&$("#x").click());
 table();
 
-// ---- Tempo real: WebSocket Finnhub (trades US). Chave grátis em finnhub.io -> window.FINNHUB_KEY (config.js ou st.secrets)
-let ws,retry=0;
-function live(msg){$("#live").textContent=msg}
+// ---- Tempo real: WebSocket do Yahoo Finance (sem chave, sem limite documentado de símbolos; NÃO oficial)
+let ws,retry=0,last=0;
+const live=m=>$("#live").textContent=m;
 function paint(s,p){const t=T[s];if(!t)return;t.price=p;if(t.target)t.upside=(t.target/p-1)*100;
 document.querySelectorAll(`[data-px="${s}"]`).forEach(e=>{e.textContent=(e.tagName=="TD"?"":"$")+p.toFixed(2);e.style.background="#2a78d633";setTimeout(()=>e.style.background="",300)});
 document.querySelectorAll(`[data-upv="${s}"]`).forEach(e=>e.innerHTML=sg(t.upside))}
-function connect(){if(!window.FINNHUB_KEY){live("🔴 sem tempo real (falta FINNHUB_KEY) · preços em diferido");return}
-ws=new WebSocket("wss://ws.finnhub.io?token="+window.FINNHUB_KEY);
-ws.onopen=()=>{retry=0;live("🟢 tempo real (Finnhub)");Object.keys(T).sort((a,b)=>T[b].score-T[a].score).slice(0,50).forEach(s=>ws.send(JSON.stringify({type:"subscribe",symbol:s})))};  // limite grátis: 50 símbolos
-ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type=="trade"){const last={};m.data.forEach(d=>last[d.s]=d.p);for(const s in last)paint(s,last[s])}};
-ws.onclose=()=>{live("🟠 reconectando…");setTimeout(connect,Math.min(30000,1000*2**retry++))};  // Finnhub pode largar a ligação sem aviso
+function dec(b64){const b=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));let i=0,id,px;  // protobuf mínimo: campo1=símbolo, campo2=preço (float32)
+const vi=()=>{let r=0,s=0,x;do{x=b[i++];r|=(x&127)<<s;s+=7}while(x&128&&i<b.length);return r};
+while(i<b.length){const tag=vi(),f=tag>>3,w=tag&7;
+if(w==0)vi();else if(w==1)i+=8;else if(w==5){if(f==2)px=new DataView(b.buffer,i,4).getFloat32(0,true);i+=4}
+else if(w==2){const l=vi();if(f==1)id=new TextDecoder().decode(b.slice(i,i+l));i+=l}else break}
+return[id,px]}
+function connect(){ws=new WebSocket("wss://streamer.finance.yahoo.com/?version=2");
+ws.onopen=()=>{retry=0;live("🟡 ligado ao Yahoo, à espera de negócios…");ws.send(JSON.stringify({subscribe:Object.keys(T)}))};
+ws.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.type!="pricing")return;const[id,px]=dec(m.message);if(id&&px>0){paint(id,px);last=Date.now();live("🟢 tempo real (Yahoo) · "+Object.keys(T).length+" ações · último tick "+new Date().toLocaleTimeString("pt-PT"))}}catch(_){}};
+ws.onclose=()=>{live("🟠 reconectando…");setTimeout(connect,Math.min(30000,1000*2**retry++))};  // feed não oficial: pode cair/mudar sem aviso
 ws.onerror=()=>ws.close()}
+setInterval(()=>{if(last&&Date.now()-last>90000)live("🟡 sem negócios há >90 s (mercado fechado?)")},15000);
 connect();
 </script></body></html>
