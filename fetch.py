@@ -411,7 +411,7 @@ def deep(sym):
                 nws.append({"title": c["title"], "link": url, "src": (c.get("provider") or {}).get("displayName", ""), "date": (c.get("pubDate") or "")[:10]})
         news.tag(nws)
         senti = news.summarize(nws)
-        dropv = news.drop_verdict((p / hi - 1) * 100 if hi else None, senti, q)
+        dropv = news.verdict((p / hi - 1) * 100 if hi else None, float(h.iloc[-1] / h.iloc[-2] - 1) * 100 if len(h) > 1 else None, senti, q)
         eps_t, eps_f = i.get("trailingEps"), i.get("forwardEps")
         sim = {"r": 0.09, "tg": 0.03, "g": round(g, 4), "nd": r((debt or 0) - (cash or 0), 0) if same else None, "sh": r(shares, 0), "fpe": r(cl(fpe), 1)}
         if dcfv is not None and not fin:
