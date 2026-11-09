@@ -1,5 +1,6 @@
 """Pipeline global: screener (milhares de ações) -> estatística (percentis por setor) -> análise profunda do top N -> data.js
 Uso: python fetch.py [--quick]   (--quick = só 2 setores, para testar)"""
+import quality
 import json, math, re, sys, time
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
@@ -114,14 +115,41 @@ def norm(name):
     return " ".join(w for w in re.findall(r"[a-z0-9]+", str(name).lower()) if w not in STOPW)
 
 
+GENERIC = {"bank", "energy", "group", "international", "holdings", "technologies", "technology", "financial", "industries", "resources", "systems", "global", "services", "capital", "trust", "partners",
+           "pharmaceuticals", "corporation", "company", "limited", "national", "united", "american", "first", "real", "estate", "insurance", "health", "healthcare", "media", "entertainment", "motor",
+           "motors", "mining", "gold", "power", "electric", "electronics", "communications", "solutions", "software", "brands", "foods", "water", "gas", "oil", "petroleum"}
+
+
+def toks(name):
+    return {w for w in re.findall(r"[a-z]+", str(name).lower()) if len(w) >= 4 and w not in STOPW and w not in GENERIC}
+
+
+def same_company(n1, m1, n2, m2):
+    """Mesma empresa cotada em duas bolsas: nomes com palavra distintiva em comum e capitalização em USD quase idêntica (±7%)."""
+    return 0.93 <= m1 / m2 <= 1.07 and bool(toks(n1) & toks(n2))
+
+
+def base(sym):
+    return sym.split(".")[0].upper()
+
+
+def same_ticker(s1, n1, m1, s2, n2, m2):
+    """Mesmo ticker-base em bolsas diferentes (ex.: MRVL e MRVL.SW) e nomes com palavra distintiva comum = mesma empresa, mesmo que a cotação secundária esteja desatualizada."""
+    return base(s1) == base(s2) and s1 != s2 and (bool(toks(n1) & toks(n2)) or 0.6 <= m1 / m2 <= 1.7)
+
+
 def dedupe(df):
-    """A mesma empresa cotada em várias bolsas: mantém a cotação mais líquida (maior volume em USD)."""
-    keep, seen = [], {}
-    for i, r_ in df.assign(_n=df.name.map(norm), _c=df.s.isin(CURATED)).sort_values(["_c", "dvol"], ascending=False).iterrows():  # curadas têm prioridade
-        dup = any(0.67 <= r_.mcap / m <= 1.5 for m in seen.get(r_._n, []))
-        if r_._n and dup:
+    """A mesma empresa em várias bolsas: mantém a cotação mais líquida (curadas têm prioridade)."""
+    keep, seen, buckets, bases = [], {}, {}, {}
+    for i, r_ in df.assign(_n=df.name.map(norm), _c=df.s.isin(CURATED)).sort_values(["_c", "dvol"], ascending=False).iterrows():
+        b = int(math.log(r_.mcap) / 0.07)
+        dup = (r_._n and any(0.67 <= r_.mcap / m <= 1.5 for m in seen.get(r_._n, []))) or any(same_company(r_["name"], r_.mcap, n2, m2) for bb in (b - 1, b, b + 1) for n2, m2 in buckets.get(bb, []))
+        dup = dup or any(same_ticker(r_.s, r_["name"], r_.mcap, s2, n2, m2) for s2, n2, m2 in bases.get(base(r_.s), []))
+        if dup:
             continue
+        bases.setdefault(base(r_.s), []).append((r_.s, r_["name"], r_.mcap))
         seen.setdefault(r_._n, []).append(r_.mcap)
+        buckets.setdefault(b, []).append((r_["name"], r_.mcap))
         keep.append(i)
     return df.loc[sorted(keep)]
 
@@ -323,6 +351,12 @@ def deep(sym):
         fair = sum(parts) / len(parts) if parts else None
         buy_below = fair * 0.85 if fair else None
         rs = risk_stats(h, p, tgt)
+        try:
+            h5 = retry(lambda: t.history(period="6y", interval="1mo"))["Close"].dropna()
+            h5.index = naive_index(h5)
+        except Exception:
+            h5 = None
+        q = quality.analyze(t, i, p, mcap, rs.get("beta"), h5, fin)
         vol = rs.get("vol") or 0
         risk = "Baixo" if vol < 22 else "Médio" if vol < 35 else "Alto"
         news = []
@@ -346,7 +380,7 @@ def deep(sym):
             "dcf": r(dcfv), "dcf_ok": dcf_ok, "dcf_up": r((dcfv / p - 1) * 100, 1) if dcfv else None, "fair": r(fair), "buy_below": r(buy_below),
             "zone": "buy" if buy_below and p <= buy_below else "wait", "cons": co, "risk": risk, "vol": rs.get("vol"), "rs": rs,
             "dy": r(dy, 2), "payout": r(pct(i.get("payoutRatio")), 0), "pe": r(i.get("trailingPE"), 1), "fpe": r(fpe, 1), "eve": r(eve, 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1),
-            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "tese": tese,
+            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "tese": tese, "q": q,
             "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "news": news}
     except Exception as e:
         log("deep falhou", sym, str(e)[:80])
@@ -396,7 +430,9 @@ def build(quick=False):
         t["sc1"] = round(v)
         c = t["cons"]
         bpa = 100 * (c["strongBuy"] + c["buy"] + 2.5) / (c["total"] + 5)  # consenso com prior de 5 analistas neutros: 1 só analista não vale 100%
-        t["rank"] = round(0.30 * t["score"] + 0.20 * v + 0.25 * 100 * (sc(t["upside"], 0, 40) or 0) + 0.25 * bpa - {"Baixo": 0, "Médio": 4, "Alto": 12}[t["risk"]])
+        qs = t["q"].get("qscore")
+        qs = 50 if qs is None else qs
+        t["rank"] = round(0.22 * t["score"] + 0.15 * v + 0.23 * 100 * (sc(t["upside"], 0, 40) or 0) + 0.20 * bpa + 0.20 * qs - {"Baixo": 0, "Médio": 4, "Alto": 12}[t["risk"]] - (8 if t["q"].get("trap") else 0))
     elig = [s for s in T if s in CURATED or (s in byS.index and byS.mcap[s] >= DEEP_MIN_USD)]
     order = sorted(elig, key=lambda s: -T[s]["rank"])
     solid = [s for s in order if T[s]["cons"]["total"] >= 5]  # destaques exigem pelo menos 5 analistas
@@ -426,7 +462,7 @@ def build(quick=False):
     QC.update({"universe": len(df), "dup_symbols": int(len(df) - df.s.nunique()), "dup_names_left": dupn, "deep_missing_in_rows": [s for s in T if s not in byS.index],
                "price_mismatch": mism, "deep_ok": len(T), "deep_wanted": len(want), "oldest_price_days": round((time.time() - float(df.tm.min())) / 86400, 1),
                "median_price_age_h": round(float((time.time() - df.tm).median()) / 3600, 1)})
-    return {"audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": tape.get("EURUSD=X", {}).get("price"), "order": order, "highlights": hl, "tickers": T, "cols": cols, "rows": rows,
+    return {"tape": tape, "tape_names": TAPE, "audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": tape.get("EURUSD=X", {}).get("price"), "order": order, "highlights": hl, "tickers": T, "cols": cols, "rows": rows,
             "pais": PAIS, "exinfo": {k: {"n": v[0], "p": v[1], "r": v[2]} for k, v in EX.items()}, "sector_stats": stats, "meta": {"n_universe": len(df), "n_deep": len(T), "n_exch": int(df.ex.nunique()), "min_usd": MIN_USD, "deep_min_usd": DEEP_MIN_USD, "rf": RF, "erp": ERP}}
 
 
