@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terminal de Análise Fundamental</title>
+<style>
+:root{color-scheme:light;--bg:#f6f6f4;--card:#fff;--line:#e6e5e1;--t1:#0b0b0b;--t2:#52514e;--s1:#2a78d6;--s2:#eb6834;--good:#0a7a3b;--warn:#a85a00;--bad:#c62828;--chip:#eef1f6}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#121211;--card:#1a1a19;--line:#32312f;--t1:#f0efec;--t2:#c3c2b7;--s1:#3987e5;--s2:#d95926;--good:#4cc17f;--warn:#e6a23c;--bad:#ef7b7b;--chip:#26292e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t1);font:14px/1.45 system-ui,sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:16px 20px 60px}
+header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}h1{font-size:20px;margin:0}
+h2{font-size:16px;margin:28px 0 10px}h3{font-size:13px;margin:14px 0 4px;color:var(--t2);text-transform:uppercase;letter-spacing:.04em}
+.mut{color:var(--t2)}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.note{border-left:3px solid var(--warn);background:var(--card);padding:8px 12px;margin:10px 0;border-radius:4px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.top{cursor:pointer;position:relative}.top:hover{border-color:var(--s1)}.rank{position:absolute;top:10px;right:12px;font-size:22px;font-weight:700;color:var(--line)}
+.tk{font-weight:700;font-size:16px}.big{font-size:22px;font-weight:700}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0}.bar i{display:block;height:100%;background:var(--s1)}
+.badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin:2px 3px 0 0;background:var(--chip);color:var(--t1);border:1px solid var(--line)}
+.badge.good{color:var(--good);border-color:var(--good)}.badge.warn{color:var(--warn);border-color:var(--warn)}
+.up{color:var(--good)}.dn{color:var(--bad)}.ok{color:var(--good)}.mid{color:var(--warn)}.bad{color:var(--bad)}
+table{width:100%;border-collapse:collapse}th,td{padding:6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:nth-child(-n+3),td:nth-child(-n+3){text-align:left}th{color:var(--t2);font-weight:500;cursor:pointer}tbody tr{cursor:pointer}tbody tr:hover{background:var(--chip)}
+.scroll{overflow-x:auto}
+.cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:14px}@media(max-width:850px){.cols{grid-template-columns:1fr}}
+.tip{border-bottom:1px dotted var(--t2);cursor:help;position:relative}
+.tip:hover::after{content:attr(data-tip);position:absolute;left:0;top:100%;z-index:30;width:260px;white-space:normal;background:var(--t1);color:var(--bg);padding:6px 8px;border-radius:6px;font-size:12px;font-weight:400;text-transform:none;letter-spacing:0}
+#drawer{position:fixed;top:0;right:0;width:min(720px,100%);height:100%;background:var(--bg);border-left:1px solid var(--line);overflow:auto;padding:16px;transform:translateX(100%);transition:.2s;z-index:20;box-shadow:-8px 0 24px #0003}
+#drawer.open{transform:none}#x{float:right;font-size:20px;background:none;border:0;color:var(--t1);cursor:pointer}
+.rat{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}.rat div{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card)}.rat b{font-size:16px}
+svg text{fill:var(--t2);font-size:11px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+#ctip{position:fixed;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;display:none;z-index:40}
+.news a{display:block;color:var(--t1);text-decoration:none;padding:6px 0;border-bottom:1px solid var(--line)}.news a:hover{text-decoration:underline}
+dl{margin:0}dt{font-weight:700;margin-top:8px}dd{margin:2px 0 0;color:var(--t2)}
+</style></head><body><div class="wrap">
+<header><h1>📊 Terminal de Análise Fundamental</h1><span class="mut"><span id="live">⚪ a ligar…</span> · <span id="upd"></span></span></header>
+<div class="note"><b>Aviso:</b> ferramenta educativa. Os scores são um filtro automático sobre dados do Yahoo Finance, não aconselhamento financeiro nem garantia de retorno. Valida sempre os números nos relatórios da empresa (10-K/10-Q) antes de decidir. Preços em USD.</div>
+
+<h2>🏆 Top 10 oportunidades do momento</h2>
+<div class="grid" id="top"></div>
+
+<h2>🍔 Estudo de caso: McDonald's (MCD) — desconto real vs. value trap</h2>
+<div class="card" id="mcd"></div>
+
+<h2>📋 Todas as ações analisadas <span class="mut" style="font-size:12px">(clica numa linha para a ficha completa · cabeçalho ordena)</span></h2>
+<div class="card scroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+
+<h2>📖 Glossário simples</h2>
+<div class="card"><dl id="gloss"></dl></div>
+</div>
+
+<aside id="drawer"><button id="x" aria-label="Fechar">×</button><div id="d"></div></aside>
+<div id="ctip"></div>
+<script src="config.js" onerror="void 0"></script>
+<script src="data.js"></script>
+<script>
+const D=window.DATA,T=D.tickers,$=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const n=(v,d=1,u="")=>v==null?"–":v.toFixed(d)+u;
+const sg=(v,d=1)=>v==null?"–":`<span class="${v>=0?"up":"dn"}">${v>=0?"▲ +":"▼ "}${v.toFixed(d)}%</span>`;
+const eur=v=>D.eurusd?`≈ €${(v/D.eurusd).toFixed(0)}`:"";
+// Definições dos rácios: [chave, nome, unidade, explicação, avaliação 2=bom 1=ok 0=fraco]
+const R=[
+["pe","P/E atual","x","Preço ÷ lucro por ação dos últimos 12 meses: quantos $ pagas por cada $1 de lucro anual. Mais baixo = mais barato, mas compara sempre com empresas do mesmo setor.",v=>v<15?2:v<25?1:0],
+["fpe","P/E projetado","x","Igual ao P/E, mas usando os lucros que os analistas esperam no próximo ano. Se for menor que o P/E atual, os lucros estão a crescer.",v=>v<15?2:v<22?1:0],
+["peg","PEG","","P/E dividido pelo crescimento esperado dos lucros. Abaixo de 1 = barato para o crescimento que tem; acima de 2 = caro.",v=>v<1?2:v<2?1:0],
+["dy","Dividendo","%","Parte do lucro paga todos os anos aos acionistas, em % do preço da ação.",v=>v>=3?2:v>=1?1:0],
+["eve","EV/EBITDA","x","Valor da empresa (incluindo dívida) ÷ lucro operacional antes de amortizações. Compara empresas com dívidas diferentes. Abaixo de 10 costuma ser barato.",v=>v<10?2:v<15?1:0],
+["roe","ROE","%","Retorno sobre capital próprio: quanto lucro a empresa gera com o dinheiro dos acionistas. Acima de 15% é bom. (Pode ser distorcido se a empresa tiver capital próprio negativo.)",v=>v>=15?2:v>=8?1:0],
+["om","Margem operacional","%","De cada $100 vendidos, quantos sobram como lucro do negócio antes de juros e impostos. Mostra poder de preço (moat).",v=>v>=20?2:v>=10?1:0],
+["nd","Dívida líq./EBITDA","x","Quantos anos de lucro operacional seriam precisos para pagar a dívida líquida. Abaixo de 2 é confortável; acima de 4 é arriscado.",v=>v<2?2:v<4?1:0],
+["fcfy","FCF yield","%","Fluxo de caixa livre ÷ valor de mercado: o dinheiro real que sobra depois de investimentos. Acima de 5% é atrativo.",v=>v>=5?2:v>=2?1:0],
+["eg","Crescimento lucros","%","Variação dos lucros face ao período homólogo. Negativo é sinal de alerta.",v=>v>=10?2:v>=0?1:0],
+["rg","Crescimento vendas","%","Variação das vendas face ao período homólogo.",v=>v>=8?2:v>=0?1:0]];
+const ICON=["✗ fraco","• ok","✓ bom"],CLS=["bad","mid","ok"];
+const GLOSS=[["P/E (Price/Earnings)","Preço da ação ÷ lucro por ação. Se o P/E é 20, pagas $20 por cada $1 de lucro anual. Mais baixo = mais barato, mas uma empresa em declínio também tem P/E baixo."],
+["Margem de segurança","A diferença entre o preço de hoje e o valor que achamos justo (aqui: preço-alvo médio dos analistas). Quanto maior, mais espaço tens para errar sem perder dinheiro."],
+["Fluxo de Caixa Livre (FCF)","O dinheiro que realmente sobra ao fim do ano depois de pagar todas as despesas e investimentos. É o que permite pagar dividendos, reduzir dívida ou recomprar ações. Lucro contabilístico pode ser 'maquilhado'; caixa é mais difícil."],
+["Moat (fosso competitivo)","Vantagem duradoura que protege uma empresa da concorrência: marca forte, escala, custos de mudança, patentes, rede de lojas/imobiliário."],
+["Value trap (armadilha de valor)","Ação que parece barata porque o negócio está realmente a deteriorar-se (lucros a cair, dívida, margens a encolher). Baixo P/E sozinho não chega."],
+["Empresa cíclica","Os lucros sobem e descem com o ciclo económico (chips, construção, petróleo). No pico, o P/E parece baixo mas pode estar a enganar."]];
+$("#gloss").innerHTML=GLOSS.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join("");
+$("#upd").textContent="Dados Yahoo Finance · atualizado "+D.updated;
+
+// ---- Top 10
+$("#top").innerHTML=D.top10.map((k,i)=>{const t=T[k];return `<div class="card top" data-k="${k}"><span class="rank">${i+1}</span>
+<div class="tk">${k}</div><div class="mut" style="font-size:12px">${esc(t.name.slice(0,30))}</div>
+<div style="margin:8px 0"><span class="big">${t.score}</span><span class="mut">/100</span> <span class="tip" data-tip="Nota 0-100: 25 pts Valuation (P/E, EV/EBITDA, FCF yield, upside) + 25 Rentabilidade + 25 Solvência + 25 Crescimento.">ⓘ</span></div>
+<div class="bar"><i style="width:${t.score}%"></i></div>
+<div><span data-px="${k}">$${n(t.price,2)}</span> <span class="mut">→ alvo $${n(t.target,0)}</span></div><div>Potencial: <span data-upv="${k}">${sg(t.upside)}</span></div>
+<div>${t.badges.map(b=>`<span class="badge ${b[1]}">${esc(b[0])}</span>`).join("")}</div></div>`}).join("");
+
+// ---- Tabela
+let sk="score",sd=-1;
+const COLS=[["_","#"],["k","Ticker"],["name","Nome"],["score","Score"],["price","Preço $"],["upside","Potencial"],["drawdown","vs máx. 52s"],["fpe","P/E proj."],["dy","Div. %"],["nd","Dív./EBITDA"],["fcfy","FCF yield"]];
+function table(){const ks=Object.keys(T).sort((a,b)=>{const x=sk=="k"?a:sk=="name"?T[a].name:T[a][sk],y=sk=="k"?b:sk=="name"?T[b].name:T[b][sk];return sd*((x??-1e9)>(y??-1e9)?1:-1)});
+$("#tbl thead").innerHTML="<tr>"+COLS.map(([k,l])=>`<th data-k="${k}">${l}${k==sk?(sd>0?" ↑":" ↓"):""}</th>`).join("")+"</tr>";
+$("#tbl tbody").innerHTML=ks.map((k,i)=>{const t=T[k];return `<tr data-k="${k}"><td class="mut">${i+1}</td><td><b>${k}</b></td><td class="mut">${esc(t.name.slice(0,26))}</td><td><b>${t.score}</b></td><td data-px="${k}">${n(t.price,2)}</td><td data-upv="${k}">${sg(t.upside)}</td><td>${sg(t.drawdown)}</td><td>${n(t.fpe,1)}</td><td>${n(t.dy,1)}</td><td>${n(t.nd,1)}</td><td>${n(t.fcfy,1)}</td></tr>`}).join("")}
+$("#tbl").onclick=e=>{const th=e.target.closest("th"),tr=e.target.closest("tbody tr");if(th&&th.dataset.k!="_"){sd=th.dataset.k==sk?-sd:-1;sk=th.dataset.k;table()}if(tr)open(tr.dataset.k)};
+$("#top").onclick=e=>{const c=e.target.closest(".top");if(c)open(c.dataset.k)};
+
+// ---- Gráfico de preço com 52s mín/máx, preço justo e marcador opcional
+function chart(t,{mark}={}){const h=t.hist,W=640,H=260,m={l:44,r:92,t:10,b:22};
+const lines=[[t.high,"Máx. 52s",""],[t.low,"Mín. 52s",""],...(t.target?[[t.target,"Preço justo","var(--s2)"]]:[])];
+const vals=[...h.map(x=>x[1]),...lines.map(l=>l[0])],lo=Math.min(...vals)*.97,hi=Math.max(...vals)*1.03;
+const x=i=>m.l+i/(h.length-1)*(W-m.l-m.r),y=v=>H-m.b-(v-lo)/(hi-lo)*(H-m.t-m.b);
+const id="c"+Math.random().toString(36).slice(2,7);
+const path=h.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(p[1]).toFixed(1)).join("");
+let g=[0,1,2,3].map(i=>{const v=lo+(hi-lo)*i/3;return `<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-5}" y="${y(v)+4}" text-anchor="end">${v.toFixed(0)}</text>`}).join("");
+g+=lines.map(([v,l,c])=>`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${c||"var(--t2)"}" stroke-dasharray="5 4"/><text x="${W-m.r+4}" y="${y(v)+4}" style="fill:${c||"var(--t2)"}">${l} ${v.toFixed(0)}</text>`).join("");
+g+=`<text x="${m.l}" y="${H-6}">${h[0][0]}</text><text x="${W-m.r}" y="${H-6}" text-anchor="end">${h.at(-1)[0]}</text>`;
+g+=`<path d="${path}" fill="none" stroke="var(--s1)" stroke-width="2"/>`;
+if(mark){const i=h.reduce((a,p,j)=>p[1]<h[a][1]?j:a,0);g+=`<circle cx="${x(i)}" cy="${y(h[i][1])}" r="5" fill="var(--card)" stroke="var(--bad)" stroke-width="2"/><text x="${x(i)}" y="${y(h[i][1])+18}" text-anchor="middle" style="fill:var(--bad)">Mínima ${h[i][1].toFixed(0)}$</text>`}
+g+=`<circle cx="${x(h.length-1)}" cy="${y(t.price)}" r="4" fill="var(--s1)"/><line id="${id}" y1="${m.t}" y2="${H-m.b}" stroke="var(--t2)" display="none"/>`;
+setTimeout(()=>{const s=document.getElementById(id)?.closest("svg");if(!s)return;s.onmousemove=e=>{const b=s.getBoundingClientRect(),sx=W/b.width,i=Math.max(0,Math.min(h.length-1,Math.round(((e.clientX-b.left)*sx-m.l)/(W-m.l-m.r)*(h.length-1))));
+const l=document.getElementById(id);l.setAttribute("x1",x(i));l.setAttribute("x2",x(i));l.removeAttribute("display");const c=$("#ctip");c.style.display="block";c.style.left=e.clientX+14+"px";c.style.top=e.clientY+14+"px";c.innerHTML=`<b>${h[i][0]}</b><br><i class="dot" style="background:var(--s1)"></i>$${h[i][1].toFixed(2)}`};
+s.onmouseleave=()=>{$("#ctip").style.display="none";document.getElementById(id)?.setAttribute("display","none")}});
+return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Preço de ${esc(t.name)} no último ano">${g}</svg>
+<div class="mut" style="font-size:12px"><i class="dot" style="background:var(--s1)"></i>Preço (1 ano) &nbsp; <i class="dot" style="background:var(--s2)"></i>Preço justo = preço-alvo médio dos analistas &nbsp; ┄ Mín./Máx. 52 semanas</div>`}
+
+// ---- Detetor de armadilha
+function checks(t){return[
+["Lucros a crescer",t.eg==null?null:t.eg>=0,`${n(t.eg,1,"%")} vs ano anterior`],
+["Margem operacional saudável (≥ 8%)",t.om==null?null:t.om>=8,n(t.om,1,"%")],
+["Dívida controlada (líq./EBITDA ≤ 4)",t.nd==null?null:t.nd<=4,n(t.nd,1,"x")],
+["Gera caixa (FCF positivo)",t.fcfy==null?null:t.fcfy>0,n(t.fcfy,1,"% FCF yield")],
+["Analistas veem subida (alvo > preço)",t.upside==null?null:t.upside>0,sg(t.upside)]]}
+const chk=c=>c.map(([l,ok,v])=>`<tr><td>${ok==null?"?":ok?'<span class="ok">✓</span>':'<span class="bad">✗</span>'} ${l}</td><td>${v}</td></tr>`).join("");
+
+// ---- Estudo de caso MCD
+(function(){const t=T.MCD;if(!t){$("#mcd").textContent="MCD não está no universo.";return}
+const h=t.hist,im=h.reduce((a,p,j)=>p[1]<h[a][1]?j:a,0),low=h[im];
+$("#mcd").innerHTML=`<div class="cols"><div>${chart(t,{mark:true})}</div><div>
+<div class="big">${low[1].toFixed(0)}$ <span class="mut">${eur(low[1])}</span> → ${t.price.toFixed(0)}$ <span class="mut">${eur(t.price)}</span></div>
+<div>A ação tocou o mínimo de 52 semanas a <b>${low[0]}</b> e já subiu <b class="up">+${t.bounce.toFixed(0)}%</b> desde aí, mas ainda está ${sg(t.drawdown,0)} do máximo.</div>
+<h3>A lição</h3><ol style="padding-left:18px;margin:0">
+<li><b>O preço caiu, o negócio não.</b> Na queda, o McDonald's continuava com margem operacional de ${n(t.om,0,"%")} e lucros ${t.eg>=0?"a crescer":"a cair"} (${n(t.eg,1,"%")}). O mercado reagiu a ruído de curto prazo (sentimento, consumo); os números do negócio não pioraram.</li>
+<li><b>O moat segurou a ação.</b> Marca global, escala e um modelo de franchising (as lojas pagam renda e royalties), que gera caixa previsível e dividendos há décadas. Esse fosso explica porque os investidores voltaram.</li>
+<li><b>Só se sabe que foi desconto depois.</b> Por isso usa a checklist <i>antes</i>, não o gráfico.</li></ol></div></div>
+<h3>Desconto real ou value trap? A checklist aplicada ao MCD (dados de hoje)</h3>
+<div class="scroll"><table style="max-width:560px"><tbody>${chk(checks(t))}</tbody></table></div>
+<p class="mut" style="font-size:13px">Uma <b>armadilha de valor</b> falha vários destes testes: parece barata (P/E baixo, longe do máximo), mas os lucros caem, a dívida pesa ou o caixa é negativo. Cuidado extra com a dívida do MCD (${n(t.nd,1,"x")} EBITDA) e o capital próprio negativo, que torna o ROE pouco fiável. <a href="#" id="mcdopen">Ver ficha completa do MCD →</a></p>`;
+$("#mcdopen").onclick=e=>{e.preventDefault();open("MCD")}})();
+
+// ---- Ficha
+function open(k){const t=T[k],th=t.thesis||["–","–","–"];
+const why=[t.drawdown<=-10?`Está <b>${Math.abs(t.drawdown).toFixed(0)}%</b> abaixo do máximo de 52 semanas ($${t.high}).`:`Está perto do máximo de 52 semanas: <b>não</b> é uma ação em desconto face ao seu próprio histórico.`,
+t.upside!=null?(t.upside>0?`${t.analysts||"?"} analistas dão preço-alvo médio de $${t.target}: <b>${t.upside.toFixed(0)}% acima</b> do preço atual.`:`O preço já está acima do alvo médio dos analistas ($${t.target}).`):"",
+t.fpe&&t.pe&&t.fpe<t.pe?`Os lucros esperados crescem (P/E projetado ${t.fpe} < atual ${t.pe}).`:"",
+t.trap.length?`<span class="mid">⚠ Atenção: ${t.trap.join(", ")}. Pode ser value trap, não compres só porque parece barata.</span>`:(t.cheap?`Os números do negócio não mostram deterioração: provável desconto temporário (confirma a causa nas notícias abaixo).`:`Sem desconto relevante pelos números.`)].filter(Boolean).join(" ");
+$("#d").innerHTML=`<div class="tk" style="font-size:22px">${k} <span class="mut" style="font-size:14px;font-weight:400">${esc(t.name)} · ${esc(t.sector||"")}</span></div>
+<div class="big"><span data-px="${k}">$${n(t.price,2)}</span> <span class="mut" style="font-size:14px">${eur(t.price)} · Recomendação: ${esc(t.rec||"–")}</span></div>
+<div>${t.badges.map(b=>`<span class="badge ${b[1]}">${esc(b[0])}</span>`).join("")}</div>
+<h3>Score fundamental <span class="tip" data-tip="Soma de 4 pilares de 25 pontos.">ⓘ</span>: ${t.score}/100</h3>
+${["Valuation","Rentabilidade","Solvência","Crescimento"].map((l,i)=>`<div style="display:flex;gap:8px;align-items:center"><span style="width:100px">${l}</span><div class="bar" style="flex:1"><i style="width:${t.pillars[i]*4}%"></i></div><span>${t.pillars[i]}/25</span></div>`).join("")}
+<h3>Preço</h3>${chart(t)}
+<h3>Tese</h3><dl><dt>O que faz a empresa</dt><dd>${esc(th[0])}</dd><dt>Porque está barata / porque caiu</dt><dd>${why}</dd><dt>Porque pode valorizar (catalisadores)</dt><dd>${esc(th[1])}</dd><dt>Principais riscos a vigiar</dt><dd>${esc(th[2])}</dd></dl>
+<h3>Desconto real ou value trap?</h3><table><tbody>${chk(checks(t))}</tbody></table>
+<h3>Rácios fundamentais <span class="mut" style="text-transform:none">(passa o rato nos nomes)</span></h3>
+<div class="rat">${R.map(([key,l,u,tip,f])=>{const v=t[key];const s=v==null?null:f(v);return `<div><span class="tip" data-tip="${esc(tip)}">${l}</span><br><b>${n(v,1,u)}</b> ${s==null?"":`<span class="${CLS[s]}" style="font-size:12px">${ICON[s]}</span>`}</div>`}).join("")}</div>
+<h3>Notícias de ${k}</h3><div class="news">${t.news.map(a=>`<a href="${esc(a.link)}" target="_blank" rel="noopener"><span class="mut">${esc(a.src)} · ${esc(a.date)}</span><br>${esc(a.title)}</a>`).join("")||'<span class="mut">Sem notícias disponíveis.</span>'}</div>`;
+$("#drawer").classList.add("open");$("#drawer").scrollTop=0}
+$("#x").onclick=()=>$("#drawer").classList.remove("open");addEventListener("keydown",e=>e.key=="Escape"&&$("#x").click());
+table();
+
+// ---- Tempo real: WebSocket Finnhub (trades US). Chave grátis em finnhub.io -> window.FINNHUB_KEY (config.js ou st.secrets)
+let ws,retry=0;
+function live(msg){$("#live").textContent=msg}
+function paint(s,p){const t=T[s];if(!t)return;t.price=p;if(t.target)t.upside=(t.target/p-1)*100;
+document.querySelectorAll(`[data-px="${s}"]`).forEach(e=>{e.textContent=(e.tagName=="TD"?"":"$")+p.toFixed(2);e.style.background="#2a78d633";setTimeout(()=>e.style.background="",300)});
+document.querySelectorAll(`[data-upv="${s}"]`).forEach(e=>e.innerHTML=sg(t.upside))}
+function connect(){if(!window.FINNHUB_KEY){live("🔴 sem tempo real (falta FINNHUB_KEY) · preços em diferido");return}
+ws=new WebSocket("wss://ws.finnhub.io?token="+window.FINNHUB_KEY);
+ws.onopen=()=>{retry=0;live("🟢 tempo real (Finnhub)");Object.keys(T).sort((a,b)=>T[b].score-T[a].score).slice(0,50).forEach(s=>ws.send(JSON.stringify({type:"subscribe",symbol:s})))};  // limite grátis: 50 símbolos
+ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type=="trade"){const last={};m.data.forEach(d=>last[d.s]=d.p);for(const s in last)paint(s,last[s])}};
+ws.onclose=()=>{live("🟠 reconectando…");setTimeout(connect,Math.min(30000,1000*2**retry++))};  // Finnhub pode largar a ligação sem aviso
+ws.onerror=()=>ws.close()}
+connect();
+</script></body></html>
