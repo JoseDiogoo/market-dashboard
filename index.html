@@ -97,16 +97,39 @@ svg text{fill:var(--mut);font:11px system-ui}
 .news a .sn{margin-left:6px}.chk{list-style:none;margin:6px 0;padding:0}.chk li{font-size:13px;padding:4px 0 4px 22px;position:relative;color:var(--t2)}.chk li:before{content:"✓";position:absolute;left:0;color:var(--up);font-weight:800}.chk li.no:before{content:"✕";color:var(--dn)}
 .mn a{display:block;color:var(--t1);text-decoration:none;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.4}.mn a:first-of-type{border-top:0}.mn a:hover{color:var(--acc)}
 .livepill .sh{display:none}@media(max-width:520px){.vbar{font-size:10px}.livepill .lg{display:none}.livepill .sh{display:inline}}
+
+:root{--ease:cubic-bezier(.2,.8,.2,1)}
+body{font-feature-settings:"tnum","cv11","ss01";-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,.pill,.card,.cta,.chip,.mc,.feat{transition:transform .18s var(--ease),box-shadow .18s var(--ease),background .18s,border-color .18s,opacity .18s}
+button:active,.pill:active,.cta:active{transform:scale(.97)}.card:active,.mc:active{transform:scale(.985)}
+@media(hover:hover){.card:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(0,0,0,.35);border-color:var(--acc)}.mc:hover{transform:translateY(-2px)}}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:8px}
+.sec{animation:rise .35s var(--ease) both}@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+h3{letter-spacing:-.01em}
+.scs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0 14px}.sc{background:var(--card2);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;padding:10px 10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}.sc b{font-size:19px;letter-spacing:-.02em}.sc .sn2{font-size:11px;font-weight:700;color:var(--c);text-transform:uppercase;letter-spacing:.05em}.sc span{font-size:12px}.sc em{font-style:normal;font-size:11px;color:var(--mut);line-height:1.3;margin-top:3px}
+.rrbar{margin:6px 4px 26px}.rt{position:relative;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}.rt i{position:absolute;top:0;bottom:0;opacity:.85}.rt s{position:absolute;top:0;bottom:0;width:2px;background:var(--bg)}.rt u{position:absolute;top:-3px;bottom:-3px;width:4px;margin-left:-2px;background:var(--t1);border-radius:2px;box-shadow:0 0 0 2px var(--bg)}.rl{position:relative;height:16px;margin-top:6px}.rl span{position:absolute;transform:translateX(-50%);font-size:10px;color:var(--mut);white-space:nowrap}
+.sl{margin:8px 0}.sl label{display:flex;justify-content:space-between;font-size:13px;color:var(--t2)}.sl b{color:var(--t1)}.sl input[type=range]{width:100%;accent-color:var(--acc);height:28px;touch-action:pan-y}
+.simout{margin:6px 0 4px}.sens th,.sens td{text-align:center!important}.sens td{line-height:1.25}.sens td span{font-size:11px;color:var(--t2)}.sens td.gg{background:var(--upbg)}.sens td.g2{background:rgba(52,211,153,.06)}.sens td.r2{background:rgba(251,113,133,.07)}.sens td.rr{background:var(--dnbg)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}.srbox{margin-top:8px}
+.peer th.me,.peer td.me{background:var(--accbg)}.peer td,.peer th{text-align:center!important}.peer td:first-child,.peer th:first-child{text-align:left!important}.win{font-style:normal;display:inline-block;background:var(--up);color:#04130d;border-radius:50%;width:16px;height:16px;line-height:16px;font-size:10px;font-weight:800;text-align:center;margin-left:3px}
+.pfin{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:10px 0}.pfin label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut);min-width:0}.pfin input,.pfin select{background:var(--card2);color:var(--t1);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:14px;min-width:0;max-width:100%}
+.pw{width:54px;background:var(--card2);color:var(--t1);border:1px solid var(--line);border-radius:8px;padding:5px;font-size:13px}.x{background:none;border:0;color:var(--mut);cursor:pointer;font-size:14px;padding:6px}.x:hover{color:var(--dn)}.pft td,.pft th{text-align:left!important}
+.dl{background:var(--accbg);border-color:var(--acc);color:var(--acc);font-weight:700;cursor:pointer}
+@media(max-width:520px){.scs{gap:6px}.sc b{font-size:16px}.sc em{font-size:10px}.pfin{flex-direction:column;align-items:stretch}}
+.yt{scrollbar-width:thin;scrollbar-color:var(--line) transparent}.yt::-webkit-scrollbar{height:6px}.yt::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}.yt::-webkit-scrollbar-track{background:transparent}@media(max-width:520px){.peer td,.peer th{padding:6px 4px;font-size:11px}.peer td:first-child{white-space:normal;max-width:66px;line-height:1.2;font-size:10.5px}.peer th .sub{display:none}.peer .win{width:14px;height:14px;line-height:14px;margin-left:2px}}
+@media(max-width:520px){.sens th,.sens td{padding:6px 4px}.sens th:first-child,.sens td:first-child{white-space:normal;max-width:78px;font-size:10.5px}}
 </style></head><body><div class="wrap">
 <div class="vbar"><i></i>Versão Pro Institutional (Live Multi-API)</div>
 <header class="top"><div class="brand"><span class="logo">◆</span>Radar<span>.</span>Invest</div><input id="q" placeholder="Procurar entre milhares de ações (ex.: Nestlé, SAP)" autocomplete="off"><span id="live" class="livepill" title="Estado das fontes de dados">a ligar…</span><button class="ibtn" id="theme" aria-label="Alternar tema claro/escuro">◐</button></header>
 <section class="hero2" id="hero2"><div class="hcopy"><h1>Onde investir <em>hoje</em>?</h1><p id="hsub"></p><div class="idxs" id="idxs"></div></div><div class="feat" id="feat"></div><div class="mini" id="mini"></div></section>
 <div class="ctl"><div class="regs" id="regs"><button data-r="all" class="on">🌍 Todas</button><button data-r="us">🇺🇸 EUA</button><button data-r="eu">🇪🇺 Europa</button></div>
-<nav class="views"><button data-v="1" class="on">Oportunidades</button><button data-v="4">Mercado</button><button data-v="2">Explorar <span id="nuni"></span></button><button data-v="3">Metodologia</button></nav></div>
+<nav class="views"><button data-v="1" class="on">Oportunidades</button><button data-v="4">Mercado</button><button data-v="5">💼 Carteira</button><button data-v="2">Explorar <span id="nuni"></span></button><button data-v="3">Metodologia</button></nav></div>
 <div id="v1"><div class="bar"><div class="pills" id="pills"></div><select id="sort" aria-label="Ordenar"><option value="rank">Ordenar: Melhor oportunidade</option><option value="upside">Ordenar: Potencial de subida</option><option value="score">Ordenar: Qualidade</option><option value="dy">Ordenar: Dividendo</option></select></div>
 <div class="sub" id="ord" style="margin:0 2px 12px"></div><div class="grid" id="grid"></div></div>
 <div id="v2" hidden><div class="xf" id="xf"></div><div class="sub" id="xc" style="margin:8px 2px"></div><div class="xt"><table id="xt"></table></div><button class="pill" id="xm" style="margin:14px auto;display:block">Mostrar mais</button></div>
 <div id="v3" hidden><div class="sec" id="meth" style="margin:0"></div></div>
+<div id="v5" hidden></div>
 <div id="v4" hidden><div class="mk" id="mkt"></div></div>
 <div class="note">Ferramenta informativa, não é aconselhamento financeiro. Metas e zonas de compra são estimativas calculadas a partir de dados públicos e podem falhar. Confirma sempre antes de investir.</div>
 </div>
@@ -131,7 +154,7 @@ const sg=(v,d=0)=>v==null?"–":`<span class="${v>=0?"up":"dn"}">${v>=0?"+":""}$
 const CATS=[["top","Top 10 oportunidades"],["g","Crescimento e tecnologia"],["d","Dividendos e defensivas"],["v","Valor com desconto"]];
 const ORD={rank:"Ordenado da melhor para a pior oportunidade (qualidade, potencial até à meta, consenso dos analistas e risco).",upside:"Ordenado do maior para o menor potencial de subida até à meta dos analistas.",score:"Ordenado da melhor para a pior qualidade fundamental.",dy:"Ordenado do maior para o menor dividendo."};
 let cat="top",sort="rank",rng="1A",q="";
-const RN={"3M":64,"6M":127,"1A":9999};
+const RN={"1M":22,"3M":64,"6M":127,"1A":9999};
 const hue=s=>[...s].reduce((a,c)=>a*31+c.charCodeAt(0),7)%360;
 const av=k=>`<div class="av" style="background:hsl(${hue(k)} 55% 45%)">${esc(T[k].name[0])}</div>`;
 const GR={"strong buy":"Compra Forte","buy":"Compra","overweight":"Sobreponderar","outperform":"Superar mercado","positive":"Positivo","hold":"Manter","neutral":"Neutro","market perform":"Manter","equal-weight":"Manter","sector perform":"Manter","underweight":"Subponderar","sell":"Vender","underperform":"Abaixo do mercado"};
@@ -188,9 +211,11 @@ const PW=()=>Math.min(560,($("#dr").clientWidth||innerWidth)-64);
 function chart(t){const h=t.hist.slice(-RN[rng]-1),W=PW(),H=220,m={l:44,r:10,t:10,b:20};
 const pmin=Math.min(...h.map(x=>x[1])),pmax=Math.max(...h.map(x=>x[1]));
 const L=[[t.target,"Meta 1 "+usd(t.target,t.cur),"var(--up)"],[t.buy_below,"Comprar abaixo "+usd(t.buy_below,t.cur),"var(--am)"],[t.dcf_ok?t.dcf:null,"Meta 2 "+usd(t.dcf,t.cur),"var(--acc2)"]].filter(l=>l[0]&&l[0]>=pmin*.7&&l[0]<=pmax*1.5);
-const vals=[pmin,pmax,...L.map(l=>l[0])],lo=Math.min(...vals)*.97,hi=Math.max(...vals)*1.03;
+const SR=[...((t.sr&&t.sr.sup)||[]).map(x=>({...x,c:"var(--up)"})),...((t.sr&&t.sr.res)||[]).map(x=>({...x,c:"var(--dn)"}))].filter(x=>x.p>=pmin*.8&&x.p<=pmax*1.25);
+const vals=[pmin,pmax,...L.map(l=>l[0]),...SR.map(x=>x.p)],lo=Math.min(...vals)*.97,hi=Math.max(...vals)*1.03;
 const x=i=>m.l+i/(h.length-1)*(W-m.l-m.r),y=v=>H-m.b-(v-lo)/(hi-lo)*(H-m.t-m.b),id="c"+Math.random().toString(36).slice(2,7);
 let g=[0,1,2,3].map(i=>{const v=lo+(hi-lo)*i/3;return `<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end">${v>=100?v.toFixed(0):v.toFixed(1)}</text>`}).join("");
+g+=SR.map(x=>`<rect x="${m.l}" width="${W-m.l-m.r}" y="${y(x.p*1.008)}" height="${Math.max(3,y(x.p*.992)-y(x.p*1.008))}" fill="${x.c}" opacity="${x.n>1?.2:.1}"/><text x="${m.l+4}" y="${y(x.p*1.008)-2}" style="fill:${x.c};font-size:10px;font-weight:700">${x.c.includes("up")?"Suporte":"Resistência"} ${x.n>1?"×"+x.n:""}</text>`).join("");
 g+=L.map(([v,l,c])=>`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-width="1.6" stroke-dasharray="5 4"/><text x="${W-m.r}" y="${y(v)-5}" text-anchor="end" style="fill:${c};font-weight:700">${l}</text>`).join("");
 const pts=h.map((p,i)=>x(i).toFixed(1)+","+y(p[1]).toFixed(1));
 g+=`<polygon points="${m.l},${H-m.b} ${pts.join(" ")} ${x(h.length-1)},${H-m.b}" fill="var(--accbg)"/><polyline points="${pts.join(" ")}" fill="none" stroke="var(--acc)" stroke-width="2.2" stroke-linejoin="round"/><circle cx="${x(h.length-1)}" cy="${y(t.price)}" r="4.5" fill="var(--acc)" stroke="var(--card)" stroke-width="2"/>
@@ -216,10 +241,12 @@ $("#dr").innerHTML=`<div class="dh"><button class="back" id="bk" aria-label="Vol
 <div class="kv"><span>Intervalo dos analistas</span><b>${usd(t.tlow,t.cur)} – ${usd(t.thigh,t.cur)}</b></div>
 ${fromBuy!=null?`<div class="kv"><span>Lucro até à Meta 1 se comprares na zona de compra</span><b>${sg(fromBuy)}</b></div>`:""}
 <p class="cap">Zona de compra = preço justo −15% (margem de segurança). Preço justo = média da meta dos analistas e do DCF (só se o DCF for plausível). ${t.dcf_ok?"":"O DCF não é mostrado: o modelo simples não se aplica a esta empresa (financeira, caixa livre fraco ou crescimento muito acima do que assume)."}</p></div>
-<div class="sec"><div class="tabs">${Object.keys(RN).map(r=>`<button class="${r==rng?"on":""}" data-r="${r}">${r}</button>`).join("")}</div>${chart(t)}<p class="cap">Linha azul = preço · verde = Meta 1 · âmbar = zona de compra${t.dcf_ok?" · azul tracejado = Meta 2":""}</p></div>
+${simHTML(t,k)}
+<div class="sec"><div class="tabs">${Object.keys(RN).map(r=>`<button class="${r==rng?"on":""}" data-r="${r}">${r}</button>`).join("")}</div>${chart(t)}<p class="cap">Linha azul = preço · verde = Meta 1 · âmbar = zona de compra${t.dcf_ok?" · azul tracejado = Meta 2":""} · faixas verdes = suportes, vermelhas = resistências</p>${srHTML(t)}</div>
 <div class="sec"><h3>O que dizem os analistas</h3><div class="row"><b style="font-size:20px">${c.buy_pct==null?"–":c.buy_pct+"% recomendam compra"}</b><span class="chip ${c.label&&c.label.startsWith("Compra")?"g":"a"}">${c.label||"–"}</span></div>
 ${consBar(c)}<div class="cap">${GRADES.map(([key,l,col])=>c[key]?`<span style="color:${col}">●</span> ${l} ${c[key]}`:"").filter(Boolean).join(" · ")} · ${c.total} analistas</div>
 ${c.firms.length?`<div style="margin-top:8px">${c.firms.map(f=>`<div class="kv"><span>${esc(f.f)}</span><b>${esc(gr(f.g))}${f.pt?" · alvo "+usd(f.pt,t.cur):""}</b></div>`).join("")}</div><p class="cap">Últimas revisões (≤120 dias).</p>`:""}</div>
+${peersHTML(t,k)}
 <div class="sec"><h3>Fatores estatísticos vs setor</h3>${ROW[k]?factorsHTML(ROW[k])+sectorHTML(ROW[k]):'<p class="cap">Fora do universo estatístico.</p>'}</div>
 ${qualHTML(t)}
 <div class="sec"><h3>Nível de risco</h3><div class="risk">${[0,1,2].map(i=>`<i style="${i<=ri?`background:${["#34d399","#fbbf24","#ef4444"][ri]}`:""}"></i>`).join("")}</div>
@@ -239,8 +266,9 @@ ${tile(t.nd!=null?(t.nd<0?"Sem dívida líquida":n(t.nd,1)+" anos"):"–","Dívi
 ${tile(t.fcfy!=null?n(t.fcfy,1)+"%":"–","Caixa livre","Dinheiro que sobra por ano ÷ valor da empresa")}
 ${tile(t.eg!=null?(t.eg>=0?"+":"")+n(t.eg)+"%":"–","Crescimento dos lucros","Face ao ano anterior")}</div></div>
 <div class="sec news"><h3>Notícias e sentimento</h3>${t.senti&&t.senti.n?`<div class="row"><span class="sn ${t.senti.label}">${{pos:"🟢 Otimista",neu:"🟡 Neutro",neg:"🔴 Pessimista"}[t.senti.label]}</span><span class="sub">${t.senti.pos} positivas · ${t.senti.neg} negativas · ${t.senti.n} notícias</span></div>`:""}${t.drop?`<div class="verdict ${t.drop.k=="exagero"?"g":"a"}" style="margin:10px 0">${esc(t.drop.t)}</div>`:""}${t.news.map(a=>`<a href="${esc(a.link)}" target="_blank" rel="noopener"><span class="sub">${esc(a.src)} · ${esc(a.date)}</span><span class="sn ${a.s||"neu"}">${{pos:"🟢",neu:"🟡",neg:"🔴"}[a.s||"neu"]}</span><br>${esc(a.title)}</a>`).join("")||'<span class="sub">Sem notícias.</span>'}<p class="cap">Sentimento por léxico financeiro aplicado aos títulos (palavras como "beats", "plunge", "probe"). É um indicador grosseiro; lê as notícias. Títulos em inglês (fontes originais).</p></div>
+<div style="padding:0 20px"><button class="pill dl" id="dlr" style="display:block;width:100%">📥 Descarregar Resumo de Análise</button></div>
 <p class="cap" style="padding:0 20px 30px">Dados: Yahoo Finance (${esc(D.updated)}). Preços em USD (€ ao câmbio atual). Não é aconselhamento financeiro.</p>`;
-$("#dr").classList.add("on");$("#ov").classList.add("on");document.body.style.overflow="hidden";$("#dr").dataset.k=k;
+$("#dr").classList.add("on");$("#ov").classList.add("on");simBind(t);{const d=$("#dlr");if(d)d.onclick=()=>exportReport(k)}document.body.style.overflow="hidden";$("#dr").dataset.k=k;
 $("#bk").onclick=()=>location.hash=""}
 function close(){$("#dr").classList.remove("on");$("#ov").classList.remove("on");document.body.style.overflow="";delete $("#dr").dataset.k}
 $("#ov").onclick=()=>location.hash="";addEventListener("keydown",e=>e.key=="Escape"&&(location.hash=""));
@@ -269,7 +297,7 @@ $("#xt").innerHTML=`<thead><tr>${XC.map(([k,l,h])=>`<th class="${h?"hm":""}" dat
 $("#xm").style.display=a.length>X.n?"block":"none"}
 $("#xt").onclick=e=>{const th=e.target.closest("th[data-s]"),tr=e.target.closest("tbody tr");if(th){const k=th.dataset.s;X.dir=X.sort==k?-X.dir:(k=="s"||k=="pais"||k=="sec"?1:-1);X.sort=k;X.n=100;xrender()}else if(tr)location.hash=tr.dataset.k};
 $("#xm").onclick=()=>{X.n+=200;xrender()};
-function setView(v){document.querySelectorAll(".views button").forEach(b=>b.classList.toggle("on",b.dataset.v==v));[1,2,3,4].forEach(i=>$("#v"+i).hidden=i!=v);$("#hero2").hidden=v!=1;if(v==4)market();if(v==2&&!$("#xq")){xfilters();xrender()}}
+function setView(v){document.querySelectorAll(".views button").forEach(b=>b.classList.toggle("on",b.dataset.v==v));[1,2,3,4,5].forEach(i=>$("#v"+i).hidden=i!=v);if(v==5)pfRender();$("#hero2").hidden=v!=1;if(v==4)market();if(v==2&&!$("#xq")){xfilters();xrender()}}
 $("#regs").onclick=e=>{const b=e.target.closest("[data-r]");if(!b)return;REG=b.dataset.r;document.querySelectorAll("#regs button").forEach(x=>x.classList.toggle("on",x==b));hero();grid();if($("#xq")){X.n=100;xrender()}if(!$("#v4").hidden)market()};
 $(".views").onclick=e=>{const b=e.target.closest("[data-v]");if(b)setView(b.dataset.v)};
 $("#nuni").textContent="("+R.length.toLocaleString("pt-PT")+")";
@@ -290,7 +318,7 @@ $("#dr").innerHTML=`<div class="dh"><button class="back" id="bk" aria-label="Vol
 <div class="sec"><h3>Fatores estatísticos</h3>${factorsHTML(r)}</div>
 <div class="sec"><h3>Comparação com o setor</h3>${sectorHTML(r)}<h3 style="margin-top:14px">Posição no intervalo de 52 semanas</h3>${rangeHTML(r)}</div>
 <div class="sec"><p class="cap">Esta ação tem análise estatística de screening, mas não tem análise completa (metas, DCF, consenso, risco, tese). A análise completa é feita para as ${D.meta.n_deep} melhores classificadas com capitalização ≥ ${D.meta.deep_min_usd/1e9} mil milhões USD e para as ações curadas. Para a incluir sempre, adiciona o ticker a <b>tese.py → UNIVERSE</b>.</p>
-<a class="pill" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://finance.yahoo.com/quote/${encodeURIComponent(k)}">Ver no Yahoo Finance</a></div>`;
+<button class="pill dl" id="dlr" style="display:block;width:100%;margin-bottom:8px">📥 Descarregar Resumo de Análise</button><a class="pill" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://finance.yahoo.com/quote/${encodeURIComponent(k)}">Ver no Yahoo Finance</a></div>`;
 $("#dr").classList.add("on");$("#ov").classList.add("on");document.body.style.overflow="hidden";$("#dr").dataset.k=k;$("#dr").scrollTop=0;$("#bk").onclick=()=>location.hash=""}
 function riskHTML(t,k){const s=t.rs||{};if(!s.vol)return"";const f=s.fan||{};const cell=(l,v)=>v==null?"":`<div class="kv"><span>${l}</span><b>${usd(v,t.cur)} ${sg((v/t.price-1)*100)}</b></div>`;
 return `<div class="tiles" style="margin:8px 0">${tile(n(s.vol)+"%","Volatilidade anual","Quanto o preço oscila num ano")}${tile(n(s.maxdd)+"%","Maior queda (12m)","Do máximo ao mínimo seguinte")}${tile(s.beta==null?"–":n(s.beta,2),"Beta vs S&P 500","1 = acompanha o mercado")}${tile(n(s.var95,1)+"%","Pior dia típico (VaR 95%)","Em 1 de cada 20 dias perde pelo menos isto")}${tile(s.sharpe==null?"–":n(s.sharpe,2),"Rácio de Sharpe","Retorno por unidade de risco")}${tile(s.ptouch==null?"–":n(s.ptouch)+"%","Prob. de tocar a Meta 1","Em 12 meses, segundo o modelo")}</div>
@@ -394,5 +422,101 @@ fh.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.type=="trade"){mode="finnhu
 fh.onclose=()=>{fh=null}}
 status();
 addEventListener("resize",()=>{clearTimeout(window._rz);window._rz=setTimeout(()=>{const k=$("#dr").dataset.k;if(k&&T[k]){const y=$("#dr").scrollTop;open(k);$("#dr").scrollTop=y}},250)});
+// ================= v3.0: simulador de cenários, suportes/resistências, peers, carteira, exportação =================
+const Phi=x=>{const t=1/(1+.2316419*Math.abs(x)),d=.3989423*Math.exp(-x*x/2),p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return x>0?1-p:p};
+const fin=v=>typeof v=="number"&&isFinite(v);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+// DCF a 10 anos com crescimento a decair linearmente até ao crescimento terminal (igual ao do fetch.py)
+function dcfPS(fcf,g,sh,nd,r,tg){let c=fcf,pv=0;for(let y=1;y<=10;y++){c*=1+g+(tg-g)*(y-1)/9;pv+=c/Math.pow(1+r,y)}pv+=c*(1+tg)/(r-tg)/Math.pow(1+r,10);return(pv-nd)/sh}
+// preço justo com as hipóteses (g = crescimento anual, r = taxa de desconto, m = P/E alvo no modo "pe")
+function fairAt(S,g,r,m){if(!S)return null;let v=null;if(S.mode=="dcf"&&fin(S.fcf)&&S.sh>0)v=dcfPS(S.fcf,g,S.sh,S.nd||0,r,S.tg);else if(S.mode=="pe"&&fin(S.eps)&&fin(m))v=S.eps*Math.pow(1+g,3)*m/Math.pow(1+r,3);return fin(v)&&v>0?v:null}
+// pontos de partida do simulador (blindados: nunca NaN, crescimento e múltiplos limitados)
+function simBase(t){const S=t.sim;if(!S||!S.mode)return null;const hp=t.q&&t.q.hist_pe;let g=S.g;
+if(S.mode=="pe"){const gf=S.epsf&&S.eps?S.epsf/S.eps-1:null;g=fin(gf)?clamp(gf,-.1,.3):clamp(S.g,0,.12)}else g=clamp(S.g,-.05,.2);
+let pe=S.fpe||t.fpe||t.pe;pe=fin(pe)?clamp(hp&&hp.mean?Math.min(pe*1.1,Math.max(hp.mean,pe*.7)):pe,6,45):18;
+return{S,g,r:S.r||.09,tg:S.tg||.03,pe}}
+function scen(t){const b=simBase(t);if(!b)return null;const mk=(nm,dg,dr,pm,col)=>{const g=clamp(b.g+dg,-.08,.3),r=b.r+dr,pe=clamp(b.pe*pm,5,55),px=fairAt({...b.S,tg:b.tg+(dr<0?.005:dr>0?-.005:0)},g,r,pe);return{nm,g,r,pe,px,col}};
+return{b,bear:mk("Pessimista",-.06,.01,.75,"var(--dn)"),base:mk("Realista",0,0,1,"var(--acc)"),bull:mk("Otimista",.06,-.005,1.2,"var(--up)")}}
+function probs(t,K){const s=t.rs||{};if(!s.vol||!K)return null;const v=s.vol/100,m=(s.mu/100)-v*v/2;return 1-Phi((Math.log(K/t.price)-m)/v)} // P(preço em 12m ≥ K)
+function simHTML(t,k){const sc=scen(t);if(!sc||!sc.bear.px||!sc.base.px||!sc.bull.px)return`<div class="sec"><h3>Simulador de cenários</h3><p class="cap">Sem dados suficientes (caixa livre ou lucros negativos/indisponíveis, ou empresa financeira) para um modelo fiável de 3 cenários. Usa os alvos dos analistas (intervalo ${usd(t.tlow,t.cur)} – ${usd(t.thigh,t.cur)}).</p></div>`;
+const {bear,base,bull,b}=sc,p=t.price,pc=x=>(x/p-1)*100,lo=Math.min(bear.px,p)*.95,hi=Math.max(bull.px,p)*1.05,pos=v=>clamp((v-lo)/(hi-lo)*100,0,100);
+const dn=Math.max(0.01,(p-bear.px)/p),upv=(bull.px-p)/p,ratio=dn>0&&bear.px<p?upv/dn:null;
+const pb=probs(t,bear.px),pbs=probs(t,base.px),pbu=probs(t,bull.px);
+const card=s=>`<div class="sc" style="--c:${s.col}"><span class="sn2">${s.nm}</span><b>${usd(s.px,t.cur)}</b><span>${sg(pc(s.px),0)}</span><em>${b.S.mode=="dcf"?`FCF +${(s.g*100).toFixed(0)}%/ano · desconto ${(s.r*100).toFixed(1)}%`:`LPA +${(s.g*100).toFixed(0)}%/ano · P/E ${s.pe.toFixed(0)}×`}</em></div>`;
+const mid=pos(p),sl=`<div class="sl"><label>Crescimento anual <b id="sg_v"></b></label><input type="range" id="sg" min="-5" max="25" step="0.5" value="${(b.g*100).toFixed(1)}"></div><div class="sl"><label>Taxa de desconto <b id="sr_v"></b></label><input type="range" id="sr" min="6" max="13" step="0.25" value="${(b.r*100).toFixed(2)}"></div>${b.S.mode=="pe"?`<div class="sl"><label>P/E alvo <b id="sm_v"></b></label><input type="range" id="sm" min="5" max="55" step="1" value="${b.pe.toFixed(0)}"></div>`:""}`;
+const G=[.05,.10,.15],C=b.S.mode=="dcf"?[.08,.09,.10]:[b.pe*.75,b.pe,b.pe*1.25];
+const cell=(g,c)=>{const v=fairAt(b.S,g,b.S.mode=="dcf"?c:b.r,b.S.mode=="dcf"?0:c);if(!v)return"<td>–</td>";const d=pc(v);return`<td class="${d>=15?"gg":d>=0?"g2":d>-15?"r2":"rr"}"><b>${usd(v,t.cur)}</b><br><span>${d>=0?"+":""}${d.toFixed(0)}%</span></td>`};
+return`<div class="sec" id="simsec"><h3>Simulador de cenários · Pessimista / Realista / Otimista</h3>
+<div class="scs">${card(bear)}${card(base)}${card(bull)}</div>
+<div class="rrbar"><div class="rt"><i style="left:0;width:${pos(p)}%;background:linear-gradient(90deg,var(--dn),var(--am))"></i><i style="left:${pos(p)}%;right:0;background:linear-gradient(90deg,var(--am),var(--up))"></i><s style="left:${pos(bear.px)}%"></s><s style="left:${pos(base.px)}%"></s><s style="left:${pos(bull.px)}%"></s><u style="left:${mid}%" title="Preço atual"></u></div>
+<div class="rl"><span style="left:${pos(bear.px)}%">${usd(bear.px,t.cur)}</span><span style="left:${pos(base.px)}%">${usd(base.px,t.cur)}</span><span style="left:${pos(bull.px)}%">${usd(bull.px,t.cur)}</span></div></div>
+<div class="kv"><span>Retorno / risco (Otimista vs Pessimista)</span><b>${ratio!=null&&bull.px>p?`+${(upv*100).toFixed(0)}% para −${(dn*100).toFixed(0)}% → ${ratio.toFixed(1)}×`:`preço atual fora do intervalo dos cenários`}</b></div>
+${pb!=null?`<div class="kv"><span>Prob. em 12 meses de cair abaixo do Pessimista</span><b>${((1-pb)*100).toFixed(0)}%</b></div><div class="kv"><span>…de ficar acima do Realista</span><b>${(pbs*100).toFixed(0)}%</b></div><div class="kv"><span>…de superar o Otimista</span><b>${(pbu*100).toFixed(0)}%</b></div>`:""}
+${base.px<p*.6?`<div class="verdict a" style="margin:8px 0">Mesmo no cenário Otimista o modelo simples fica ${bull.px<p?"abaixo":"perto"} do preço: o mercado está a assumir crescimento ou margens bem acima do que este modelo projeta (vê o “DCF inverso” na auditoria às contas). Usa o simulador para ver que crescimento justificaria o preço.</div>`:""}<p class="cap">Probabilidades do modelo estatístico (volatilidade histórica de 12 meses, retorno esperado CAPM), não dos cenários em si.</p>
+<h3 style="margin-top:16px">Experimenta as tuas hipóteses</h3>${sl}<div class="simout" id="so"></div>
+<h3 style="margin-top:16px">Sensibilidade do preço justo</h3><div class="yt"><table class="sens"><tr><th>${b.S.mode=="dcf"?"Crescimento ↓ / desconto →":"Crescimento ↓ / P/E alvo →"}</th>${C.map(c=>`<th>${b.S.mode=="dcf"?(c*100).toFixed(0)+"%":c.toFixed(0)+"×"}</th>`).join("")}</tr>${G.map(g=>`<tr><td>${(g*100).toFixed(0)}%/ano</td>${C.map(c=>cell(g,c)).join("")}</tr>`).join("")}</table></div>
+<p class="cap">${b.S.mode=="dcf"?"Modelo DCF a 10 anos (crescimento do caixa livre a decair até "+(b.tg*100).toFixed(0)+"%).":"Modelo de lucros: LPA atual × (1+crescimento)³ × P/E alvo, descontado 3 anos."} Pessimista = crescimento −6 p.p., desconto/múltiplo menos favoráveis; Otimista = +6 p.p. Verde: ≥15% acima do preço atual; vermelho: abaixo. Ilustração de sensibilidade, não previsão.</p></div>`}
+function simBind(t){const b=simBase(t);if(!b)return;const g=$("#sg"),r=$("#sr"),m=$("#sm");if(!g)return;
+const up=()=>{const gv=+g.value/100,rv=+r.value/100,mv=m?+m.value:0,v=fairAt(b.S,gv,rv,mv);$("#sg_v").textContent=g.value+"%";$("#sr_v").textContent=(+r.value).toFixed(2)+"%";if(m)$("#sm_v").textContent=m.value+"×";
+$("#so").innerHTML=v?`<div class="kv"><span>Preço justo com as tuas hipóteses</span><b>${usd(v,t.cur)} ${sg((v/t.price-1)*100,0)}</b></div>`:'<div class="cap">Hipóteses sem solução (a taxa de desconto tem de ser maior que o crescimento terminal).</div>'};
+[g,r,m].forEach(e=>e&&(e.oninput=up));up()}
+// ---------- suportes e resistências
+function srHTML(t){const s=t.sr||{};if(!(s.sup||[]).length&&!(s.res||[]).length)return"";const row=(a,l,c)=>a.map(x=>`<div class="kv"><span><span class="dot" style="background:${c}"></span>${l}</span><b>${usd(x.p,t.cur)} <span class="sub">${sg((x.p/t.price-1)*100,0)} · ${x.n>1?x.n+" reações":"1 reação"}</span></b></div>`).join("");
+return`<div class="srbox">${row((s.res||[]).slice().reverse(),"Resistência (topo)","var(--dn)")}${row(s.sup||[],"Suporte (fundo)","var(--up)")}<p class="cap">Zonas onde o preço travou ou inverteu nos últimos 12 meses (mínimos/máximos locais agrupados a ±2,5%). Quantas mais reações, mais relevante. Um suporte perdido costuma virar resistência.</p></div>`}
+// ---------- peers
+const PEERM=[["P/E projetado","fpe",t=>t.fpe??t.pe,-1,v=>v!=null&&v>0&&v<300,v=>n(v,1)],["Margem operacional","om",t=>t.om,1,fin,v=>n(v,1)+"%"],["Crescimento das vendas","rg",t=>t.rg,1,fin,v=>n(v,1)+"%"],["Dívida líquida / EBITDA","nd",t=>t.nd,-1,fin,v=>n(v,1)+"×"],["Score de qualidade","qs",t=>t.q&&t.q.qscore,1,fin,v=>n(v,0)],["Potencial até à Meta 1","up",t=>t.upside,1,fin,v=>(v>=0?"+":"")+n(v,0)+"%"]];
+function peerList(k){const t=T[k];let a=Object.keys(T).filter(x=>x!=k&&T[x].industry&&T[x].industry==t.industry);if(a.length<2)a=Object.keys(T).filter(x=>x!=k&&T[x].sector==t.sector);
+return a.sort((x,y)=>(T[y].mcap||0)-(T[x].mcap||0)).slice(0,3)}
+function peersHTML(t,k){const ps=peerList(k);if(!ps.length)return"";const all=[k,...ps];
+const best=PEERM.map(([,, f,dir,ok])=>{const vs=all.map(x=>{const v=f(T[x]);return ok(v)?v:null});const c=vs.filter(v=>v!=null);if(c.length<2)return-1;const w=dir>0?Math.max(...c):Math.min(...c);return vs.indexOf(w)});
+const med=PEERM.map(([,, f,,ok])=>{const c=ps.map(x=>f(T[x])).filter(ok).sort((a,b)=>a-b);return c.length?c[Math.floor(c.length/2)]:null});
+return`<div class="sec"><h3>Comparador direto com rivais</h3><div class="yt"><table class="peer"><tr><th></th>${all.map((x,i)=>`<th class="${i?"":"me"}" ${i?`data-k="${esc(x)}" style="cursor:pointer"`:""}>${esc(x)}<br><span class="sub">${esc(T[x].name.slice(0,14))}</span></th>`).join("")}<th>Mediana</th></tr>
+${PEERM.map(([l,,f,,ok,fm],mi)=>`<tr><td>${l}</td>${all.map((x,i)=>{const v=f(T[x]);return`<td class="${i?"":"me"}">${ok(v)?fm(v):"–"}${best[mi]==i?' <i class="win" title="Melhor do grupo">✓</i>':""}</td>`}).join("")}<td>${med[mi]!=null?fm0(PEERM[mi],med[mi]):"–"}</td></tr>`).join("")}</table></div>
+<p class="cap">Rivais = maiores empresas da mesma indústria (ou setor) com análise completa no Radar. ✓ verde = melhor valor do grupo (P/E e dívida: o mais baixo; resto: o mais alto). Valores nulos ou extremos (P/E > 300) não entram.</p></div>`}
+const fm0=(m,v)=>m[5](v);
+// ---------- exportação
+function exportReport(k){const t=T[k],q=t.q||{},s=t.tese||{},li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join("");const f=(v,d=2)=>v==null?"–":Number(v).toFixed(d);
+const sc=scen(t),row=(a,b)=>`<tr><td>${a}</td><td>${b}</td></tr>`;
+const html=`<!doctype html><html lang="pt"><meta charset="utf-8"><title>${esc(t.name)} · Resumo de análise</title><style>body{font:15px/1.55 system-ui,sans-serif;max-width:760px;margin:30px auto;padding:0 18px;color:#111}h1{margin:0}h2{margin:24px 0 6px;font-size:16px;border-bottom:1px solid #ddd;padding-bottom:4px}table{border-collapse:collapse;width:100%}td{padding:5px 8px;border-bottom:1px solid #eee}td:last-child{text-align:right;font-weight:600}small{color:#666}</style>
+<h1>${esc(t.name)} <small>${esc(k)}</small></h1><small>Radar.Invest · gerado em ${new Date().toLocaleString("pt-PT")} · dados de ${esc(D.updated||"")} (Yahoo Finance)</small>
+<h2>Plano de investimento</h2><table>${row("Preço atual",usd(t.price,t.cur))}${row("Comprar abaixo de",usd(t.buy_below,t.cur))}${row("Meta 1 · analistas",usd(t.target,t.cur)+" ("+f(t.upside,0)+"%)")}${row("Meta 2 · DCF",t.dcf_ok?usd(t.dcf,t.cur):"n/d")}${row("Consenso",(t.cons.buy_pct??"–")+"% compra · "+t.cons.total+" analistas")}${row("Risco",esc(t.risk)+" · vol. "+f(t.vol,0)+"%")}${sc&&sc.bear.px?row("Cenários (pess./real./otim.)",usd(sc.bear.px,t.cur)+" / "+usd(sc.base.px,t.cur)+" / "+usd(sc.bull.px,t.cur)):""}</table>
+<h2>Qualidade</h2><table>${row("Nota de qualidade",(q.qscore??"–")+"/100 · "+esc(q.qlabel||""))}${q.piotroski?row("Piotroski F",q.piotroski.score+"/"+q.piotroski.of):""}${q.altman?row("Altman Z",f(q.altman.z)):""}${q.roic?row("ROIC vs custo de capital",f(q.roic.now,1)+"% vs "+f(q.roic.wacc,1)+"%"):""}${q.moat?row("Moat (proxy)",esc(q.moat)):""}</table>
+<h2>O que faz</h2><p>${esc(s.faz)}</p><h2>Porque está com desconto</h2><ul>${li(s.barata)}</ul><h2>Saúde financeira</h2><ul>${li(s.saude)}</ul><h2>Catalisadores</h2><ul>${li(s.cat)}</ul><h2>Riscos</h2><ul>${li(s.riscos)}</ul>
+<h2>Pontos a favor / alertas das contas</h2><ul>${li(q.why)}${li(q.warn)}</ul><p><small>Estimativas automáticas com dados gratuitos do Yahoo Finance; não constitui aconselhamento financeiro. Confirma sempre nos relatórios oficiais.</small></p></html>`;
+const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=`Radar_${k.replace(/[^A-Za-z0-9]/g,"_")}_${new Date().toISOString().slice(0,10)}.html`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+// ---------- simulador de carteira
+const PF={sel:JSON.parse(localStorage.pfSel||"[]").filter(k=>T[k]),cap:+(localStorage.pfCap||5000),w:JSON.parse(localStorage.pfW||"{}")};
+const pfSave=()=>{localStorage.pfSel=JSON.stringify(PF.sel);localStorage.pfCap=PF.cap;localStorage.pfW=JSON.stringify(PF.w)};
+const eurPx=k=>{const f=fxOf(k);return D.eurusd&&f?T[k].price*f/D.eurusd:null};
+function retSeries(k){const m=new Map(),h=T[k].hist;for(let i=1;i<h.length;i++)m.set(h[i][0],h[i][1]/h[i-1][1]-1);return m}
+function pfStats(){const ks=PF.sel;if(!ks.length)return null;let tw=ks.reduce((a,k)=>a+(PF.w[k]??100/ks.length),0)||1;const w=Object.fromEntries(ks.map(k=>[k,(PF.w[k]??100/ks.length)/tw]));
+const ser=Object.fromEntries(ks.map(k=>[k,retSeries(k)]));let days=[...ser[ks[0]].keys()].filter(d=>ks.every(k=>ser[k].has(d)));
+let vol=null,div=0,upS=0,upW=0,eyW=0,eyT=0,mu=0,sectors={},curr={};
+if(days.length>=60){const pr=days.map(d=>ks.reduce((a,k)=>a+w[k]*ser[k].get(d),0)),mean=pr.reduce((a,b)=>a+b,0)/pr.length;vol=Math.sqrt(pr.reduce((a,b)=>a+(b-mean)**2,0)/(pr.length-1))*Math.sqrt(252)}
+const wv=ks.reduce((a,k)=>a+w[k]*(T[k].vol||0),0)/100;
+ks.forEach(k=>{const t=T[k],val=PF.cap*w[k];div+=val*(t.dy||0)/100;if(fin(t.upside)){upS+=w[k]*clamp(t.upside,-60,100);upW+=w[k]}const pe=t.fpe||t.pe;if(pe>0&&pe<300){eyW+=w[k]/pe;eyT+=w[k]}mu+=w[k]*((t.rs&&t.rs.mu)||8);sectors[t.sector||"Outros"]=(sectors[t.sector||"Outros"]||0)+w[k];curr[t.cur]=(curr[t.cur]||0)+w[k]});
+const hhi=Object.values(sectors).reduce((a,b)=>a+b*b,0);
+return{w,vol,wv,div,pe:eyT>0.5?eyT/eyW:null,up:upW>0.5?upS/upW:null,mu,sectors,curr,hhi,days:days.length}}
+function pfView(){const st=pfStats(),ks=PF.sel;const opts=Object.keys(T).filter(k=>!ks.includes(k)).sort((a,b)=>T[a].name.localeCompare(T[b].name));
+let h=`<div class="box"><h3>💼 Simulador de carteira</h3><p class="cap" style="margin-top:0">Escolhe 3 a 6 ações com análise completa, define o capital e vê rendimento de dividendos, P/E, potencial e risco consolidado (com correlações reais dos últimos 12 meses).</p>
+<div class="pfin"><label>Capital (€)<input type="number" id="pfc" min="100" step="100" value="${PF.cap}"></label><label>Adicionar ação<select id="pfa"><option value="">${ks.length>=6?"máx. 6 ações":"Escolher…"}</option>${ks.length>=6?"":opts.map(k=>`<option value="${esc(k)}">${esc(T[k].name)} (${esc(k)})</option>`).join("")}</select></label><button class="pill" id="pfeq">Pesos iguais</button><button class="pill" id="pfq" title="Cria uma carteira de exemplo com as melhores ações do Top 10">Exemplo: Top 3</button></div>`;
+if(!ks.length)return h+`<p class="sub" style="margin-top:14px">Ainda sem ações. Escolhe acima ou usa “Exemplo: Top 3”.</p></div>`;
+h+=`<div class="yt"><table class="pft"><tr><th>Ação</th><th>Peso</th><th>Investido</th><th>Ações</th><th>Dividendo/ano</th><th></th></tr>${ks.map(k=>{const t=T[k],val=PF.cap*st.w[k],ep=eurPx(k),dv=val*(t.dy||0)/100;return`<tr><td><b>${esc(k)}</b><br><span class="sub">${esc(t.name.slice(0,20))}</span></td><td><input class="pw" data-k="${esc(k)}" type="number" min="0" max="100" step="1" value="${(st.w[k]*100).toFixed(0)}">%</td><td>€${val.toLocaleString("pt-PT",{maximumFractionDigits:0})}</td><td>${ep?(val/ep).toFixed(val/ep<10?2:1):"–"}</td><td>€${dv.toLocaleString("pt-PT",{maximumFractionDigits:0})} <span class="sub">${t.dy?n(t.dy,1)+"%":"s/ div."}</span></td><td><button class="x" data-rm="${esc(k)}" aria-label="Remover">✕</button></td></tr>`}).join("")}</table></div>
+<div class="tiles" style="margin-top:12px">${tile("€"+st.div.toLocaleString("pt-PT",{maximumFractionDigits:0}),"Dividendos por ano","≈ €"+(st.div/12).toLocaleString("pt-PT",{maximumFractionDigits:0})+" por mês (antes de impostos)")}${tile(st.pe?n(st.pe,1)+"×":"–","P/E ponderado","Média harmónica pelos pesos")}${tile(st.up!=null?(st.up>=0?"+":"")+n(st.up,0)+"%":"–","Potencial médio","Até às metas dos analistas")}${tile(st.vol!=null?n(st.vol*100,0)+"%":"≈"+n(st.wv*100,0)+"%","Volatilidade anual","Risco consolidado"+(st.vol!=null?" (com correlações)":""))}</div>`;
+const rk=(st.vol??st.wv)*100,lvl=rk<18?["Baixo","g"]:rk<28?["Médio","a"]:["Alto","r"],ndiv=Object.keys(st.sectors).length;
+const m=st.mu/100-(st.vol??st.wv)**2/2,v=(st.vol??st.wv);
+h+=`<div class="row" style="margin-top:12px"><span class="chip ${lvl[1]}">Risco ${lvl[0]}</span><span class="chip ${st.hhi<.4?"g":st.hhi<.6?"a":"r"}">Diversificação setorial ${st.hhi<.4?"boa":st.hhi<.6?"média":"fraca"} (${ndiv} setores)</span></div>
+<div class="kv"><span>Retorno esperado (CAPM, modelo)</span><b>${n(st.mu,1)}% ao ano</b></div>
+<div class="kv"><span>Intervalo a 12 meses (90% de confiança)</span><b>€${(PF.cap*Math.exp(m-1.645*v)).toLocaleString("pt-PT",{maximumFractionDigits:0})} – €${(PF.cap*Math.exp(m+1.645*v)).toLocaleString("pt-PT",{maximumFractionDigits:0})}</b></div>
+<div class="kv"><span>Exposição por setor</span><b></b></div>${Object.entries(st.sectors).sort((a,b)=>b[1]-a[1]).map(([s,w])=>`<div class="sb"><span>${SECPT[s]||s}</span><div class="tr"><i style="left:0;width:${(w*100).toFixed(0)}%;background:var(--acc)"></i></div><b>${(w*100).toFixed(0)}%</b></div>`).join("")}
+<p class="cap">Dividendos = capital × peso × rendimento atual do dividendo (antes de impostos e retenções; podem mudar). Valores em € ao câmbio atual; ações cotadas noutras moedas têm risco cambial. Volatilidade calculada sobre ${st.days||0} dias comuns de negociação. Simulação educativa, não garante retorno nem é aconselhamento.</p>`;
+return h+"</div>"}
+function pfRender(){$("#v5").innerHTML=pfView();const c=$("#pfc");c.onchange=()=>{PF.cap=clamp(+c.value||1000,100,1e8);pfSave();pfRender()};
+$("#pfa").onchange=e=>{if(e.target.value&&PF.sel.length<6){PF.sel.push(e.target.value);pfSave();pfRender()}};
+$("#pfeq").onclick=()=>{PF.w={};pfSave();pfRender()};
+$("#pfq").onclick=()=>{PF.sel=D.order.filter(k=>T[k].elite).slice(0,3);PF.w={};pfSave();pfRender()};
+document.querySelectorAll(".pw").forEach(i=>i.onchange=()=>{PF.w[i.dataset.k]=clamp(+i.value||0,0,100);pfSave();pfRender()});
+document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{PF.sel=PF.sel.filter(x=>x!=b.dataset.rm);delete PF.w[b.dataset.rm];pfSave();pfRender()})}
+
 hero();grid();route();connect();
 </script></body></html>

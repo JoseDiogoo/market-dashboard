@@ -309,6 +309,35 @@ def risk_stats(h, p, tgt):
     return {"vol": r(vol * 100, 0), "maxdd": r(dd, 0), "sharpe": r(sharpe, 2), "var95": r(var95, 1), "beta": r(beta, 2), "mu": r(mu * 100, 1), "fan": fan, "ptouch": r(ptouch, 0)}
 
 
+def levels(h, p, w=8, tol=0.025):
+    """Suportes/resistências: pivôs (mínimos/máximos locais em ±w dias) agrupados a ±2,5%. n = nº de vezes que o preço reagiu ali."""
+    v = h.values.astype(float)
+    if len(v) < 2 * w + 5:
+        return {}
+    piv = []
+    for k in range(w, len(v) - w):
+        seg = v[k - w:k + w + 1]
+        if v[k] == seg.min() or v[k] == seg.max():
+            piv.append(v[k])
+    cl = []
+    for x in sorted(piv):
+        if cl and x <= cl[-1][0] * (1 + tol):
+            cl[-1][1].append(x)
+            cl[-1][0] = float(np.mean(cl[-1][1]))
+        else:
+            cl.append([x, [x]])
+    lv = [(c[0], len(c[1])) for c in cl]
+    sup = sorted([x for x in lv if x[0] < p * 0.99], key=lambda x: -x[0])
+    res = sorted([x for x in lv if x[0] > p * 1.01], key=lambda x: x[0])
+    pick = lambda a: [{"p": r(x[0], 2), "n": x[1]} for x in sorted(a, key=lambda x: (-(x[1] >= 2), abs(x[0] / p - 1)))[:3]]
+    return {"sup": sorted(pick(sup), key=lambda x: -x["p"]), "res": sorted(pick(res), key=lambda x: x["p"])}
+
+
+def cl(v, hi=300):
+    """ratios absurdos (P/E de 4000, etc.) → None: não aparecem nem entram em comparações"""
+    return None if v is None or not (1 <= v < hi) else v
+
+
 def deep(sym):
     try:
         time.sleep(0.4)  # ritmo suave para não ser limitado
@@ -368,6 +397,12 @@ def deep(sym):
         news.tag(nws)
         senti = news.summarize(nws)
         dropv = news.drop_verdict((p / hi - 1) * 100 if hi else None, senti, q)
+        eps_t, eps_f = i.get("trailingEps"), i.get("forwardEps")
+        sim = {"r": 0.09, "tg": 0.03, "g": round(g, 4), "nd": r((debt or 0) - (cash or 0), 0) if same else None, "sh": r(shares, 0), "fpe": r(cl(fpe), 1)}
+        if dcfv is not None and not fin:
+            sim.update({"mode": "dcf", "fcf": r(i["freeCashflow"], 0)})
+        elif same and eps_t and eps_t > 0:
+            sim.update({"mode": "pe", "eps": r(eps_t, 2), "epsf": r(eps_f, 2) if eps_f and eps_f > 0 else None})
         co = consenso(t, i)
         dy = i.get("dividendYield")
         cat = CURATED.get(sym) or ("d" if (dy or 0) >= 3 and risk != "Alto" else "g" if (rg or 0) >= 10 or (eg or 0) >= 15 else "v")
@@ -377,8 +412,8 @@ def deep(sym):
             "drawdown": r((p / hi - 1) * 100, 1), "target": r(tgt), "tlow": r(tl), "thigh": r(th), "upside": r(up, 1),
             "dcf": r(dcfv), "dcf_ok": dcf_ok, "dcf_up": r((dcfv / p - 1) * 100, 1) if dcfv else None, "fair": r(fair), "buy_below": r(buy_below),
             "zone": "buy" if buy_below and p <= buy_below else "wait", "cons": co, "risk": risk, "vol": rs.get("vol"), "rs": rs,
-            "dy": r(dy, 2), "payout": r(pct(i.get("payoutRatio")), 0), "pe": r(i.get("trailingPE"), 1), "fpe": r(fpe, 1), "eve": r(eve, 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1),
-            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "q": q,
+            "dy": r(dy, 2), "payout": r(pct(i.get("payoutRatio")), 0), "pe": r(cl(i.get("trailingPE")), 1), "fpe": r(cl(fpe), 1), "eve": r(cl(eve), 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1),
+            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "q": q, "sr": levels(h, p), "sim": sim,
             "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "news": nws, "senti": senti, "drop": dropv}
         auto = tese_auto.gen(i, {**out, "cat": None})
         if sym in TESE:  # curadas: texto escrito à mão + saúde financeira automática

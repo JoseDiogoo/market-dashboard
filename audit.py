@@ -97,6 +97,12 @@ check("elite vem primeiro na ordem das oportunidades", D["order"][:len(el)] == e
 check("destaque principal sem armadilha de valor", not T[D["highlights"]["pick"]]["q"]["trap"])
 check("taxa sem risco (FRED) plausível", 0.005 < D["meta"]["rf"] < 0.12, f"rf={D['meta']['rf']} macro={D.get('macro')}")
 check("sentimento só pos/neu/neg", all(a.get("s") in ("pos", "neu", "neg") for t in T.values() for a in t["news"]) and all(a["s"] in ("pos", "neu", "neg") for a in D["mnews"]["items"]))
+check("data.js sem NaN/Infinity (JSON válido)", not re.search(r"\b(NaN|-?Infinity)\b", raw))
+check("ratios sem extremos (P/E, P/E projetado, EV/EBITDA ≤ 300)", all(t[k] is None or 0 < t[k] <= 300 for t in T.values() for k in ("pe", "fpe", "eve")))
+dc = [(k, t["dcf"], fetch.dcf(t["sim"]["fcf"], t["sim"]["g"], t["sim"]["sh"], t["sim"]["nd"])) for k, t in T.items() if t.get("sim", {}).get("mode") == "dcf" and t.get("dcf")]
+check("simulador: DCF do front-end = DCF do pipeline (±1%)", all(abs(a / b - 1) < 0.01 for _, a, b in dc), f"{len(dc)} comparados")
+check("simulador: todos têm modo ou ficam sem simulação", all((t.get("sim") or {}).get("mode") in ("dcf", "pe", None) for t in T.values()), f"dcf={sum(1 for t in T.values() if t['sim'].get('mode') == 'dcf')} pe={sum(1 for t in T.values() if t['sim'].get('mode') == 'pe')}")
+check("suportes abaixo e resistências acima do preço", all(all(x["p"] < t["price"] for x in t["sr"].get("sup", [])) and all(x["p"] > t["price"] for x in t["sr"].get("res", [])) for t in T.values()), f"{sum(1 for t in T.values() if t['sr'].get('sup'))} com suportes")
 print("INFO notícias de mercado:", len(D["mnews"]["items"]), D["mnews"]["sources"], "| insiders com dados:", sum(1 for t in T.values() if t["q"].get("insiders")), "| cíclicas:", sum(1 for t in T.values() if t["q"]["norm"].get("cyc")))
 print("\nresumo:", D["audit"])
 sys.exit(1 if bad else 0)
