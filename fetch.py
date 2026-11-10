@@ -378,11 +378,6 @@ def deep(sym):
         fpe, eve = i.get("forwardPE"), i.get("enterpriseToEbitda")
         roe, om = pct(i.get("returnOnEquity")), pct(i.get("operatingMargins"))
         eg, rg = pct(i.get("earningsGrowth")), pct(i.get("revenueGrowth"))
-        val = avg([sc(30 - fpe, 0, 22) if fpe and fpe > 0 else None, sc(20 - eve, 0, 14) if eve and eve > 0 else None, sc(fcfy, 0, 8), sc(up, 0, 30)])
-        rent = avg([sc(roe, 5, 25), sc(om, 5, 30)])
-        solv = avg([None if nd is None else sc(4 - nd, 0, 4)])
-        grow = avg([sc(eg, -10, 20), sc(rg, -5, 15)])
-        score = round(25 * (val + rent + solv + grow))
         shares = mcap / p if mcap else None
         fin = i.get("sector") == "Financial Services"
         g = 0.03 if eg is None and rg is None else min(0.08, max(0.0, avg([sc(eg, 0, 15) and eg / 100, sc(rg, 0, 15) and rg / 100])))
@@ -428,7 +423,7 @@ def deep(sym):
             "dcf": r(dcfv), "dcf_ok": dcf_ok, "dcf_up": r((dcfv / p - 1) * 100, 1) if dcfv else None, "fair": r(fair), "buy_below": r(buy_below),
             "zone": "buy" if buy_below and p <= buy_below else "wait", "cons": co, "risk": risk, "vol": rs.get("vol"), "rs": rs,
             "dy": r(dy, 2), "payout": r(pct(i.get("payoutRatio")), 0), "pe": r(cl(i.get("trailingPE")), 1), "fpe": r(cl(fpe), 1), "eve": r(cl(eve), 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1),
-            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "score": score, "pillars": [round(25 * x) for x in (val, rent, solv, grow)], "mcap": mcap, "q": q, "sr": levels(h, p), "sim": sim, "atr": r(atr, 2),
+            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "mcap": mcap, "q": q, "sr": levels(h, p), "sim": sim, "atr": r(atr, 2),
             "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "news": nws, "senti": senti, "drop": dropv}
         auto = tese_auto.gen(i, {**out, "cat": None})
         if sym in TESE:  # curadas: texto escrito à mão + saúde financeira automática
@@ -462,6 +457,51 @@ def macro():
 # ---------------------------------------------------------------- orquestração
 def nz(v, d=0):
     return None if v is None or (isinstance(v, float) and (math.isnan(v) or math.isinf(v))) else round(float(v), d)
+
+
+def rerank(d):
+    """Classificação comum à geração e à renovação de preços."""
+    d.setdefault("analysis_updated", d["updated"])
+    T = d["tickers"]
+    rows = {row[0]: dict(zip(d["cols"], row)) for row in d["rows"]}
+    for s, t in T.items():
+        row = rows.get(s, {})
+        # O consenso entra separadamente: retirar o fator analistas desta parcela.
+        v = sum(w * (row.get(k) if row.get(k) is not None else 50) for k, w in (("fv", .30), ("fg", .20), ("fm", .15), ("fi", .10))) / .75
+        fpe, eve = t.get("fpe"), t.get("eve")
+        val = avg([sc(30 - fpe, 0, 22) if fpe and fpe > 0 else None, sc(20 - eve, 0, 14) if eve and eve > 0 else None, sc(t.get("fcfy"), 0, 8)])
+        rent = avg([sc(t.get("roe"), 5, 25), sc(t.get("om"), 5, 30)])
+        solv = avg([sc(4 - t["nd"], 0, 4) if t.get("nd") is not None else None])
+        grow = avg([sc(t.get("eg"), -10, 20), sc(t.get("rg"), -5, 15)])
+        t["score"] = round(25 * (val + rent + solv + grow))
+        t["pillars"] = [round(25 * x) for x in (val, rent, solv, grow)]
+        t["sc1"] = row.get("sc1")
+        c = t["cons"]
+        bpa = 100 * (c["strongBuy"] + c["buy"] + 2.5) / (c["total"] + 5)  # consenso com prior de 5 analistas neutros: 1 só analista não vale 100%
+        qs = t["q"].get("qscore")
+        qs = 50 if qs is None else qs
+        nm_ = t["q"].get("norm") or {}
+        pen = {"Baixo": 0, "Médio": 4, "Alto": 12}[t["risk"]] + (8 if t["q"].get("trap") else 0) + (12 if nm_.get("peak") else 6 if nm_.get("cyc") else 0)
+        t["rank"] = round(0.22 * t["score"] + 0.15 * v + 0.23 * 100 * (sc(t["upside"], 0, 40) or 0) + 0.20 * bpa + 0.20 * qs - pen)
+
+    def elite(t):  # crivo do Top 10: compounders com consenso forte, caixa real, balanço saudável
+        q, c = t["q"], t["cons"]
+        return bool(c["total"] >= 10 and (c["buy_pct"] or 0) > 65 and q.get("compounder", {}).get("ok") and not q.get("trap") and not (q.get("norm") or {}).get("peak")
+                    and (q.get("qscore") or 0) >= 60 and (q.get("altman") or {}).get("zone") != "perigo" and (t.get("nd") is not None and t["nd"] < 4)
+                    and (t.get("fcfy") is not None and t["fcfy"] > 0))
+    for t in T.values():
+        t["elite"] = elite(t)
+    elig = [s for s in T if s in CURATED or ((rows.get(s, {}).get("mcap") or 0) * 1e6 >= DEEP_MIN_USD)]
+    order = sorted(elig, key=lambda s: (not T[s]["elite"], -T[s]["rank"]))
+    solid = [s for s in order if T[s]["cons"]["total"] >= 5]  # destaques exigem pelo menos 5 analistas
+    clean = [s for s in solid if not T[s]["q"].get("trap")]
+    safe = [s for s in clean if (T[s]["dy"] or 0) >= 2 and T[s]["risk"] != "Alto" and T[s].get("payout") is not None and T[s]["payout"] < 90 and (T[s]["fcfy"] or 0) > 0 and (T[s]["eg"] is None or T[s]["eg"] >= -5)]
+    pick = clean[0] if clean else solid[0] if solid else None
+    disc = [s for s in clean if s != pick and T[s]["score"] >= 55 and (T[s]["cons"]["buy_pct"] or 0) >= 50 and T[s]["upside"] and (T[s]["q"].get("qscore") or 0) >= 60]
+    hl = {"pick": pick, "dividend": max(safe, key=lambda s: T[s]["dy"]) if safe else None, "discount": max(disc, key=lambda s: T[s]["upside"]) if disc else None}
+    d["order"], d["highlights"] = order, hl
+    d.setdefault("audit", {})["elite"] = sum(t["elite"] for t in T.values())
+    return d
 
 
 def build(quick=False):
@@ -498,33 +538,6 @@ def build(quick=False):
             T.update({s: d for s, d in ex.map(deep, pend) if d})
     log(f"profundas concluídas: {len(T)}/{len(want)} · {time.time() - t0:.0f}s")
     byS = df.set_index("s")
-    for s, t in T.items():
-        v = byS.sc1.get(s) if s in byS.index else None
-        v = 50.0 if v is None or pd.isna(v) else float(v)
-        t["sc1"] = round(v)
-        c = t["cons"]
-        bpa = 100 * (c["strongBuy"] + c["buy"] + 2.5) / (c["total"] + 5)  # consenso com prior de 5 analistas neutros: 1 só analista não vale 100%
-        qs = t["q"].get("qscore")
-        qs = 50 if qs is None else qs
-        nm_ = t["q"].get("norm") or {}
-        pen = {"Baixo": 0, "Médio": 4, "Alto": 12}[t["risk"]] + (8 if t["q"].get("trap") else 0) + (12 if nm_.get("peak") else 6 if nm_.get("cyc") else 0)
-        t["rank"] = round(0.22 * t["score"] + 0.15 * v + 0.23 * 100 * (sc(t["upside"], 0, 40) or 0) + 0.20 * bpa + 0.20 * qs - pen)
-
-    def elite(t):  # crivo do Top 10: compounders com consenso forte, caixa real, balanço saudável
-        q, c = t["q"], t["cons"]
-        return bool(c["total"] >= 10 and (c["buy_pct"] or 0) > 65 and q.get("compounder", {}).get("ok") and not q.get("trap") and not (q.get("norm") or {}).get("peak")
-                    and (q.get("qscore") or 0) >= 60 and (q.get("altman") or {}).get("zone") != "perigo" and (t["nd"] is None or t["nd"] < 4)
-                    and (t.get("fcfy") is None or t["fcfy"] > 0))
-    for t in T.values():
-        t["elite"] = elite(t)
-    elig = [s for s in T if s in CURATED or (s in byS.index and byS.mcap[s] >= DEEP_MIN_USD)]
-    order = sorted(elig, key=lambda s: (not T[s]["elite"], -T[s]["rank"]))
-    solid = [s for s in order if T[s]["cons"]["total"] >= 5]  # destaques exigem pelo menos 5 analistas
-    clean = [s for s in solid if not T[s]["q"].get("trap")]
-    safe = [s for s in clean if (T[s]["dy"] or 0) >= 2 and T[s]["risk"] != "Alto" and (T[s]["payout"] or 0) < 90 and (T[s]["fcfy"] or 0) > 0 and (T[s]["eg"] is None or T[s]["eg"] >= -5)]
-    pick = clean[0] if clean else solid[0]
-    disc = [s for s in clean if s != pick and T[s]["score"] >= 55 and (T[s]["cons"]["buy_pct"] or 0) >= 50 and T[s]["upside"] and (T[s]["q"].get("qscore") or 0) >= 60]
-    hl = {"pick": pick, "dividend": max(safe, key=lambda s: T[s]["dy"]) if safe else None, "discount": max(disc, key=lambda s: T[s]["upside"]) if disc else None}
     def pos(v, d=1):  # rácios negativos (prejuízo / capital próprio negativo) não são mostrados
         return None if v is None or pd.isna(v) or v <= 0 else nz(v, d)
     cols = ["s", "name", "ex", "cur", "sec", "px", "chg", "mcap", "fpe", "pe", "pb", "dy", "ret", "hi", "lo", "rat", "sc1", "fv", "fg", "fm", "fa", "fi", "fx", "dp", "tm"]
@@ -552,9 +565,10 @@ def build(quick=False):
         mn = news.market()
     except Exception:
         mn = {"items": [], "sources": [], "summary": {"n": 0}}
-    QC.update({"elite": sum(1 for t in T.values() if t["elite"]), "market_news_sources": mn["sources"], "macro": {k: v["v"] for k, v in MAC.items()}})
-    return {"mnews": mn, "macro": MAC, "version": "Pro Institutional", "tape": tape, "tape_names": TAPE, "audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": tape.get("EURUSD=X", {}).get("price"), "order": order, "highlights": hl, "tickers": T, "cols": cols, "rows": rows,
+    QC.update({"market_news_sources": mn["sources"], "macro": {k: v["v"] for k, v in MAC.items()}})
+    d = {"mnews": mn, "macro": MAC, "version": "Radar de Investimento", "tape": tape, "tape_names": TAPE, "audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": tape.get("EURUSD=X", {}).get("price"), "order": [], "highlights": {}, "tickers": T, "cols": cols, "rows": rows,
             "pais": PAIS, "exinfo": {k: {"n": v[0], "p": v[1], "r": v[2]} for k, v in EX.items()}, "sector_stats": stats, "meta": {"n_universe": len(df), "n_deep": len(T), "n_exch": int(df.ex.nunique()), "min_usd": MIN_USD, "deep_min_usd": DEEP_MIN_USD, "rf": RF, "erp": ERP, "sources": ["Yahoo Finance (cotações, fundamentais, analistas, insiders)", "FRED (taxas EUA)", "CNBC / MarketWatch / Bloomberg / Yahoo (notícias RSS)"]}}
+    return rerank(d)
 
 
 def refresh_rows(d):
@@ -566,6 +580,8 @@ def refresh_rows(d):
     try:
         quotes, fx = fetch_universe(SECTORS)
         cur = to_frame(quotes, fx).set_index("s")
+        if fx.get("EUR") and math.isfinite(fx["EUR"]) and fx["EUR"] > 0:
+            d["eurusd"] = fx["EUR"]
     except Exception as e:
         log("refresh: screener falhou", str(e)[:80])
     if cur is None or cur.empty:
@@ -573,20 +589,38 @@ def refresh_rows(d):
             syms = list(d["tickers"])
             h = yf.download(syms, period="5d", progress=False, auto_adjust=False, threads=True)["Close"].dropna(how="all")
             rows = {s: (float(h[s].dropna().iloc[-1]), float(h[s].dropna().iloc[-1] / h[s].dropna().iloc[-2] - 1) * 100) for s in syms if s in h and len(h[s].dropna()) > 1}
-            cur = pd.DataFrame({"px": {s: v[0] for s, v in rows.items()}, "chg": {s: v[1] for s, v in rows.items()}, "tm": {s: time.time() for s in rows}})
+            cur = pd.DataFrame({"px": {s: v[0] for s, v in rows.items()}, "chg": {s: v[1] for s, v in rows.items()}, "tm": {s: h[s].dropna().index[-1].timestamp() for s in rows}})
             src = {"name": "Yahoo Finance · download (reserva)", "ok": bool(len(cur)), "mode": "deep"}
         except Exception as e:
             log("refresh: reserva falhou", str(e)[:80])
             cur = pd.DataFrame(columns=["px", "chg", "tm"])
             src = {"name": "Snapshot guardado", "ok": False, "mode": "stale"}
+    d.setdefault("analysis_updated", d["updated"])
     ci = {c: i for i, c in enumerate(d["cols"])}
+    refreshed = set()
     for row in d["rows"]:
         if row[0] in cur.index:
             x = cur.loc[row[0]]
+            if not math.isfinite(float(x.px)) or x.px <= 0 or not math.isfinite(float(x.tm)):
+                continue
+            refreshed.add(row[0])
+            if "fx" in x and pd.notna(x.fx):
+                row[ci["fx"]] = nz(x.fx, 6)
             row[ci["px"]], row[ci["chg"]], row[ci["tm"]] = nz(x.px, 2 if x.px < 1000 else 0), nz(x.chg, 2), int(x.tm / 60)
     for s, t in d["tickers"].items():
-        if s in cur.index:
+        if s in refreshed:
             p = float(cur.px[s])
+            if not math.isfinite(p) or p <= 0:
+                continue
+            old = t["price"]
+            for key in ("pe", "fpe"):
+                if t.get(key) is not None:
+                    t[key] = r(t[key] * p / old, 1)
+            for key in ("fcfy", "dy"):
+                if t.get(key) is not None:
+                    t[key] = r(t[key] * old / p, 2)
+            if t.get("mcap"):
+                t["mcap"] *= p / old
             t["price"], t["d1"] = round(p, 2), nz(cur.chg[s], 2)
             if t.get("target"):
                 t["upside"] = round((t["target"] / p - 1) * 100, 1)
@@ -595,11 +629,17 @@ def refresh_rows(d):
         d["mnews"] = news.market()
     except Exception:
         pass
+    src["ok"] = bool(refreshed)
+    src["coverage"] = len(refreshed) / max(1, len(d["rows"]))
+    if not refreshed:
+        src["mode"] = "stale"
+    elif len(refreshed) < len(d["rows"]):
+        src["mode"] = "partial"
     src["ms"] = int((time.time() - t0) * 1000)
     src["ts"] = int(time.time())
     d["source"] = src
-    d["updated"] = time.strftime("%Y-%m-%d %H:%M")
-    return d
+    # updated é a data da análise; nunca a hora de uma tentativa de rede.
+    return rerank(d)
 
 
 if __name__ == "__main__":

@@ -54,7 +54,7 @@ check("ordem de oportunidades só com análise completa", all(s in T for s in D[
 check("destaques existem", all((v is None or v in T) for v in D["highlights"].values()))
 # comparação com cotações obtidas de novo e de forma independente (histórico diário)
 random.seed(1)
-sample = random.sample(R, 25)
+sample = random.sample(R, min(25, len(R)))
 diffs = []
 for r in sample:
     try:
@@ -65,7 +65,7 @@ for r in sample:
         pass
 worst = sorted(diffs, key=lambda x: -x[3])[:3]
 ok_n = sum(1 for d in diffs if d[3] < 0.05)
-check("amostra de 25 preços ≈ histórico independente (±5%)", ok_n >= 0.9 * len(diffs), f"{ok_n}/{len(diffs)} dentro de 5%; piores: {worst}")
+check("amostra de preços ≈ histórico independente (±5%)", bool(sample) and len(diffs) >= .8 * len(sample) and ok_n >= 0.9 * len(diffs), f"{ok_n}/{len(diffs)} dentro de 5%; piores: {worst}")
 Q = {k: t["q"] for k, t in T.items() if t.get("q")}
 check("todas as análises completas têm bloco de qualidade", len(Q) == len(T), f"{len(Q)}/{len(T)}")
 check("qualidade: nota 0-100, Piotroski ≤ 9, anos ascendentes", all((q.get("qscore") is None or 0 <= q["qscore"] <= 100) and (not q.get("piotroski") or 0 <= q["piotroski"]["score"] <= q["piotroski"]["of"] <= 9) and [x["y"] for x in q.get("series", [])] == sorted(x["y"] for x in q.get("series", [])) for q in Q.values()))
@@ -84,13 +84,14 @@ for s in random.sample(list(Q), min(15, len(Q))):
     except Exception:
         pass
 bad_r = [x for x in rev_d if not 0.5 <= x[1] <= 1.6]
-check("vendas do último exercício ≈ vendas 12m", len(bad_r) <= max(1, len(rev_d) // 8), f"{len(rev_d)} amostras; fora: {bad_r}")
+check("vendas do último exercício ≈ vendas 12m", bool(rev_d) and len(bad_r) <= max(1, len(rev_d) // 8), f"{len(rev_d)} amostras; fora: {bad_r}")
 import re
 EN = re.compile(r"\b(the|and|provides|which|its)\b", re.I)
 auto = {k: t["tese"] for k, t in T.items() if not t["tese"].get("hand")}
 eng = [k for k, x in auto.items() if EN.search(" ".join([x["faz"].replace(T[k]["name"].strip(" -"), ""), *x["barata"], *x["saude"], *x["cat"], *x["riscos"]]))]
 check("teses automáticas 100% em português (sem texto em inglês do Yahoo)", not eng and all(len(x["faz"]) > 60 and "resumo do Yahoo" not in x["faz"] for x in auto.values()), str(eng[:5]))
 el = [k for k in D["order"] if T[k]["elite"]]
+check("elite exige caixa positivo e dívida conhecida abaixo de 4", all(t.get("fcfy") is not None and t["fcfy"] > 0 and t.get("nd") is not None and t["nd"] < 4 for t in T.values() if t["elite"]))
 top = el[:10]
 check("Top 10: só compounders que passam o crivo", all(T[k]["cons"]["total"] >= 10 and (T[k]["cons"]["buy_pct"] or 0) > 65 and T[k]["q"]["compounder"]["ok"] and not T[k]["q"]["trap"] and not T[k]["q"]["norm"].get("peak") and (T[k]["q"]["qscore"] or 0) >= 60 for k in top), f"{len(el)} elite: {top}")
 check("elite vem primeiro na ordem das oportunidades", D["order"][:len(el)] == el)

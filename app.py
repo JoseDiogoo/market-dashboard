@@ -41,6 +41,7 @@ def fresh(key):
     d = copy.deepcopy(base(key))
     try:
         import fetch
+        fetch.rerank(d)
         return fetch.refresh_rows(d)
     except Exception:
         d["source"] = {"name": "Snapshot guardado", "ok": False, "mode": "stale"}
