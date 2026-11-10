@@ -2,3 +2,6 @@ __pycache__/
 .streamlit/secrets.toml
 .playwright-mcp/
 *.log
+
+research/
+research/*.pkl

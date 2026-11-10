@@ -11,6 +11,7 @@ const fin=Number.isFinite,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let T={},D={eurusd:1},PL={cap:2000,prof:'bal'};
 const fxOf=k=>D.rows?D.rows.find(r=>r[0]===k)?.[D.cols.indexOf('fx')]:1;
 const eurPx=k=>T[k].price*fxOf(k)/D.eurusd,volOfW=()=>null,WHT=()=>.15;
+${section('// <exit-targets>', '// </exit-targets>')}
 ${section('function planLevels(', 'const WHT=')}
 ${section('function planPool(', '// pesos:')}
 ${section('function planWeights(', 'function volOfW(')}
@@ -19,10 +20,31 @@ ${section('function planCalc(', 'function planRender(')}
 const run = code => vm.runInContext(code, ctx);
 run(`T.A={price:100,atr:3,vol:25,fair:150,buy_below:85,dy:3,payout:40,fcfy:5,nd:1,
   risk:'Baixo',sector:'Technology',rank:80,elite:true,
-  cons:{total:20,buy_pct:90},q:{qscore:80,trap:false,norm:{}},sr:{sup:[{p:94}],res:[]}};`);
+  cons:{total:20,buy_pct:90},q:{qscore:80,trap:false,norm:{}},sr:{sup:[{p:94,n:3}],res:[]},high:140};`);
 let levels = run('planLevels(T.A)');
 assert.ok(levels.entry2);
 assert.ok(Math.abs(levels.ref - 2 / (1 / levels.entry1 + 1 / levels.entry2)) < 1e-10);
+// --- metas calibradas por probabilidade e stop largo ---
+assert.ok(Math.abs(run('Phi(0)') - .5) < 1e-6 && Math.abs(run('Phi(1.96)') - .975) < 1e-4);
+assert.ok(Math.abs(run('pTouch(100,100*Math.exp(.4538*.25),{vol:25})') - .65) < .004);
+assert.equal(run('pTouch(100,99,{vol:25})'), 1);
+assert.ok(run('pTouch(100,130,{vol:25},.25)') < run('pTouch(100,130,{vol:25},1)')); // menos prazo, menos probabilidade
+let X = run('exitTargets(T.A)');
+assert.equal(X.k, 'vol');
+assert.ok(Math.abs(X.m1.pr - .65) < .004 && X.m1.v < X.m2.v && X.m1.nh === null); // máx. 52s a 140: a meta tática fica abaixo
+assert.ok(run('exitTargets(T.A,undefined,3)').m1.v < run('exitTargets(T.A,undefined,12)').m1.v);
+run('T.A.high=105');
+X = run('exitTargets(T.A)');
+assert.equal(X.k, 'reteste'); assert.equal(X.m1.v, 105); assert.equal(X.m1.nh, null); // topo recente mais perto: reteste
+assert.ok(X.m1.pr >= .65 && X.m2.nh > 0); // preço justo 150 exige novo máximo (+42,9%)
+run('T.A.high=102');
+X = run('exitTargets(T.A,undefined,12)');
+assert.equal(X.k, 'vol'); assert.ok(X.m1.nh > 0 && X.m1.nh < .2);
+run('T.A.high=140');
+levels = run('planLevels(T.A)');
+assert.ok(levels.stop >= 70 && levels.stop <= 90 && levels.t1 < levels.t2 && levels.X.m2.pr < levels.X.m1.pr);
+assert.ok((levels.ref - levels.stop) / levels.ref >= .1); // stop largo: pelo menos 10% abaixo
+levels = run('planLevels(T.A)');
 let result = run('planCalc()');
 assert.ok(Math.abs(result.rows[0].sh * levels.ref - 2000) < 1e-8);
 assert.ok(Math.abs(result.g1 - result.rows[0].sh * (levels.t1 - levels.ref)) < 1e-8);

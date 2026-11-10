@@ -71,7 +71,8 @@ check("todas as análises completas têm bloco de qualidade", len(Q) == len(T), 
 check("qualidade: nota 0-100, Piotroski ≤ 9, anos ascendentes", all((q.get("qscore") is None or 0 <= q["qscore"] <= 100) and (not q.get("piotroski") or 0 <= q["piotroski"]["score"] <= q["piotroski"]["of"] <= 9) and [x["y"] for x in q.get("series", [])] == sorted(x["y"] for x in q.get("series", [])) for q in Q.values()))
 check("financeiras sem Piotroski/Altman/ROIC", all(not (q.get("fin") and (q.get("piotroski") or q.get("altman") or q.get("roic"))) for q in Q.values()))
 check("P/E histórico plausível", all(0 < x["pe"] < 500 for q in Q.values() for x in q.get("series", []) if x.get("pe") is not None))
-check("ROIC e margens plausíveis", all(-5000 < (x.get(k) or 0) < 5000 for q in Q.values() for x in q.get("series", []) for k in ("roic", "om", "nm", "gm")))
+# margens muito negativas são reais em empresas com receita quase nula (ex.: TGTX 2022, om -7670%); do lado positivo continua a haver teto
+check("ROIC e margens plausíveis", all(-5000 < (x.get("roic") or 0) < 5000 and -1e5 < (x.get(k) or 0) < 500 for q in Q.values() for x in q.get("series", []) for k in ("om", "nm", "gm")))
 with_q = sum(1 for q in Q.values() if q.get("qscore") is not None)
 check("≥60% das análises com nota de qualidade", with_q >= 0.6 * len(T), f"{with_q}/{len(T)}")
 rev_d = []
