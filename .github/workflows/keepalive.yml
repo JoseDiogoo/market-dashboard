@@ -1,0 +1,19 @@
+# Mantém a app do Streamlit acordada (abre-a num browser de 2 em 2 horas; o plano gratuito adormece após 12 h sem visitas).
+name: Manter app acordada
+on:
+  schedule:
+    - cron: "23 */2 * * *"
+    - cron: "53 */2 * * *"  # reserva do cron do GitHub
+  workflow_dispatch: {}
+permissions: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install playwright==1.48.0 && python -m playwright install --with-deps chromium
+      - run: python keepalive.py https://market-dashboard16.streamlit.app/
