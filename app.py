@@ -1,12 +1,26 @@
 """Streamlit: embebe index.html com os dados. Base = data.js (gerado por fetch.py / GitHub Actions);
 preços do universo inteiro são renovados a cada 10 min (≈10 s); a análise completa tem preços ao vivo por WebSocket no browser.
-As caches são chaveadas pelo conteúdo dos ficheiros (mtime/tamanho): um novo deploy invalida-as de imediato, sem ficar preso a dados velhos."""
+As caches são chaveadas pelo conteúdo dos ficheiros (mtime/tamanho): um novo deploy invalida-as de imediato, sem ficar preso a dados velhos.
+
+Ecrã: a página do Streamlit fica sem cabeçalho, margens nem scroll próprio e o iframe ocupa a janela toda (100dvh: PC, tablet e telemóvel);
+o index.html trata do resto com as suas media queries. Sem recarga automática (a app voltava ao início de 10 em 10 min e a página escurecia
+durante a renovação); os preços ao vivo vêm por WebSocket e uma sessão nova já apanha a cache de 10 min."""
 import copy, json, pathlib
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Radar de Investimento", layout="wide")
+st.set_page_config(page_title="Radar de Investimento", layout="wide", initial_sidebar_state="collapsed")
 HERE = pathlib.Path(__file__).parent
+
+# ponytail: um só iframe na página, por isso o seletor `iframe` basta; se vier um segundo componente, restringir pelo data-testid
+st.markdown("""<style>
+html,body,.stApp{background:#070b16!important}
+header[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="stDecoration"],footer,#MainMenu{display:none!important}
+[data-testid="stMainBlockContainer"],.block-container{padding:0!important;max-width:100%!important}
+[data-testid="stVerticalBlock"]{gap:0!important}
+[data-testid="stAppViewContainer"],[data-testid="stMain"],section.main{overflow:hidden!important}
+iframe{display:block;width:100%!important;height:100vh!important;height:100dvh!important;border:0!important}
+</style>""", unsafe_allow_html=True)
 
 
 def sig(*names):
@@ -14,7 +28,7 @@ def sig(*names):
 
 
 @st.cache_data(ttl=3600, show_spinner="A carregar a base de dados…")
-def base(_sig):
+def base(key):  # `key` (sem _) entra na chave da cache: um ficheiro novo invalida-a (com `_sig` o Streamlit ignorava-o)
     p = HERE / "data.js"
     if p.exists():
         return json.loads(p.read_text(encoding="utf-8")[len("window.DATA="):])
@@ -23,8 +37,8 @@ def base(_sig):
 
 
 @st.cache_data(ttl=600, show_spinner="A renovar preços do mercado…")
-def fresh(_sig):
-    d = copy.deepcopy(base(_sig))
+def fresh(key):
+    d = copy.deepcopy(base(key))
     try:
         import fetch
         return fetch.refresh_rows(d)
@@ -33,12 +47,7 @@ def fresh(_sig):
         return d  # se o Yahoo falhar, mostra a base com a data real de atualização
 
 
-@st.fragment(run_every=600)
-def view():
-    s = sig("data.js", "index.html", "fetch.py", "quality.py")
-    html = (HERE / "index.html").read_text(encoding="utf-8")
-    raw = "window.DATA=" + json.dumps(fresh(s), separators=(",", ":")).replace("</", "<\\/")
-    components.html(html.replace('<script src="data.js"></script>', "<script>" + raw + "</script>"), height=950, scrolling=True)
-
-
-view()
+s = sig("data.js", "index.html", "fetch.py", "quality.py")
+html = (HERE / "index.html").read_text(encoding="utf-8")
+raw = "window.DATA=" + json.dumps(fresh(s), separators=(",", ":")).replace("</", "<\\/")
+components.html(html.replace('<script src="data.js"></script>', "<script>" + raw + "</script>"), height=900, scrolling=True)
