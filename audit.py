@@ -108,6 +108,18 @@ check("suportes abaixo e resistências acima do preço", all(all(x["p"] < t["pri
 at = [(k, t.get("atr"), t["price"]) for k, t in T.items()]
 check("ATR 14d presente (≥90%) e plausível (0 < ATR < 25% do preço)", sum(1 for _, a, _p in at if a) >= 0.9 * len(at) and all(a is None or 0 < a < 0.25 * p for _, a, p in at), f"{sum(1 for _, a, _p in at if a)}/{len(at)}")
 check("notícias: todas as ações têm veredicto (rótulo, razão e ação)", all(t.get("drop") and t["drop"].get("label") and t["drop"].get("t") and t["drop"].get("a") for t in T.values()))
+# --- modelos quantitativos (Sloan, Mohanram, Greenblatt) e sinais técnicos
+QN = {k: (t["q"].get("quant") or {}) for k, t in T.items()}
+check("quant: todas as análises completas têm o bloco quant", all(QN.values()), f"{sum(1 for v in QN.values() if v)}/{len(QN)}")
+check("Sloan: accruals plausíveis (|x| ≤ 300%) e zona coerente", all(abs(q["sloan"]["ratio"]) <= 300 and q["sloan"]["zone"] == ("baixo" if q["sloan"]["ratio"] <= 5 else "medio" if q["sloan"]["ratio"] <= 10 else "alto") for q in QN.values() if q.get("sloan")),
+      f"{sum(1 for q in QN.values() if q.get('sloan'))} com Sloan")
+G = [q["g"] for q in QN.values() if q.get("g") and "score" in q["g"]]
+check("Mohanram: nota entre 0 e nº de sinais (≤ 8)", all(0 <= g["score"] <= g["of"] <= 8 for g in G), f"{len(G)} com G-Score")
+M = [q["magic"] for q in QN.values() if q.get("magic", {}).get("rank")]
+check("Magic Formula: ranks únicos 1..N e topo = decil superior", sorted(m["rank"] for m in M) == list(range(1, len(M) + 1)) and all(m["of"] == len(M) for m in M) and sum(1 for m in M if m["top"]) == max(1, -(-len(M) // 10)) if M else True, f"{len(M)} elegíveis, {sum(1 for m in M if m['top'])} Top Pick")
+check("Magic Formula: sem financeiras nem utilities no ranking", all(not q["magic"].get("excluded") for q in QN.values() if q.get("magic", {}).get("rank")))
+TC = [t["tech"] for t in T.values() if t.get("tech")]
+check("técnicos: RSI entre 0 e 100; divergências coerentes com os preços", all(0 <= x["rsi"] <= 100 and (not x["bull"] or x["bull"]["p2"] < x["bull"]["p1"] and x["bull"]["r2"] > x["bull"]["r1"]) and (not x["bear"] or x["bear"]["p2"] > x["bear"]["p1"] and x["bear"]["r2"] < x["bear"]["r1"]) for x in TC), f"{len(TC)} com sinais técnicos; divergências de alta {sum(1 for x in TC if x['bull'])}, de baixa {sum(1 for x in TC if x['bear'])}, banda 2,5σ {sum(1 for x in TC if x['boll'] and x['boll']['touch'] is not None)}")
 print("INFO notícias de mercado:", len(D["mnews"]["items"]), D["mnews"]["sources"], "| insiders com dados:", sum(1 for t in T.values() if t["q"].get("insiders")), "| cíclicas:", sum(1 for t in T.values() if t["q"]["norm"].get("cyc")))
 print("\nresumo:", D["audit"])
 sys.exit(1 if bad else 0)

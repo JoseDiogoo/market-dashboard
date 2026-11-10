@@ -351,6 +351,87 @@ def cl(v, hi=300):
     return None if v is None or not (1 <= v < hi) else v
 
 
+def _rsi(c, n=14):
+    """RSI de Wilder (média móvel exponencial com alpha 1/n)."""
+    d = np.diff(c, prepend=c[0])
+    au = pd.Series(np.where(d > 0, d, 0.0)).ewm(alpha=1 / n, adjust=False).mean().values
+    ad = pd.Series(np.where(d < 0, -d, 0.0)).ewm(alpha=1 / n, adjust=False).mean().values
+    return 100 - 100 / (1 + au / np.where(ad == 0, 1e-12, ad))
+
+
+def _pivots(c, kind, w=5):
+    """Mínimos ('low') ou máximos ('high') locais em ±w dias; só ficam confirmados w dias depois (sem olhar para o futuro)."""
+    out = []
+    for k in range(w, len(c) - w):
+        seg = c[k - w:k + w + 1]
+        if (c[k] == (seg.min() if kind == "low" else seg.max())) and (seg == c[k]).sum() == 1:
+            out.append(k)
+    return out
+
+
+def tech_signals(h, w=5, fresh=10):
+    """Sinais técnicos INFORMATIVOS sobre os fechos de 1 ano: divergência de RSI(14) e exaustão de Bollinger (20 dias, 2,5σ).
+    Backtest próprio (research/backtest_signals.py, 10 anos, 265 ações): a divergência de alta não rendeu mais do que um mínimo novo SEM divergência (+1,19% contra +1,20% a 20 dias)
+    e agrupada por mês não é significativa (t = -0,2); a banda de 2,5σ identifica sobretudo "caiu muito" (a queda de 15% em 20 dias rendeu mais). Por isso não entram no ranking nem no veredicto.
+    Divergência de alta: 2.º mínimo mais baixo (-1%) com RSI mais alto (+2) e RSI do 1.º < 40, pivôs a 5-60 dias, confirmada há ≤ `fresh` dias. Baixa: o espelho (RSI do 1.º > 60)."""
+    c = h.values.astype(float)
+    n = len(c)
+    if n < 120:
+        return None
+    r = _rsi(c)
+    dates = [d.strftime("%Y-%m-%d") for d in h.index]
+    out = {"rsi": round(float(r[-1]), 1), "bull": None, "bear": None, "boll": None}
+    for kind, key in (("low", "bull"), ("high", "bear")):
+        pv = _pivots(c, kind, w)
+        for a, b in zip(pv[:-1], pv[1:]):
+            if not 5 <= b - a <= 60 or n - 1 - (b + w) > fresh or b + w >= n:
+                continue
+            if kind == "low" and c[b] < c[a] * 0.99 and r[b] > r[a] + 2 and r[a] < 40 or kind == "high" and c[b] > c[a] * 1.01 and r[b] < r[a] - 2 and r[a] > 60:
+                out[key] = {"d1": dates[a], "p1": round(float(c[a]), 2), "r1": round(float(r[a]), 1), "d2": dates[b], "p2": round(float(c[b]), 2), "r2": round(float(r[b]), 1), "ago": n - 1 - (b + w)}
+    s = pd.Series(c)
+    sma, sd = s.rolling(20).mean().values, s.rolling(20).std().values
+    z = (c - sma) / np.where(sd == 0, np.nan, sd)
+    if not np.isnan(z[-1]):
+        touch = next((k for k in range(5) if not np.isnan(z[-1 - k]) and z[-1 - k] <= -2.5), None)
+        out["boll"] = {"z": round(float(z[-1]), 2), "touch": touch, "k": 2.5}
+    return out
+
+
+def quant_finalize(T):
+    """Fecha os modelos que precisam do universo das análises completas: Mohanram G-Score (medianas por setor; com menos de 8 empresas no setor usa-se a mediana global)
+    e ranking Magic Formula (soma dos ranks de earnings yield e retorno do capital, sem financeiras nem utilities; topo = decil superior)."""
+    def med(vals):
+        v = [x for x in vals if x is not None]
+        return float(np.median(v)) if v else None
+    gkeys = ("roa", "cfo_roa", "roa_var", "sg_var", "rd", "capex", "sga", "pb")
+    by_sec = {}
+    for t in T.values():
+        g = (t["q"].get("quant") or {}).get("g")
+        if g:
+            by_sec.setdefault(g.get("sector"), []).append(g)
+    allg = [g for v in by_sec.values() for g in v]
+    for t in T.values():
+        g = (t["q"].get("quant") or {}).get("g")
+        if not g:
+            continue
+        grp = by_sec[g.get("sector")] if len(by_sec[g.get("sector")]) >= 8 else allg
+        m = {k: med([x.get(k) for x in grp]) for k in gkeys}
+        gt = lambda a, b: None if a is None or b is None else bool(a > b)
+        sig = {"G1": gt(g["roa"], m["roa"]), "G2": gt(g["cfo_roa"], m["cfo_roa"]), "G3": g["cfo_gt_ni"], "G4": None if g["roa_var"] is None or m["roa_var"] is None else bool(g["roa_var"] < m["roa_var"]),
+               "G5": None if g["sg_var"] is None or m["sg_var"] is None else bool(g["sg_var"] < m["sg_var"]), "G6": gt(g["rd"], m["rd"]), "G7": gt(g["capex"], m["capex"]), "G8": gt(g["sga"], m["sga"])}
+        ok = {k: v for k, v in sig.items() if v is not None}
+        growth = g.get("sector") in ("Technology", "Communication Services", "Healthcare") or (g.get("pb") is not None and m["pb"] is not None and g["pb"] > m["pb"])
+        t["q"]["quant"]["g"] = {"score": sum(ok.values()), "of": len(ok), "sig": {k: (None if v is None else int(v)) for k, v in sig.items()}, "growth": bool(growth),
+                                "grp": "setor" if grp is not allg else "global"}
+    el = [(s, t["q"]["quant"]["magic"]) for s, t in T.items() if (t["q"].get("quant") or {}).get("magic") and not t["q"]["quant"]["magic"].get("excluded")
+          and t["q"]["quant"]["magic"].get("ey") is not None and t["q"]["quant"]["magic"].get("roc") is not None]
+    n = len(el)
+    r_ey = {s: k for k, (s, _) in enumerate(sorted(el, key=lambda x: -x[1]["ey"]))}
+    r_roc = {s: k for k, (s, _) in enumerate(sorted(el, key=lambda x: -x[1]["roc"]))}
+    for rank, (s, m) in enumerate(sorted(el, key=lambda x: (r_ey[x[0]] + r_roc[x[0]], -x[1]["ey"])), 1):
+        m.update(rank=rank, of=n, top=bool(rank <= max(1, math.ceil(n * 0.10))))
+
+
 def deep(sym):
     try:
         time.sleep(0.4)  # ritmo suave para não ser limitado
@@ -424,7 +505,7 @@ def deep(sym):
             "zone": "buy" if buy_below and p <= buy_below else "wait", "cons": co, "risk": risk, "vol": rs.get("vol"), "rs": rs,
             "dy": r(dy, 2), "payout": r(pct(i.get("payoutRatio")), 0), "pe": r(cl(i.get("trailingPE")), 1), "fpe": r(cl(fpe), 1), "eve": r(cl(eve), 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1),
             "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "mcap": mcap, "q": q, "sr": levels(h, p), "sim": sim, "atr": r(atr, 2),
-            "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "news": nws, "senti": senti, "drop": dropv}
+            "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "tech": tech_signals(h), "news": nws, "senti": senti, "drop": dropv}
         auto = tese_auto.gen(i, {**out, "cat": None})
         if sym in TESE:  # curadas: texto escrito à mão + saúde financeira automática
             f = TESE[sym]
@@ -537,6 +618,7 @@ def build(quick=False):
         with ThreadPoolExecutor(3) as ex:
             T.update({s: d for s, d in ex.map(deep, pend) if d})
     log(f"profundas concluídas: {len(T)}/{len(want)} · {time.time() - t0:.0f}s")
+    quant_finalize(T)
     byS = df.set_index("s")
     def pos(v, d=1):  # rácios negativos (prejuízo / capital próprio negativo) não são mostrados
         return None if v is None or pd.isna(v) or v <= 0 else nz(v, d)

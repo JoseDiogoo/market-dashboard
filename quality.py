@@ -119,6 +119,58 @@ def implied_growth(fcf, shares, netdebt, price, rate=0.09, tg=0.03, yrs=10):
     return (lo + hi) / 2
 
 
+def quant_raw(fin, bs, cf, i, fin_sector, same, mcap):
+    """Insumos brutos de três modelos clássicos (os que precisam do universo, Mohanram e Magic Formula, fecham em fetch.quant_finalize).
+    SLOAN (1996): accruals = (lucro líquido − caixa operacional) / ativos médios. Alto = lucro de papel. Limiares ≤5% / ≤10% / >10% = regra prática (Sloan não fixa cortes).
+    MOHANRAM (2005): 8 sinais 0/1 para ações de crescimento (G1 ROA e G2 CFO/ativos acima da mediana do setor, G3 caixa operacional > lucro, G4 variância do ROA e G5 das vendas
+    abaixo da mediana, G6 I&D, G7 capex e G8 publicidade acima da mediana). O Yahoo não tem publicidade: G8 usa SG&A (aproximação usada por outras fontes).
+    GREENBLATT: earnings yield = EBIT/EV; retorno do capital = EBIT/(fundo de maneio sem caixa nem dívida curta + ativos fixos líquidos). Nunca levanta exceção."""
+    out = {}
+    try:
+        ta = [_v(bs, "Total Assets", k) for k in range(5)]
+        ni = [_v(fin, ["Net Income", "Net Income Common Stockholders"], k) for k in range(5)]
+        cfo = [_v(cf, "Operating Cash Flow", k) for k in range(5)]
+        rev = [_v(fin, "Total Revenue", k) for k in range(5)]
+        # --- Sloan (não se aplica a financeiras: o caixa operacional inclui a atividade de crédito)
+        ratios = []
+        if not fin_sector:
+            for k in range(3):
+                if None not in (ni[k], cfo[k], ta[k], ta[k + 1]) and ta[k] + ta[k + 1] > 0:
+                    ratios.append((ni[k] - cfo[k]) / ((ta[k] + ta[k + 1]) / 2))
+        if ratios:
+            r0 = ratios[0]
+            out["sloan"] = {"ratio": _r(100 * r0, 1), "avg3": _r(100 * float(np.mean(ratios)), 1), "n": len(ratios), "high_years": sum(1 for x in ratios if x > 0.10),
+                            "zone": "baixo" if r0 <= 0.05 else "medio" if r0 <= 0.10 else "alto"}
+        # --- Mohanram (insumos; as medianas do setor vêm depois)
+        if not fin_sector and ta[1] and ta[1] > 0:
+            roa_s = [ni[k] / ta[k + 1] for k in range(4) if ni[k] is not None and ta[k + 1]]
+            sg_s = [rev[k] / rev[k + 1] - 1 for k in range(3) if rev[k] and rev[k + 1] and rev[k + 1] > 0]
+            cap = _v(cf, ["Capital Expenditure", "Purchase Of PPE"], 0)
+            g = {"roa": _div(ni[0], ta[1]), "cfo_roa": _div(cfo[0], ta[1]), "cfo_gt_ni": None if None in (ni[0], cfo[0]) else bool(cfo[0] > ni[0]),
+                 "roa_var": float(np.var(roa_s)) if len(roa_s) >= 3 else None, "sg_var": float(np.var(sg_s)) if len(sg_s) >= 2 else None,
+                 "rd": (_v(fin, "Research And Development", 0) or 0.0) / ta[1], "capex": None if cap is None else abs(cap) / ta[1],
+                 "sga": _div(_v(fin, "Selling General And Administration", 0), ta[1]), "pb": i.get("priceToBook"), "sector": i.get("sector")}
+            out["g"] = {k_: (_r(v, 6) if isinstance(v, float) else v) for k_, v in g.items()}
+        # --- Magic Formula
+        ebit = _v(fin, ["EBIT", "Operating Income"], 0)
+        cash = _v(bs, ["Cash And Cash Equivalents", "Cash Cash Equivalents And Short Term Investments"], 0)
+        debt = _v(bs, "Total Debt", 0)
+        ca, cl = _v(bs, "Current Assets", 0), _v(bs, "Current Liabilities", 0)
+        std = _v(bs, ["Current Debt", "Current Debt And Capital Lease Obligation"], 0) or 0.0
+        ppe = _v(bs, ["Net PPE", "Properties"], 0)
+        m = {"sector": i.get("sector"), "excluded": bool(fin_sector or i.get("sector") == "Utilities" or not same)}
+        if ebit is not None and mcap and debt is not None and cash is not None and same:
+            ev = mcap + debt - cash
+            m["ey"] = _r(ebit / ev, 4) if ev > 0 else None
+        if ebit is not None and None not in (ca, cl, cash, ppe):
+            ic = (ca - cash) - (cl - std) + ppe
+            m["roc"] = _r(ebit / ic, 4) if ic > 0 else None
+        out["magic"] = m
+    except Exception:
+        pass
+    return out
+
+
 def analyze(t, i, p, mcap, beta, hist5, fin_sector):
     """Devolve o bloco `q` (qualidade + história + analistas) de uma ação. Nunca levanta exceção."""
     out = {"src": "Yahoo Finance (demonstrações anuais, equivalentes aos 10-K/relatórios anuais)"}
@@ -305,6 +357,7 @@ def analyze(t, i, p, mcap, beta, hist5, fin_sector):
     out["compounder"] = {"checks": chk, "ok": len(chk) >= (2 if fin_sector else 3) and all(chk.values())}
     for x in ser:
         x.pop("_fcf", None); x.pop("_ni", None)
+    out["quant"] = quant_raw(fin, bs, cf, i, fin_sector, same, mcap)
     out.update(_verdict(out, i, p, tm))
     return out
 
