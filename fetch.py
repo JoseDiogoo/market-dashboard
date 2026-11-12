@@ -1,7 +1,7 @@
 """Pipeline global: screener (milhares de ações) -> estatística (percentis por setor) -> análise profunda do top N -> data.js
 Uso: python fetch.py [--quick]   (--quick = só 2 setores, para testar)"""
-import quality, news, tese_auto
-import json, math, re, sys, time
+import quality, news, tese_auto, benchmarks, stretch
+import json, math, pathlib, re, sys, time
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import pandas as pd
@@ -437,7 +437,8 @@ def deep(sym):
         time.sleep(0.4)  # ritmo suave para não ser limitado
         t = yf.Ticker(sym)
         i = retry(lambda: t.info)
-        hd = retry(lambda: t.history(period="1y"))
+        hd2 = retry(lambda: t.history(period="2y"))  # 2 anos: o esticamento compara com a própria história
+        hd = hd2.iloc[-252:]  # o resto da análise continua a usar 1 ano
         h = hd["Close"].dropna()
         atr = atr14(hd)
         if len(h) < 30:
@@ -504,7 +505,7 @@ def deep(sym):
             "dcf": r(dcfv), "dcf_ok": dcf_ok, "dcf_up": r((dcfv / p - 1) * 100, 1) if dcfv else None, "fair": r(fair), "buy_below": r(buy_below),
             "zone": "buy" if buy_below and p <= buy_below else "wait", "cons": co, "risk": risk, "vol": rs.get("vol"), "rs": rs,
             "dy": r(dy, 2), "payout": r(pct(i.get("payoutRatio")), 0), "pe": r(cl(i.get("trailingPE")), 1), "fpe": r(cl(fpe), 1), "eve": r(cl(eve), 1), "roe": r(roe, 1), "om": r(om, 1), "nd": r(nd, 1),
-            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "mcap": mcap, "q": q, "sr": levels(h, p), "sim": sim, "atr": r(atr, 2),
+            "fcfy": r(fcfy, 1), "eg": r(eg, 1), "rg": r(rg, 1), "mcap": mcap, "q": q, "sr": levels(h, p), "sim": sim, "atr": r(atr, 2), "ext": stretch.stretch(hd2),
             "hist": [[d.strftime("%Y-%m-%d"), round(float(v), 2)] for d, v in h.items()], "tech": tech_signals(h), "news": nws, "senti": senti, "drop": dropv}
         auto = tese_auto.gen(i, {**out, "cat": None})
         if sym in TESE:  # curadas: texto escrito à mão + saúde financeira automática
@@ -619,6 +620,8 @@ def build(quick=False):
             T.update({s: d for s, d in ex.map(deep, pend) if d})
     log(f"profundas concluídas: {len(T)}/{len(want)} · {time.time() - t0:.0f}s")
     quant_finalize(T)
+    BM = benchmarks.finalize(T)  # percentis por setor/indústria + referência Damodaran (ponto A)
+    CAL = json.loads((pathlib.Path(__file__).parent / "research" / "levels_calibration.json").read_text(encoding="utf-8"))  # calibração à Osler (ponto B)
     byS = df.set_index("s")
     def pos(v, d=1):  # rácios negativos (prejuízo / capital próprio negativo) não são mostrados
         return None if v is None or pd.isna(v) or v <= 0 else nz(v, d)
@@ -647,9 +650,9 @@ def build(quick=False):
         mn = news.market()
     except Exception:
         mn = {"items": [], "sources": [], "summary": {"n": 0}}
-    QC.update({"market_news_sources": mn["sources"], "macro": {k: v["v"] for k, v in MAC.items()}})
+    QC.update({"benchmarks": BM, "market_news_sources": mn["sources"], "macro": {k: v["v"] for k, v in MAC.items()}})
     d = {"mnews": mn, "macro": MAC, "version": "Radar de Investimento", "tape": tape, "tape_names": TAPE, "audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": tape.get("EURUSD=X", {}).get("price"), "order": [], "highlights": {}, "tickers": T, "cols": cols, "rows": rows,
-            "pais": PAIS, "exinfo": {k: {"n": v[0], "p": v[1], "r": v[2]} for k, v in EX.items()}, "sector_stats": stats, "meta": {"n_universe": len(df), "n_deep": len(T), "n_exch": int(df.ex.nunique()), "min_usd": MIN_USD, "deep_min_usd": DEEP_MIN_USD, "rf": RF, "erp": ERP, "sources": ["Yahoo Finance (cotações, fundamentais, analistas, insiders)", "FRED (taxas EUA)", "CNBC / MarketWatch / Bloomberg / Yahoo (notícias RSS)"]}}
+            "pais": PAIS, "exinfo": {k: {"n": v[0], "p": v[1], "r": v[2]} for k, v in EX.items()}, "sector_stats": stats, "cal": CAL, "meta": {"n_universe": len(df), "n_deep": len(T), "n_exch": int(df.ex.nunique()), "min_usd": MIN_USD, "deep_min_usd": DEEP_MIN_USD, "rf": RF, "erp": ERP, "sources": ["Yahoo Finance (cotações, fundamentais, analistas, insiders)", "FRED (taxas EUA)", "CNBC / MarketWatch / Bloomberg / Yahoo (notícias RSS)"]}}
     return rerank(d)
 
 

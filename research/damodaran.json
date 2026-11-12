@@ -1,0 +1,587 @@
+{
+"date": "2026-01-05",
+"src": {
+"om": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/margin.xls",
+"roic": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/roc.xls",
+"eve": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/vebitda.xls"
+},
+"note": "médias por indústria, empresas dos EUA (Damodaran, NYU Stern)",
+"ind": {
+"Advertising": {
+"n": 52,
+"om": 0.1007,
+"roic": 0.6183,
+"eve": 10.2096
+},
+"Aerospace/Defense": {
+"n": 79,
+"om": 0.0865,
+"roic": 0.2264,
+"eve": 16.775
+},
+"Air Transport": {
+"n": 23,
+"om": 0.0532,
+"roic": 0.1158,
+"eve": 7.3491
+},
+"Apparel": {
+"n": 35,
+"om": 0.0911,
+"roic": 0.1975,
+"eve": 10.2956
+},
+"Auto & Truck": {
+"n": 33,
+"om": 0.0232,
+"roic": 0.0245,
+"eve": 28.717
+},
+"Auto Parts": {
+"n": 35,
+"om": 0.0567,
+"roic": 0.1241,
+"eve": 4.4556
+},
+"Bank (Money Center)": {
+"n": 15,
+"om": 0.0,
+"roic": null,
+"eve": null
+},
+"Banks (Regional)": {
+"n": 568,
+"om": 0.0,
+"roic": null,
+"eve": null
+},
+"Beverage (Alcoholic)": {
+"n": 14,
+"om": 0.2276,
+"roic": 0.1621,
+"eve": 8.6053
+},
+"Beverage (Soft)": {
+"n": 27,
+"om": 0.2053,
+"roic": 0.3119,
+"eve": 16.5764
+},
+"Broadcasting": {
+"n": 24,
+"om": 0.1233,
+"roic": 0.1579,
+"eve": 7.8438
+},
+"Brokerage & Investment Banking": {
+"n": 32,
+"om": -0.0,
+"roic": null,
+"eve": null
+},
+"Building Materials": {
+"n": 41,
+"om": 0.1264,
+"roic": 0.23,
+"eve": 10.8299
+},
+"Business & Consumer Services": {
+"n": 155,
+"om": 0.1227,
+"roic": 0.3565,
+"eve": 13.3501
+},
+"Cable TV": {
+"n": 9,
+"om": 0.1849,
+"roic": 0.1285,
+"eve": 6.1833
+},
+"Chemical (Basic)": {
+"n": 29,
+"om": 0.0267,
+"roic": 0.0393,
+"eve": 7.766
+},
+"Chemical (Diversified)": {
+"n": 4,
+"om": 0.0329,
+"roic": 0.0446,
+"eve": 7.0474
+},
+"Chemical (Specialty)": {
+"n": 59,
+"om": 0.1217,
+"roic": 0.1215,
+"eve": 11.8008
+},
+"Coal & Related Energy": {
+"n": 16,
+"om": -0.0402,
+"roic": -0.0514,
+"eve": 10.1557
+},
+"Computer Services": {
+"n": 64,
+"om": 0.0741,
+"roic": 0.3928,
+"eve": 11.3453
+},
+"Computers/Peripherals": {
+"n": 36,
+"om": 0.2248,
+"roic": 0.8432,
+"eve": 19.9766
+},
+"Construction Supplies": {
+"n": 40,
+"om": 0.1523,
+"roic": 0.1898,
+"eve": 14.9295
+},
+"Diversified": {
+"n": 20,
+"om": 0.2273,
+"roic": 0.1513,
+"eve": 11.1442
+},
+"Drugs (Biotechnology)": {
+"n": 496,
+"om": 0.0897,
+"roic": 0.0767,
+"eve": 7.443
+},
+"Drugs (Pharmaceutical)": {
+"n": 228,
+"om": 0.2954,
+"roic": 0.3273,
+"eve": 9.9551
+},
+"Education": {
+"n": 32,
+"om": 0.1401,
+"roic": 0.2659,
+"eve": 7.7979
+},
+"Electrical Equipment": {
+"n": 112,
+"om": 0.0953,
+"roic": 0.197,
+"eve": 19.9807
+},
+"Electronics (Consumer & Office)": {
+"n": 8,
+"om": -0.0449,
+"roic": -0.3235,
+"eve": 3.8993
+},
+"Electronics (General)": {
+"n": 114,
+"om": 0.1042,
+"roic": 0.2448,
+"eve": 15.7426
+},
+"Engineering/Construction": {
+"n": 48,
+"om": 0.0649,
+"roic": 0.2766,
+"eve": 17.1067
+},
+"Entertainment": {
+"n": 92,
+"om": 0.106,
+"roic": 0.1615,
+"eve": 16.496
+},
+"Environmental & Waste Services": {
+"n": 53,
+"om": 0.1461,
+"roic": 0.3502,
+"eve": 15.3356
+},
+"Farming/Agriculture": {
+"n": 35,
+"om": 0.0545,
+"roic": 0.0773,
+"eve": 13.5528
+},
+"Financial Svcs. (Non-bank & Insurance)": {
+"n": 176,
+"om": 0.1848,
+"roic": null,
+"eve": 52.2376
+},
+"Food Processing": {
+"n": 78,
+"om": 0.1063,
+"roic": 0.17,
+"eve": 9.6157
+},
+"Food Wholesalers": {
+"n": 13,
+"om": 0.0261,
+"roic": 0.2173,
+"eve": 11.0753
+},
+"Furn/Home Furnishings": {
+"n": 27,
+"om": 0.0659,
+"roic": 0.1313,
+"eve": 9.6968
+},
+"Green & Renewable Energy": {
+"n": 15,
+"om": 0.1987,
+"roic": 0.0402,
+"eve": 13.4199
+},
+"Healthcare Products": {
+"n": 204,
+"om": 0.1534,
+"roic": 0.2255,
+"eve": 15.1343
+},
+"Healthcare Support Services": {
+"n": 104,
+"om": 0.03,
+"roic": 0.3756,
+"eve": 10.9849
+},
+"Heathcare Information and Technology": {
+"n": 115,
+"om": 0.1471,
+"roic": 0.1826,
+"eve": 16.5414
+},
+"Homebuilding": {
+"n": 30,
+"om": 0.1257,
+"roic": 0.1499,
+"eve": 8.9181
+},
+"Hospitals/Healthcare Facilities": {
+"n": 31,
+"om": 0.1336,
+"roic": 0.2865,
+"eve": 8.8414
+},
+"Hotel/Gaming": {
+"n": 63,
+"om": 0.1939,
+"roic": 0.2495,
+"eve": 13.5717
+},
+"Household Products": {
+"n": 110,
+"om": 0.1862,
+"roic": 0.4154,
+"eve": 12.1319
+},
+"Information Services": {
+"n": 15,
+"om": 0.1189,
+"roic": 0.2782,
+"eve": 10.3774
+},
+"Insurance (General)": {
+"n": 21,
+"om": 0.2131,
+"roic": 0.5129,
+"eve": 15.6518
+},
+"Insurance (Life)": {
+"n": 20,
+"om": 0.1061,
+"roic": 0.1085,
+"eve": 12.5225
+},
+"Insurance (Prop/Cas.)": {
+"n": 57,
+"om": 0.1525,
+"roic": 0.1874,
+"eve": 8.4354
+},
+"Investments & Asset Management": {
+"n": 283,
+"om": 0.255,
+"roic": 0.15,
+"eve": 36.7618
+},
+"Machinery": {
+"n": 105,
+"om": 0.1586,
+"roic": 0.2824,
+"eve": 14.7755
+},
+"Metals & Mining": {
+"n": 73,
+"om": 0.2385,
+"roic": 0.2846,
+"eve": 11.3287
+},
+"Office Equipment & Services": {
+"n": 14,
+"om": 0.1073,
+"roic": 0.2483,
+"eve": 7.6175
+},
+"Oil/Gas (Integrated)": {
+"n": 4,
+"om": 0.1125,
+"roic": 0.0847,
+"eve": 8.0701
+},
+"Oil/Gas (Production and Exploration)": {
+"n": 142,
+"om": 0.2542,
+"roic": 0.1392,
+"eve": 5.1241
+},
+"Oil/Gas Distribution": {
+"n": 23,
+"om": 0.2578,
+"roic": 0.125,
+"eve": 11.5606
+},
+"Oilfield Svcs/Equip.": {
+"n": 97,
+"om": 0.0465,
+"roic": 0.1252,
+"eve": 8.3143
+},
+"Packaging & Container": {
+"n": 19,
+"om": 0.0958,
+"roic": 0.1564,
+"eve": 9.4609
+},
+"Paper/Forest Products": {
+"n": 6,
+"om": 0.0634,
+"roic": 0.1036,
+"eve": 8.0485
+},
+"Power": {
+"n": 46,
+"om": 0.2147,
+"roic": 0.0705,
+"eve": 12.3432
+},
+"Precious Metals": {
+"n": 56,
+"om": 0.4039,
+"roic": 0.2582,
+"eve": 10.5842
+},
+"Publishing & Newspapers": {
+"n": 19,
+"om": 0.0998,
+"roic": 0.232,
+"eve": 10.2122
+},
+"R.E.I.T.": {
+"n": 190,
+"om": 0.2464,
+"roic": 0.0368,
+"eve": 19.8668
+},
+"Real Estate (Development)": {
+"n": 14,
+"om": 0.2153,
+"roic": 0.0722,
+"eve": 10.2305
+},
+"Real Estate (General/Diversified)": {
+"n": 12,
+"om": 0.2145,
+"roic": 0.0527,
+"eve": 17.2869
+},
+"Real Estate (Operations & Services)": {
+"n": 54,
+"om": 0.0285,
+"roic": 0.075,
+"eve": 17.857
+},
+"Recreation": {
+"n": 49,
+"om": 0.0969,
+"roic": 0.1426,
+"eve": 9.0087
+},
+"Reinsurance": {
+"n": 1,
+"om": 0.0721,
+"roic": 0.1019,
+"eve": 8.6709
+},
+"Restaurant/Dining": {
+"n": 64,
+"om": 0.1579,
+"roic": 0.3681,
+"eve": 16.9669
+},
+"Retail (Automotive)": {
+"n": 34,
+"om": 0.0624,
+"roic": 0.155,
+"eve": 14.7766
+},
+"Retail (Building Supply)": {
+"n": 14,
+"om": 0.1194,
+"roic": 0.4658,
+"eve": 14.2932
+},
+"Retail (Distributors)": {
+"n": 62,
+"om": 0.101,
+"roic": 0.1741,
+"eve": 13.6825
+},
+"Retail (General)": {
+"n": 23,
+"om": 0.068,
+"roic": 0.2506,
+"eve": 12.145
+},
+"Retail (Grocery and Food)": {
+"n": 15,
+"om": 0.0229,
+"roic": 0.1375,
+"eve": 8.5761
+},
+"Retail (REITs)": {
+"n": 26,
+"om": 0.4025,
+"roic": 0.0546,
+"eve": 16.7229
+},
+"Retail (Special Lines)": {
+"n": 94,
+"om": 0.0773,
+"roic": 0.4309,
+"eve": 11.3997
+},
+"Rubber& Tires": {
+"n": 3,
+"om": 0.0224,
+"roic": 0.0338,
+"eve": 5.3225
+},
+"Semiconductor": {
+"n": 66,
+"om": 0.3533,
+"roic": 0.413,
+"eve": 25.9106
+},
+"Semiconductor Equip": {
+"n": 31,
+"om": 0.2617,
+"roic": 0.4531,
+"eve": 18.3251
+},
+"Shipbuilding & Marine": {
+"n": 8,
+"om": 0.126,
+"roic": 0.1199,
+"eve": 7.953
+},
+"Shoe": {
+"n": 11,
+"om": 0.0903,
+"roic": 0.2488,
+"eve": 16.6781
+},
+"Software (Entertainment)": {
+"n": 77,
+"om": 0.3385,
+"roic": 0.4686,
+"eve": 15.1718
+},
+"Software (Internet)": {
+"n": 29,
+"om": 0.0369,
+"roic": 0.061,
+"eve": 15.7256
+},
+"Software (System & Application)": {
+"n": 309,
+"om": 0.3298,
+"roic": 0.5428,
+"eve": 17.9569
+},
+"Steel": {
+"n": 19,
+"om": 0.041,
+"roic": 0.0688,
+"eve": 11.5904
+},
+"Telecom (Wireless)": {
+"n": 12,
+"om": 0.2098,
+"roic": 0.1335,
+"eve": 8.9585
+},
+"Telecom. Equipment": {
+"n": 57,
+"om": 0.207,
+"roic": 0.5362,
+"eve": 15.6798
+},
+"Telecom. Services": {
+"n": 39,
+"om": 0.2047,
+"roic": 0.1322,
+"eve": 6.4594
+},
+"Tobacco": {
+"n": 10,
+"om": 0.4354,
+"roic": 0.6903,
+"eve": 13.0548
+},
+"Transportation": {
+"n": 19,
+"om": 0.0757,
+"roic": 0.1734,
+"eve": 11.4573
+},
+"Transportation (Railroads)": {
+"n": 4,
+"om": 0.3741,
+"roic": 0.1456,
+"eve": 13.4882
+},
+"Trucking": {
+"n": 26,
+"om": 0.0689,
+"roic": 0.0944,
+"eve": 10.3263
+},
+"Utility (General)": {
+"n": 14,
+"om": 0.2349,
+"roic": 0.0612,
+"eve": 13.727
+},
+"Utility (Water)": {
+"n": 14,
+"om": 0.3372,
+"roic": 0.073,
+"eve": 14.1324
+},
+"Total Market": {
+"n": 5994,
+"om": 0.1282,
+"roic": 0.1008,
+"eve": 16.4615
+},
+"Total Market (without financials)": {
+"n": 4822,
+"om": 0.1314,
+"roic": 0.1892,
+"eve": 14.0234
+}
+}
+}

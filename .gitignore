@@ -3,5 +3,4 @@ __pycache__/
 .playwright-mcp/
 *.log
 
-research/
 research/*.pkl

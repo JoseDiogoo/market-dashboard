@@ -19,6 +19,7 @@ header[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="stDecorat
 [data-testid="stMainBlockContainer"],.block-container{padding:0!important;max-width:100%!important}
 [data-testid="stVerticalBlock"]{gap:0!important}
 [data-testid="stAppViewContainer"],[data-testid="stMain"],section.main{overflow:hidden!important}
+[data-testid="stTextInput"]{position:fixed!important;left:-9999px!important;top:0!important;height:1px!important;overflow:hidden!important}
 iframe{display:block;width:100%!important;height:100vh!important;height:100dvh!important;border:0!important}
 </style>""", unsafe_allow_html=True)
 
@@ -48,7 +49,16 @@ def fresh(key):
         return d  # se o Yahoo falhar, mostra a base com a data real de atualização
 
 
-s = sig("data.js", "index.html", "fetch.py", "quality.py")
+@st.cache_data(ttl=600, show_spinner=False)
+def extra(qs):  # separador Posições: ações fora das 2658 (nome ou ticker) resolvidas no Yahoo; o index.html pede-as por um campo escondido
+    import lookup
+    return lookup.many(list(qs))
+
+
+st.text_input("lk", key="lk", label_visibility="collapsed")  # ponte iframe -> Python: o index.html escreve aqui os nomes/tickers a procurar
+s = sig("data.js", "index.html", "fetch.py", "quality.py", "benchmarks.py")
 html = (HERE / "index.html").read_text(encoding="utf-8")
 raw = "window.DATA=" + json.dumps(fresh(s), separators=(",", ":")).replace("</", "<\\/")
-components.html(html.replace('<script src="data.js"></script>', "<script>" + raw + "</script>"), height=900, scrolling=True)
+lk = tuple(x.strip() for x in st.session_state.get("lk", "").split(",") if x.strip())[:8]
+ex = "window.EXTRA=" + json.dumps(extra(lk) if lk else {}).replace("</", "<\\/") + ";"
+components.html(html.replace('<script src="data.js"></script>', "<script>" + ex + raw + "</script>"), height=900, scrolling=True)
