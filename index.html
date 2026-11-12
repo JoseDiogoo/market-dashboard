@@ -140,13 +140,13 @@ h3{letter-spacing:-.01em}
 <header class="top"><div class="brand"><span class="logo">◆</span>Radar<span>.</span>Invest</div><input id="q" placeholder="Procurar entre milhares de ações (ex.: Nestlé, SAP)" autocomplete="off"><span id="live" class="livepill" title="Estado das fontes de dados">a ligar…</span><button class="ibtn" id="theme" aria-label="Alternar tema claro/escuro">◐</button></header>
 <section class="hero2" id="hero2"><div class="hcopy"><h1>Onde investir <em>hoje</em>?</h1><p id="hsub"></p><div class="idxs" id="idxs"></div></div><div class="feat" id="feat"></div><div class="mini" id="mini"></div></section>
 <div class="ctl"><div class="regs" id="regs"><button data-r="all" class="on">🌍 Todas</button><button data-r="us">🇺🇸 EUA</button><button data-r="eu">🇪🇺 Europa</button></div>
-<nav class="views"><button data-v="6" class="hot">🎯 Plano de Ação</button><button data-v="1" class="on">Oportunidades</button><button data-v="4">Mercado</button><button data-v="5">💼 Carteira</button><button data-v="2">Explorar <span id="nuni"></span></button><button data-v="3">Metodologia</button></nav></div>
+<nav class="views"><button data-v="6" class="hot">🎯 Plano de Ação</button><button data-v="1" class="on">Oportunidades</button><button data-v="4">Mercado</button><button data-v="5">💼 Carteira</button><button data-v="7">🥧 Posições</button><button data-v="2">Explorar <span id="nuni"></span></button><button data-v="3">Metodologia</button></nav></div>
 <div id="v1"><div class="bar"><div class="pills" id="pills"></div><select id="sort" aria-label="Ordenar"><option value="rank">Ordenar: Melhor oportunidade</option><option value="upside">Ordenar: Potencial de subida</option><option value="score">Ordenar: Qualidade</option><option value="dy">Ordenar: Dividendo</option></select></div>
 <div class="sub" id="ord" style="margin:0 2px 12px"></div><div class="grid" id="grid"></div></div>
 <div id="v2" hidden><div class="xf" id="xf"></div><div class="sub" id="xc" style="margin:8px 2px"></div><div class="xt"><table id="xt"></table></div><button class="pill" id="xm" style="margin:14px auto;display:block">Mostrar mais</button></div>
 <div id="v3" hidden><div class="sec" id="meth" style="margin:0"></div></div>
 <div id="v6" hidden></div>
-<div id="v5" hidden></div>
+<div id="v5" hidden></div><div id="v7" hidden></div>
 <div id="v4" hidden><div class="mk" id="mkt"></div></div>
 <div class="note">Ferramenta informativa, não é aconselhamento financeiro. Metas e zonas de compra são estimativas calculadas a partir de dados públicos e podem falhar. Confirma sempre antes de investir.</div>
 </div>
@@ -365,7 +365,7 @@ $("#xt").innerHTML=`<thead><tr>${XC.map(([k,l,h])=>`<th class="${h?"hm":""}" dat
 $("#xm").style.display=a.length>X.n?"block":"none"}
 $("#xt").onclick=e=>{const th=e.target.closest("th[data-s]"),tr=e.target.closest("tbody tr");if(th){const k=th.dataset.s;X.dir=X.sort==k?-X.dir:(k=="s"||k=="pais"||k=="sec"?1:-1);X.sort=k;X.n=100;xrender()}else if(tr)location.hash=tr.dataset.k};
 $("#xm").onclick=()=>{X.n+=200;xrender()};
-function setView(v){document.querySelectorAll(".views button").forEach(b=>b.classList.toggle("on",b.dataset.v==v));[1,2,3,4,5,6].forEach(i=>$("#v"+i).hidden=i!=v);if(v==5)pfRender();if(v==6)planRender();$("#hero2").hidden=v!=1;if(v==4)market();if(v==2&&!$("#xq")){xfilters();xrender()}}
+function setView(v){document.querySelectorAll(".views button").forEach(b=>b.classList.toggle("on",b.dataset.v==v));[1,2,3,4,5,6,7].forEach(i=>$("#v"+i).hidden=i!=v);if(v==5)pfRender();if(v==7)posRender();if(v==6)planRender();$("#hero2").hidden=v!=1;if(v==4)market();if(v==2&&!$("#xq")){xfilters();xrender()}}
 $("#regs").onclick=e=>{const b=e.target.closest("[data-r]");if(!b)return;REG=b.dataset.r;document.querySelectorAll("#regs button").forEach(x=>x.classList.toggle("on",x==b));hero();grid();if($("#xq")){X.n=100;xrender()}if(!$("#v4").hidden)market()};
 $(".views").onclick=e=>{const b=e.target.closest("[data-v]");if(b)setView(b.dataset.v)};
 $("#nuni").textContent="("+R.length.toLocaleString("pt-PT")+")";
@@ -693,4 +693,12 @@ if(r)r.oninput=()=>{const v=document.querySelector(".plv");if(v)v.textContent=E0
 document.querySelectorAll(".orow").forEach(o=>o.onclick=e=>{if(!e.target.closest("a,button"))location.hash=o.dataset.k})}
 
 hero();grid();route();connect();
+
+// <posicoes> "5 PLTR, 3 AAPL" -> pizza por setor, valor = qtd × preço atual (USD). ponytail: conic-gradient, sem libs; só tickers do universo.
+const SEC_C=["#7c8cff","#22d3ee","#34d399","#fbbf24","#fb7185","#a78bfa","#f472b6","#60a5fa","#fb923c","#2dd4bf","#c084fc"];
+function posRender(){const v=$("#v7");if(!v.dataset.i){v.dataset.i=1;v.innerHTML='<div class="sec"><h3>As minhas posições</h3><p class="cap">Escreve quantas ações tens de cada, ex.: <b>5 NVDA, 3 AAPL</b></p><textarea id="pin" rows="2" style="width:100%;box-sizing:border-box;background:var(--bg2);color:var(--t1);border:1px solid var(--line);border-radius:12px;padding:10px;font:16px system-ui"></textarea></div><div id="pout"></div>';$("#pin").value=localStorage.posTxt||"5 NVDA, 3 AAPL";$("#pin").oninput=()=>{localStorage.posTxt=$("#pin").value;posRender()}}
+const bad=[],by={},rows=[];for(const m of $("#pin").value.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:x|ações|acoes)?\s*([A-Za-z][A-Za-z0-9.\-]*)/g)){const q=+m[1].replace(",","."),k=m[2].toUpperCase(),t=T[k];if(!t||!fin(t.price)){bad.push(k);continue}const val=q*t.price;rows.push([k,q,val,t.sector||"Outro"]);by[t.sector||"Outro"]=(by[t.sector||"Outro"]||0)+val}
+const tot=rows.reduce((a,r)=>a+r[2],0),sec=Object.entries(by).sort((a,b)=>b[1]-a[1]);let acc=0;
+const grad=sec.map(([,x],i)=>{const a=acc/tot*100;acc+=x;return`${SEC_C[i%11]} ${a}% ${acc/tot*100}%`}).join(",");
+$("#pout").innerHTML=(bad.length?`<p class="cap" style="margin:8px 18px">Fora da base (ignorado): ${bad.map(esc).join(", ")}</p>`:"")+(tot?`<div class="sec"><div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center"><div style="width:200px;height:200px;border-radius:50%;background:conic-gradient(${grad});flex:none"></div><div style="flex:1;min-width:200px">${sec.map(([n,x],i)=>`<div class="row" style="margin:6px 0"><span><i style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${SEC_C[i%11]};margin-right:8px"></i>${esc(n)}</span><b>${(x/tot*100).toFixed(1)}% <span class="cap">${usd(x)}</span></b></div>`).join("")}<div class="row cap" style="margin-top:10px"><span>Total</span><b>${usd(tot)}</b></div></div></div></div><div class="sec">${rows.map(r=>`<div class="row" style="margin:6px 0"><span>${esc(r[1])} × ${esc(r[0])} <span class="cap">${esc(r[3])}</span></span><b>${(r[2]/tot*100).toFixed(1)}% · ${usd(r[2])}</b></div>`).join("")}</div>`:'<p class="cap" style="margin:8px 18px">Sem posições válidas.</p>')}
 </script></body></html>
