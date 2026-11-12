@@ -673,7 +673,7 @@ const t1=X.m1.v,t2=X.m2.v,stop=clamp(entry-6*atr,entry*.7,entry*.9); // stop lar
 return{p,atr,E,inZone:E.inZone,entry,entry1:E.inZone?p:null,entry2:E.inZone?null:entry,t1,t2,X,stop,ref:entry,loss:(entry-stop)/entry,gain1:t1/entry-1,gain2:t2/entry-1,rr:(t1-entry)/Math.max(entry-stop,1e-9)}}
 const WHT=k=>k.endsWith(".L")?0:k.includes(".")?.25:.15; // retenção na fonte típica (aprox.): EUA 15% com W-8BEN, Reino Unido 0%, resto da Europa ~25%
 const PROF={bal:["⚖️ Equilibrado","Até 5 empresas de elite: valorização, qualidade e dividendos",5],div:["🛡️ Dividendos & Renda","Até 5 gigantes defensivas focadas no dividendo",5],gro:["🚀 Alto Crescimento & IA","Até 5 líderes com maior potencial de subida",5]};
-function planPool(prof){const base=Object.keys(T).filter(k=>{const t=T[k];return t.price>0&&D.eurusd&&fxOf(k)&&t.cons.total>=5&&!(t.q&&t.q.trap)&&planLevels(t)&&(t.q&&t.q.qscore!=null)});
+function planPool(prof){const base=Object.keys(T).filter(k=>{const t=T[k];return t.price>0&&D.eurusd&&fxOf(k)&&t.cons.total>=5&&!(t.q&&t.q.trap)&&(pl=>pl&&(PL.mode=="wait"||pl.inZone))(planLevels(t))&&(t.q&&t.q.qscore!=null)});
 const sc=k=>{const t=T[k],q=t.q.qscore,pl=planLevels(t),up=clamp(pl.gain2*100,0,60),bp=t.cons.buy_pct||0,cy=(t.q.norm&&(t.q.norm.peak?25:t.q.norm.cyc?12:0))||0,rrb=clamp(pl.rr,0,2)*4;
 if(prof=="bal")return t.elite?100+t.rank:null;
 if(prof=="div")return(t.dy||0)>=1.8&&t.risk!="Alto"&&t.payout!=null&&t.payout<90&&(t.fcfy||0)>0&&q>=55&&(t.cons.buy_pct||0)>=50?clamp(t.dy,0,7)/7*50+q*.35+(bp/100)*15+rrb-cy:null;
@@ -686,7 +686,7 @@ let s=w.reduce((a,b)=>a+b,0);w=w.map(x=>x/s);
 for(let it=0;it<100;it++){const hi=w.map(x=>Math.min(x,Math.max(.35,1/ks.length))),lo=hi.map(x=>Math.max(x,ks.length>3?.08:0));const t=lo.reduce((a,b)=>a+b,0);w=lo.map(x=>x/t)}return w}
 function volOfW(ks,w){const ser=ks.map(retSeries);const days=[...ser[0].keys()].filter(d=>ser.every(m=>m.has(d)));if(days.length<60)return null;
 const pr=days.map(d=>ser.reduce((a,m,i)=>a+w[i]*m.get(d),0)),mn=pr.reduce((a,b)=>a+b,0)/pr.length;return Math.sqrt(pr.reduce((a,b)=>a+(b-mn)**2,0)/(pr.length-1))*Math.sqrt(252)}
-const PL={cap:clamp(+(localStorage.plCap||2000),200,1e6),prof:localStorage.plProf||"bal"};
+const PL={cap:clamp(+(localStorage.plCap||2000),200,1e6),prof:localStorage.plProf||"bal",mode:localStorage.plMode=="wait"?"wait":"now"}; // mode "now" = só entradas boas hoje; "wait" = inclui ordens limite à espera de recuo
 const E0=v=>"€"+v.toLocaleString("pt-PT",{maximumFractionDigits:0}),E2=v=>"€"+v.toLocaleString("pt-PT",{minimumFractionDigits:2,maximumFractionDigits:2}),EP=(v,k)=>{const e=eur(v,k);return e||usd(v,T[k].cur)};
 function planCalc(){const ks=planPool(PL.prof);if(!ks.length)return{ks:[]};const w=planWeights(ks);const rows=ks.map((k,i)=>{const t=T[k],pl=planLevels(t),amt=Math.round(PL.cap*w[i]),ep=eurPx(k)*pl.ref/t.price,sh=amt/ep;return{k,t,pl,w:w[i],amt,sh,whole:Math.floor(sh),div:amt*(t.dy||0)/100*(1-WHT(k)),divg:amt*(t.dy||0)/100}});
 const diff=PL.cap-rows.reduce((a,r)=>a+r.amt,0);rows[0].amt+=diff;rows[0].sh=rows[0].amt/(eurPx(rows[0].k)*rows[0].pl.ref/rows[0].t.price);rows[0].whole=Math.floor(rows[0].sh);
@@ -697,16 +697,17 @@ const pending=rows.reduce((a,r)=>a+(r.pl.inZone?0:r.amt),0);
 return{ks,rows,tot,g1,g2,dv,dvg,ml,vol,wv,effN,secs,pending}}
 function planRender(){const el=$("#v6"),pc=planCalc();
 const chips=[1000,2000,3000,5000,10000].map(v=>`<button class="pill ${PL.cap==v?"on":""}" data-cap="${v}">${E0(v)}</button>`).join("");
-let h=`<div class="box plhd"><h3>🎯 Plano de Ação</h3><p class="cap" style="margin:0 0 10px">Tens <b>${E0(PL.cap)}</b> para investir hoje? Aqui está onde colocar o dinheiro, quanto, a que preço entrar e onde sair. Análise completa de ${esc(D.analysis_updated||D.updated||"")}. As ações sem entrada boa hoje ficam como ordem limite à espera de recuo; os resultados pressupõem que executam.</p>
+let h=`<div class="box plhd"><h3>🎯 Plano de Ação</h3><p class="cap" style="margin:0 0 10px">Tens <b>${E0(PL.cap)}</b> para investir hoje? Aqui está onde colocar o dinheiro, quanto, a que preço entrar e onde sair. Análise completa de ${esc(D.analysis_updated||D.updated||"")}. ${PL.mode=="now"?"Só ações com entrada boa hoje: o capital fica todo alocado de imediato.":"Modo paciente: as ações sem entrada boa hoje ficam como ordem limite à espera de recuo e podem demorar a executar."}</p>
 <div class="plcap"><label>Capital a investir<span class="plv">${E0(PL.cap)}</span></label><input type="range" id="plr" min="500" max="20000" step="100" value="${clamp(PL.cap,500,20000)}"><div class="row" style="justify-content:flex-start;gap:8px;flex-wrap:wrap">${chips}<input type="number" id="pln" min="200" step="100" value="${PL.cap}" aria-label="Capital em euros"></div></div>
 <div class="hzs"><span>Prazo da Meta 1</span>${[3,6,12].map(m=>`<button class="${m==HZ?"on":""}" data-hz="${m}">${m} meses</button>`).join("")}</div><div class="plprof">${Object.entries(PROF).map(([k,[l,d]])=>`<button class="pp ${PL.prof==k?"on":""}" data-pf="${k}"><b>${l}</b><span>${d}</span></button>`).join("")}</div></div>`;
-if(!pc.ks.length){$("#v6").innerHTML=h+`<div class="box"><p class="sub">Nenhuma ação passa hoje os critérios deste perfil. Experimenta outro perfil.</p></div>`;planBind();return}
+const tg=`<div class="hzs" style="margin:0 0 10px"><span>Ordens</span><button class="${PL.mode=="now"?"on":""}" data-pm="now">🟢 Prontas a comprar hoje</button><button class="${PL.mode=="wait"?"on":""}" data-pm="wait">⏳ Incluir ordens de recuo</button></div>`;
+if(!pc.ks.length){$("#v6").innerHTML=h+`<div class="box">${tg}<p class="sub">${PL.mode=="now"?"Nenhuma ação com entrada boa hoje passa os critérios deste perfil. Experimenta outro perfil ou «Incluir ordens de recuo».":"Nenhuma ação passa hoje os critérios deste perfil. Experimenta outro perfil."}</p></div>`;planBind();return}
 const rk=(pc.vol??pc.wv)*100,lv=rk<18?["Baixo","g"]:rk<28?["Médio","a"]:["Alto","r"];
 h+=`<div class="box"><p class="cap">A comprar já: <b>${E0(pc.tot-pc.pending)}</b>. Em ordens limite à espera de recuo: <b>${E0(pc.pending)}</b>. Os resultados abaixo pressupõem todas as ordens executadas aos limites indicados.</p></div>`;
 h+=`<div class="plimp"><div class="imp g"><span>🎯 Lucro potencial</span><b>+${E0(pc.g1)}</b><em>até à Meta 1 (+${(pc.g1/pc.tot*100).toFixed(1)}%)<br>até à Meta 2: +${E0(pc.g2)} (+${(pc.g2/pc.tot*100).toFixed(1)}%)</em></div>
 <div class="imp b"><span>💰 Dividendos anuais líquidos</span><b>~${E0(pc.dv)}/ano</b><em>yield líquido ${(pc.dv/pc.tot*100).toFixed(1)}% (bruto ${(pc.dvg/pc.tot*100).toFixed(1)}%) · ≈ ${E0(pc.dv/12)}/mês</em></div>
 <div class="imp ${lv[1]}"><span>🛡️ Nível de risco</span><b>${lv[0]}</b><em>volatilidade ${rk.toFixed(0)}% ao ano · ${pc.secs} setores · ${pc.effN.toFixed(1)} posições efetivas<br>perda estimada nas cautelas (sem gaps): −${E0(pc.ml)} (−${(pc.ml/pc.tot*100).toFixed(1)}%)</em></div></div>`;
-h+=`<div class="box"><h3>Ordens para lançar na corretora</h3><div class="otbl"><div class="oh"><span>Empresa</span><span>% → €</span><span>Quantidade</span><span>🟢 Entrada</span><span>🎯 Saída (lucro)</span><span>⚠️ Cautela</span><span>💵 Dividendos</span></div>`;
+h+=`<div class="box"><h3>Ordens para lançar na corretora</h3>${tg}<div class="otbl"><div class="oh"><span>Empresa</span><span>% → €</span><span>Quantidade</span><span>🟢 Entrada</span><span>🎯 Saída (lucro)</span><span>⚠️ Cautela</span><span>💵 Dividendos</span></div>`;
 h+=pc.rows.map(r=>{const{k,t,pl}=r,pe=v=>EP(v,k),loc=v=>t.cur&&t.cur!="EUR"?`<small>${usd(v,t.cur)}</small>`:"";
 const entry=pl.inZone?`<b>🟢 Comprar já</b><br>ordem limite até ${pe(pl.entry)} ${loc(pl.entry)}`:`<b>🟡 À espera de recuo</b><br>limite ${pe(pl.entry)} ${loc(pl.entry)}<br><small>${esc(pl.E.why.join(" e "))}</small>`;
 const nd=pl.rr;return`<div class="orow" data-k="${esc(k)}"><div data-l="Empresa" class="oc"><div class="row" style="justify-content:flex-start;gap:10px;flex-wrap:nowrap">${av(k)}<div><b>${esc(t.name.slice(0,24))}</b><br><span class="sub">${esc(k)} · ${exName(k)} · ${t.risk.toLowerCase()}</span></div></div></div>
@@ -726,6 +727,7 @@ el.innerHTML=h;planBind()}
 function planBind(){const set=c=>{PL.cap=clamp(Math.round(+c||2000),200,1e6);localStorage.plCap=PL.cap;planRender()};
 const r=$("#plr");if(r)r.onchange=()=>set(r.value);const nn=$("#pln");if(nn)nn.onchange=()=>set(nn.value);
 document.querySelectorAll("[data-cap]").forEach(b=>b.onclick=()=>set(b.dataset.cap));
+document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{PL.mode=b.dataset.pm;localStorage.plMode=PL.mode;planRender()});
 document.querySelectorAll("[data-pf]").forEach(b=>b.onclick=()=>{PL.prof=b.dataset.pf;localStorage.plProf=PL.prof;planRender()});
 document.querySelectorAll("#v6 [data-hz]").forEach(b=>b.onclick=()=>{setHZ(b.dataset.hz);planRender()});
 if(r)r.oninput=()=>{const v=document.querySelector(".plv");if(v)v.textContent=E0(+r.value)};

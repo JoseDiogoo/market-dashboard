@@ -7,7 +7,7 @@ o index.html trata do resto com as suas media queries. Sem recarga automática (
 durante a renovação); os preços ao vivo vêm por WebSocket e uma sessão nova já apanha a cache de 10 min."""
 import copy, json, pathlib
 import streamlit as st
-import streamlit.components.v1 as components
+import streamlit.components.v1 as components  # só para versões antigas do Streamlit (sem st.iframe)
 
 st.set_page_config(page_title="Radar de Investimento", layout="wide", initial_sidebar_state="collapsed")
 HERE = pathlib.Path(__file__).parent
@@ -61,4 +61,9 @@ html = (HERE / "index.html").read_text(encoding="utf-8")
 raw = "window.DATA=" + json.dumps(fresh(s), separators=(",", ":")).replace("</", "<\\/")
 lk = tuple(x.strip() for x in st.session_state.get("lk", "").split(",") if x.strip())[:8]
 ex = "window.EXTRA=" + json.dumps(extra(lk) if lk else {}).replace("</", "<\\/") + ";"
-components.html(html.replace('<script src="data.js"></script>', "<script>" + ex + raw + "</script>"), height=900, scrolling=True)
+page = html.replace('<script src="data.js"></script>', "<script>" + ex + raw + "</script>")
+# st.components.v1.html foi dado como descontinuado (aviso do Streamlit): usa st.iframe (mesmo iframe de mesma origem, que a ponte do campo «lk» exige) e só recai no antigo em versões sem st.iframe.
+if hasattr(st, "iframe"):
+    st.iframe(page, width="stretch", height=900)  # o CSS acima fixa a altura em 100dvh
+else:
+    components.html(page, height=900, scrolling=True)

@@ -8,7 +8,7 @@ const section = (start, end) => script.slice(script.indexOf(start), script.index
 const ctx = vm.createContext({console});
 vm.runInContext(`
 const fin=Number.isFinite,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-let T={},D={eurusd:1},PL={cap:2000,prof:'bal'};
+let T={},D={eurusd:1},PL={cap:2000,prof:'bal',mode:'now'};
 const fxOf=k=>D.rows?D.rows.find(r=>r[0]===k)?.[D.cols.indexOf('fx')]:1;
 const usd=v=>String(v),n=(v,d=0)=>Number(v).toFixed(d);
 const eurPx=k=>T[k].price*fxOf(k)/D.eurusd,volOfW=()=>null,WHT=()=>.15;
@@ -56,7 +56,10 @@ levels = run('planLevels(T.A)');
 assert.equal(levels.inZone, false); assert.equal(levels.entry, 92); assert.equal(levels.entry1, null); assert.equal(levels.entry2, 92);
 assert.ok(levels.E.stretched && !levels.E.rich && /esticada/.test(levels.E.why[0]));
 assert.equal(run('call(T.A)[0]'), 'a');
+assert.equal(run('planPool("bal").length'), 0); // modo padrão: esticada não entra na carteira
+run("PL.mode='wait'"); assert.equal(run('planPool("bal").length'), 1);
 assert.equal(run('planCalc().pending'), 2000);
+run("PL.mode='now'");
 // --- acima do valor justo: espera pelo valor justo; muito acima (> 25% de recuo) => sem plano realista ---
 run('T.A.ext={pct:50,x75:97}; T.A.buy_below=90');
 levels = run('planLevels(T.A)'); assert.equal(levels.entry, 90); assert.ok(levels.E.rich);
@@ -84,6 +87,9 @@ for (let count = 1; count <= 5; count++) {
 ctx.snapshot = JSON.parse(fs.readFileSync('data.js','utf8').slice('window.DATA='.length));
 run('T=snapshot.tickers;D=snapshot');
 for (const profile of ['bal','div','gro']) {
+  run(`PL.prof='${profile}'; PL.mode='now'`);
+  assert.ok(run('planCalc().rows||[]').every(r=>r.pl.inZone) && run('planCalc().pending') === 0);
+  run("PL.mode='wait'");
   run(`PL.prof='${profile}'`);
   const plan = run('planCalc()');
   assert.ok(plan.ks.length <= 5);
