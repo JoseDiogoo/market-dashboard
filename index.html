@@ -137,7 +137,7 @@ h3{letter-spacing:-.01em}
 /* ---- layout v2: barra lateral + área de trabalho densa ---- */
 :root{--topH:58px}
 body{font-size:14px;background:var(--bg)}
-.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh;max-width:1720px;margin:0 auto}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
 .side{position:sticky;top:0;height:100vh;align-self:start;display:flex;flex-direction:column;gap:16px;padding:18px 12px;border-right:1px solid var(--line);background:var(--bg2);overflow-y:auto}
 .side .brand{padding:0 8px 4px;font-size:18px}
 .views{flex-direction:column;overflow:visible;gap:2px}
@@ -151,7 +151,7 @@ body{font-size:14px;background:var(--bg)}
 .sfoot .livepill{white-space:normal;border-radius:8px;line-height:1.35}
 .sfoot .ibtn{width:100%;height:34px;border-radius:8px;font-size:15px}
 #upd{font-size:11px;color:var(--mut);line-height:1.4;padding:0 2px}
-.main{min-width:0;padding:0 24px 60px}
+.main{min-width:0;width:100%;max-width:1560px;margin:0 auto;padding:0 24px 60px}
 .top{position:sticky;top:0;z-index:25;height:var(--topH);padding:0;background:var(--bg);display:flex;align-items:center;gap:12px}
 #q{max-width:none;margin:0;border-radius:8px;padding:9px 14px}
 .vbar{background:none;padding:6px 0 0;justify-content:flex-start}
