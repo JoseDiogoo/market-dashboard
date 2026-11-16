@@ -467,7 +467,7 @@ $(".views").onclick=e=>{const b=e.target.closest("[data-v]");if(b)setView(b.data
 $("#upd").innerHTML=`Atualizado ${esc(D.updated||"–")}<br>${((D.audit||{}).deep_ok??"–")} análises completas · ${R.length.toLocaleString("pt-PT")} ações`;
 // aviso de frescura: a análise é gerada 1x por dia útil; só as cotações das análises completas se atualizam ao vivo
 {const t=Date.parse(String(D.updated||"").replace(" ","T")+"Z"),h=isFinite(t)?(Date.now()-t)/36e5:null,age=h==null?"":h<1?"há menos de 1 h":h<48?"há "+Math.round(h)+" h":"há "+Math.round(h/24)+" dias";
-$("#fresh").innerHTML=`<i style="background:${h!=null&&h>72?"var(--dn)":h!=null&&h>30?"var(--am)":"var(--up)"}"></i>Análise de ${esc(D.updated||"?")} UTC (${age}). Fundamentais, metas e planos são do fecho anterior: confirma o preço em tempo real na corretora antes de qualquer ordem.`}
+$("#fresh").innerHTML=`<i style="background:${h!=null&&h>96?"var(--dn)":h!=null&&h>30?"var(--am)":"var(--up)"}"></i>Análise de ${esc(D.updated||"?")} UTC (${age}). Fundamentais, metas e planos são do fecho anterior: confirma o preço em tempo real na corretora antes de qualquer ordem.`}
 $("#nuni").textContent="("+R.length.toLocaleString("pt-PT")+")";
 
 // ---------- estatística: fatores e comparação com o setor

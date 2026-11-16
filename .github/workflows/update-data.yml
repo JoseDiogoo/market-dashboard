@@ -2,6 +2,7 @@ name: Atualizar dados de mercado
 on:
   schedule:
     - cron: "30 6 * * 1-5"   # dias úteis, 06:30 UTC
+    - cron: "45 21 * * 1-5"  # dias úteis, 21:45 UTC (depois do fecho dos EUA)
   workflow_dispatch: {}
 permissions:
   contents: write
