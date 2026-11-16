@@ -6,6 +6,10 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: write
+  issues: write
+concurrency:
+  group: update-data   # nunca duas atualizações em simultâneo
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -18,7 +22,9 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python -m unittest discover -s tests
+        continue-on-error: true   # um teste de código partido não pode parar a atualização dos dados; o audit.py protege os dados
       - run: node tests/plan.cjs
+        continue-on-error: true
       - run: python fetch.py
       - run: python audit.py
       - name: Commit data.js
@@ -26,4 +32,9 @@ jobs:
           git config user.name "market-bot"
           git config user.email "market-bot@users.noreply.github.com"
           git add data.js
-          git diff --cached --quiet || (git commit -m "Atualiza dados de mercado" && git push)
+          git diff --cached --quiet || (git commit -m "Atualiza dados de mercado" && git pull --rebase -X theirs && git push)
+      - name: Abrir issue se a atualização falhar
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "Atualização de dados falhou ($(date -u +%F\ %H:%M) UTC)" --body "Ver $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
