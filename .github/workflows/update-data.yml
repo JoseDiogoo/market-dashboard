@@ -1,8 +1,10 @@
 name: Atualizar dados de mercado
 on:
   schedule:
-    - cron: "30 6 * * 1-5"   # dias úteis, 06:30 UTC
-    - cron: "45 21 * * 1-5"  # dias úteis, 21:45 UTC (depois do fecho dos EUA)
+    - cron: "30 6 * * 1-5"   # abertura da Europa
+    - cron: "0 12 * * 1-5"   # meio do dia
+    - cron: "30 16 * * 1-5"  # abertura dos EUA
+    - cron: "45 21 * * 1-5"  # depois do fecho dos EUA
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -24,6 +26,8 @@ jobs:
       - run: python -m unittest discover -s tests
         continue-on-error: true   # um teste de código partido não pode parar a atualização dos dados; o audit.py protege os dados
       - run: node tests/plan.cjs
+        continue-on-error: true
+      - run: node tests/simple.cjs
         continue-on-error: true
       - run: python fetch.py
       - run: python audit.py

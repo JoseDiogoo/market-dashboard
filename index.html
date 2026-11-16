@@ -380,11 +380,47 @@ ${R.map(r=>`<div style="padding:10px 0;border-top:1px solid var(--line)"><div cl
 <h3 style="margin-top:16px">✅ Porquê investir</h3><ul class="cap" style="padding-left:18px;line-height:1.5">${li(pro)}</ul>
 <h3 style="margin-top:12px">⚠️ Porquê não investir (ou ter cuidado)</h3><ul class="cap" style="padding-left:18px;line-height:1.5">${li(con.concat(mid.filter(r=>/valor justo/.test(r[0]))))}</ul>
 <p class="cap"><b>Evidência:</b> A = estudo académico citado · B = convenção de praticantes ou estatística sobre dados reais · C = heurística do projeto, sem validação. 🟢 favorável · 🟡 neutro · 🔴 desfavorável · ⚪ informativo. Não é aconselhamento financeiro.</p></div>`}
+// ---------- aba "Em linguagem simples": o que ter em conta, porquê comprar, cautelas, quando/quanto comprar e quando vender
+let DTAB="simple";try{DTAB=localStorage.dtab=="full"?"full":"simple"}catch(e){}
+function simpleHTML(t,k){const q=t.q||{},c=t.cons||{},rs=t.rs||{},[cc,lab,sub]=call(t),p=planLevels(t),E=entryCheck(t),pe=v=>eur(v,k)||usd(v,t.cur),caution=lab.includes("Cuidado"),li=a=>a.map(x=>`<li>${esc(x)}</li>`).join("");
+const head=caution?["r","⚠️","Cuidado: não parece boa altura","Há sinais de que a ação pode estar barata por más razões: "+sub+"."]:cc=="g"?["g","🟢","Parece uma boa altura para comprar","Hoje o preço não está esticado nem acima do valor justo estimado."]:cc=="a"?["a","🟡","Melhor esperar","O preço de hoje não é o ideal: "+sub+"."]:["a","⚪","Sem referência fiável","Há poucos dados para dar uma indicação segura."];
+const why=[];
+if(t.target&&fin(t.upside)&&t.upside>0)why.push(`Os analistas que acompanham a empresa apontam, em média, para ${pe(t.target)} nos próximos 12 meses (+${Math.round(t.upside)}% face ao preço de hoje).`);
+if(c.buy_pct!=null&&c.total>=5)why.push(`${c.buy_pct}% dos ${c.total} analistas recomendam comprar.`);
+if(q.qscore!=null&&q.qscore>=60)why.push(`É uma empresa de boa qualidade (nota ${q.qscore}/100): ${q.qlabel}.`);
+(q.why||[]).slice(0,2).forEach(x=>why.push(x));
+if(t.dy>=2)why.push(`Paga ${n(t.dy,1)}% ao ano em dividendos (dinheiro que recebes só por teres a ação).`);
+if(fin(t.drawdown)&&t.drawdown<=-15)why.push(`Está ${Math.abs(t.drawdown).toFixed(0)}% abaixo do máximo dos últimos 12 meses.`);
+if(!why.length)why.push("Neste momento não há razões fortes a favor. Não é obrigatório investir.");
+const warn=[];
+if(q.trap)warn.push("Pode ser uma «armadilha de valor»: parece barata, mas por bons motivos (lucros a piorar ou em pico).");
+if(t.risk=="Alto"||(fin(rs.maxdd)&&rs.maxdd<=-25))warn.push(`Oscila muito (cerca de ±${t.vol}% por ano) e já chegou a cair ${Math.abs(rs.maxdd??0)}% num ano. Só deves investir o que aguentas ver cair.`);
+if(E&&E.stretched)warn.push("O preço subiu depressa face ao que é normal nesta ação: historicamente o mês seguinte foi ligeiramente pior.");
+if(E&&E.rich)warn.push("Está acima do valor justo estimado: estarias a pagar um prémio.");
+if((c.total||0)<8)warn.push(`Poucos analistas a acompanhar (${c.total||0}): a opinião média é menos fiável.`);
+(q.warn||[]).slice(0,2).forEach(x=>warn.push(x));
+((t.tese||{}).riscos||[]).slice(0,2).forEach(x=>warn.push(x));
+warn.push("Alvos, valores justos e probabilidades são estimativas, não garantias. Lê sempre a notícia e confirma o preço na tua corretora antes de comprar.");
+let when;
+if(caution)when="Evita comprar por agora. Se já tens a ação, reavalia se a razão pela qual a compraste continua válida.";
+else if(p&&p.inZone)when=`Podes comprar já. Usa uma ordem limite até ${pe(p.entry)} para não pagares mais do que o previsto.`;
+else if(p)when=`Espera por um recuo até ${pe(p.entry)} (${n((p.entry/t.price-1)*100)}% face ao preço de hoje) e deixa lá uma ordem limite. Se o preço nunca chegar, não persigas: ficas de fora.`;
+else if(E&&!E.inZone)when=`Sem entrada boa agora: ${E.why.join(" e ")}.`;
+else when="Sem plano: dados insuficientes.";
+const pctMax={Baixo:12,Médio:8,Alto:4}[t.risk]||5,cap=PL.cap,amt=cap*pctMax/100;
+const how=[`Regra simples: não ponhas mais de ${pctMax}% do teu dinheiro numa só ação de risco ${(RISKPT[t.risk]||"médio").toLowerCase()}. Com ${E0(cap)} seria, no máximo, ${E0(amt)} (o capital muda-se no Plano de Ação).`,"Entra em 2 ou 3 compras ao longo de algumas semanas, em vez de tudo de uma vez.","Só investe dinheiro de que não vais precisar nos próximos anos e espalha por várias empresas e setores."];
+const sell=p?[`Meta 1: ${pe(p.t1)} (+${(p.gain1*100).toFixed(0)}%). Ao chegar aqui, vende cerca de metade para garantir lucro (probabilidade estimada ${pcs(p.X.m1.pr)} em ${p.X.m} meses).`,`Meta 2: ${pe(p.t2)} (+${(p.gain2*100).toFixed(0)}%). Aqui reavalia: se a empresa continua forte, podes manter uma parte.`,`Alerta de perda: ${pe(p.stop)} (−${(p.loss*100).toFixed(0)}%). Se o preço cair até aqui, pára e reavalia em vez de esperar que recupere.`]:[t.target?`Referência: o alvo dos analistas é ${pe(t.target)}. Ao chegar perto, considera vender uma parte.`:"Sem metas fiáveis para esta ação.","Vende também se a empresa piorar a sério (resultados, dívida ou notícias graves)."];
+const S=(h,b)=>`<div class="sec"><h3>${h}</h3>${b}</div>`;
+return `<div class="sec"><div class="row"><div><span class="price" data-px="${k}" style="font-size:28px">${usd(t.price,t.cur)}</span> <span class="sub">${eur(t.price,k)}</span></div><span data-d1="${k}" style="font-weight:700">${sg(t.d1,1)}</span></div><div class="verdict ${head[0]}" style="margin-top:12px">${head[1]} <b>${head[2]}</b><br><span style="font-weight:500;font-size:13px">${esc(head[3])}</span></div></div>
+${S("✅ Porque comprar",`<ul class="t">${li(why)}</ul>`)}${S("⚠️ O que ter em conta (cautelas)",`<ul class="t">${li(warn)}</ul>`)}${S("🕒 Quando comprar",`<p style="margin:4px 0;color:var(--t2)">${esc(when)}</p>`)}${S("💶 Quanto comprar",`<ul class="t">${li(how)}</ul>`)}${S("🎯 Quando vender",`<ul class="t">${li(sell)}</ul>`)}
+<p class="cap" style="padding:0 20px 8px">Resumo automático em linguagem simples, feito a partir dos mesmos números da análise completa (separador ao lado). Ferramenta informativa, não é aconselhamento financeiro.</p>`}
 function open(k){const t=T[k],c=t.cons,s=t.tese,fromBuy=t.target&&t.buy_below?(t.target/t.buy_below-1)*100:null;
 const dd=t.drawdown<=-8?`Está ${Math.abs(t.drawdown).toFixed(0)}% abaixo do máximo dos últimos 12 meses (${usd(t.high,t.cur)}).`:`Está perto do máximo dos últimos 12 meses: o preço já subiu bastante, por isso a margem de erro é menor.`;
 const vt=!t.buy_below?["a","Não há dados suficientes para calcular uma zona de compra fiável."]:t.price<=t.buy_below?["g",`Zona de compra: o preço atual (${usd(t.price,t.cur)}) está abaixo de ${usd(t.buy_below,t.cur)}, 15% abaixo do preço justo estimado.`]:["a",`Ainda acima da zona de compra. Uma entrada com margem de segurança seria abaixo de ${usd(t.buy_below,t.cur)} (${n((t.buy_below/t.price-1)*100)}% face ao preço atual).`];
 const ri=["Baixo","Médio","Alto"].indexOf(t.risk);
 $("#dr").innerHTML=`<div class="dh"><button class="back" id="bk" aria-label="Voltar">←</button><div class="row" style="justify-content:flex-start;gap:10px">${av(k)}<div><div class="nm">${esc(t.name)}</div><div class="sub">${k} · ${PAIS[(ROW[k]||{}).ex]||""} · ${esc(t.sector||"")}</div></div></div></div>
+<div class="tabs" style="padding:10px 16px 0"><button data-dt="simple" class="${DTAB=="simple"?"on":""}">🧭 Em linguagem simples</button><button data-dt="full" class="${DTAB=="full"?"on":""}">📊 Análise completa</button></div>
+<div id="dsimple" ${DTAB=="simple"?"":"hidden"}>${simpleHTML(t,k)}</div><div id="dfull" ${DTAB=="full"?"":"hidden"}>
 ${execHTML(t,k)}
 ${fullHTML(t,k)}
 <div class="sec"><div class="row"><div><span class="price" data-px="${k}" style="font-size:30px">${usd(t.price,t.cur)}</span> <span class="sub">${eur(t.price,k)}</span></div><span data-d1="${k}" style="font-weight:700">${sg(t.d1,1)}</span></div>
@@ -430,12 +466,12 @@ ${tile(t.fcfy!=null?n(t.fcfy,1)+"%":"–","Caixa livre","Dinheiro que sobra por 
 ${tile(t.eg!=null?(t.eg>500?">+500%":t.eg<-500?"<−500%":(t.eg>=0?"+":"")+n(t.eg)+"%"):"–","Crescimento dos lucros","Último trimestre vs mesmo trimestre do ano anterior")}</div></div>
 <div class="sec news"><h3>Notícias e sentimento</h3>${newsHTML(t)}</div>
 <div style="padding:0 20px"><button class="pill dl" id="dlr" style="display:block;width:100%">📥 Descarregar Resumo de Análise</button></div>
-<p class="cap" style="padding:0 20px 30px">Análise completa: Yahoo Finance (${esc(D.analysis_updated||D.updated)}). Preços na moeda de cotação (€ ao câmbio atual). Não é aconselhamento financeiro.</p>`;
+<p class="cap" style="padding:0 20px 30px">Análise completa: Yahoo Finance (${esc(D.analysis_updated||D.updated)}). Preços na moeda de cotação (€ ao câmbio atual). Não é aconselhamento financeiro.</p></div>`;
 $("#dr").classList.add("on");$("#ov").classList.add("on");simBind(t);{const d=$("#dlr");if(d)d.onclick=()=>exportReport(k)}document.body.style.overflow="hidden";$("#dr").dataset.k=k;
 $("#bk").onclick=()=>location.hash=""}
 function close(){$("#dr").classList.remove("on");$("#ov").classList.remove("on");document.body.style.overflow="";delete $("#dr").dataset.k}
 $("#ov").onclick=()=>location.hash="";addEventListener("keydown",e=>e.key=="Escape"&&(location.hash=""));
-$("#dr").onclick=e=>{const z=e.target.closest("[data-hz]");if(z&&T[$("#dr").dataset.k]){setHZ(z.dataset.hz);const y=$("#dr").scrollTop;open($("#dr").dataset.k);$("#dr").scrollTop=y;return}const b=e.target.closest("[data-r]");if(b&&T[$("#dr").dataset.k]){rng=b.dataset.r;const y=$("#dr").scrollTop;open($("#dr").dataset.k);$("#dr").scrollTop=y}};
+$("#dr").onclick=e=>{const dt=e.target.closest("[data-dt]");if(dt){DTAB=dt.dataset.dt;try{localStorage.dtab=DTAB}catch(_){}document.querySelectorAll("[data-dt]").forEach(b=>b.classList.toggle("on",b==dt));$("#dsimple").hidden=DTAB!="simple";$("#dfull").hidden=DTAB!="full";return}const z=e.target.closest("[data-hz]");if(z&&T[$("#dr").dataset.k]){setHZ(z.dataset.hz);const y=$("#dr").scrollTop;open($("#dr").dataset.k);$("#dr").scrollTop=y;return}const b=e.target.closest("[data-r]");if(b&&T[$("#dr").dataset.k]){rng=b.dataset.r;const y=$("#dr").scrollTop;open($("#dr").dataset.k);$("#dr").scrollTop=y}};
 function route(){const k=decodeURIComponent(location.hash.slice(1));if(T[k]){const fresh=$("#dr").dataset.k!=k;open(k);if(fresh)$("#dr").scrollTop=0}else if(ROW[k])openLite(k);else close()}
 addEventListener("hashchange",route);
 
