@@ -295,7 +295,7 @@ def risk_stats(h, p, tgt):
         j = pd.concat([a.rename("a"), SPY["ret"].rename("b")], axis=1, join="inner").dropna()
         if len(j) >= 100 and j.b.var() > 0:
             beta = float(j.cov().iloc[0, 1] / j.b.var())
-            beta = 0.67 * beta + 0.33  # ajuste de Blume: puxa para 1 (os fechos europeus e americanos não coincidem, o que enviesa o beta bruto para baixo)
+            beta = max(0.35, min(2.5, 0.67 * beta + 0.33))  # ajuste de Blume (puxa para 1; os fechos europeus e americanos não coincidem, o que enviesa o beta bruto para baixo) + piso/teto: risco sistemático negativo não é plausível em grandes empresas
     mu = RF + ERP * (beta if beta is not None else 1.0)
     m = mu - vol ** 2 / 2
     z = {5: -1.645, 25: -0.674, 50: 0.0, 75: 0.674, 95: 1.645}
@@ -445,7 +445,7 @@ def deep(sym):
         if len(h) < 30:
             return sym, None
         rr = h.pct_change().dropna()
-        if rr.abs().max() > 0.5 and rr.std() * math.sqrt(252) > 1.5:  # salto >50% num dia E volatilidade >150%: erro de dados do Yahoo, não um movimento real
+        if (rr.max() > 2.0 or rr.min() < -0.7) and rr.std() * math.sqrt(252) > 1.5:  # salto impossível (>+200% ou <−70% num dia) E volatilidade >150%: erro de dados do Yahoo; saltos de 50-70% (resultados clínicos) são válidos
             QC.setdefault("bad_history", []).append(sym)
             log("histórico com erro, ignorado:", sym)
             return sym, None
