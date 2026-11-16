@@ -176,7 +176,7 @@ body{font-size:14px;background:var(--bg)}
 .side .brand{padding:0;font-size:17px}.sfoot{margin:0 0 0 auto;flex-direction:row;align-items:center}.sfoot .ibtn{width:36px}.sfoot .livepill{font-size:11px;padding:5px 9px}#upd{display:none}
 .views{flex-direction:row;overflow-x:auto;order:3;flex-basis:100%}.views button{width:auto;white-space:nowrap;border-radius:999px;padding:8px 12px}
 .views button.on,.views button.hot.on,.views button.hot{box-shadow:none}
-.side .regs{order:4;flex-basis:100%;padding:2px}.side .regs button{min-height:28px;padding:4px 2px}.side{gap:6px;padding:6px 12px}.views button{min-height:34px;padding:6px 12px}.vbar{display:none}
+.side .regs{order:4;flex-basis:100%;padding:2px}.side .regs button{min-height:28px;padding:4px 2px}.side{gap:6px;padding:6px 12px}.views button{min-height:34px;padding:6px 12px}.vbar{font-size:10px;padding:4px 0 0;text-align:left}
 .top{position:static;height:auto;padding:10px 0}
 .hero2{grid-template-columns:minmax(0,1fr);grid-template-areas:"copy" "feat" "mini"}.mini{grid-template-columns:1fr 1fr}
 .xt th{top:auto}}
@@ -188,7 +188,7 @@ body{font-size:14px;background:var(--bg)}
 <div class="sfoot"><span id="live" class="livepill" title="Estado das fontes de dados">a ligar…</span><div id="upd"></div><button class="ibtn" id="theme" aria-label="Alternar tema claro/escuro">◐</button></div></aside>
 <main class="main">
 <header class="top"><input id="q" placeholder="Procurar entre milhares de ações (ex.: Nestlé, SAP)" autocomplete="off"></header>
-<div class="vbar"><i></i>Radar de Investimento · dados públicos</div>
+<div class="vbar" id="fresh"><i></i>Radar de Investimento · dados públicos</div>
 <section class="hero2" id="hero2"><div class="hcopy"><h1>Onde investir <em>hoje</em>?</h1><p id="hsub"></p><div class="idxs" id="idxs"></div></div><div class="feat" id="feat"></div><div class="mini" id="mini"></div></section>
 <div id="v1"><div class="bar"><div class="pills" id="pills"></div><select id="sort" aria-label="Ordenar"><option value="rank">Ordenar: Melhor oportunidade</option><option value="upside">Ordenar: Potencial de subida</option><option value="score">Ordenar: Qualidade</option><option value="dy">Ordenar: Dividendo</option></select></div>
 <div class="sub" id="ord" style="margin:0 2px 12px"></div><div class="grid" id="grid"></div></div>
@@ -465,6 +465,9 @@ function setView(v){document.querySelectorAll(".views button").forEach(b=>b.clas
 $("#regs").onclick=e=>{const b=e.target.closest("[data-r]");if(!b)return;REG=b.dataset.r;document.querySelectorAll("#regs button").forEach(x=>x.classList.toggle("on",x==b));hero();grid();if($("#xq")){X.n=100;xrender()}if(!$("#v4").hidden)market()};
 $(".views").onclick=e=>{const b=e.target.closest("[data-v]");if(b)setView(b.dataset.v)};
 $("#upd").innerHTML=`Atualizado ${esc(D.updated||"–")}<br>${((D.audit||{}).deep_ok??"–")} análises completas · ${R.length.toLocaleString("pt-PT")} ações`;
+// aviso de frescura: a análise é gerada 1x por dia útil; só as cotações das análises completas se atualizam ao vivo
+{const t=Date.parse(String(D.updated||"").replace(" ","T")+"Z"),h=isFinite(t)?(Date.now()-t)/36e5:null,age=h==null?"":h<1?"há menos de 1 h":h<48?"há "+Math.round(h)+" h":"há "+Math.round(h/24)+" dias";
+$("#fresh").innerHTML=`<i style="background:${h!=null&&h>72?"var(--dn)":h!=null&&h>30?"var(--am)":"var(--up)"}"></i>Análise de ${esc(D.updated||"?")} UTC (${age}). Fundamentais, metas e planos são do fecho anterior: confirma o preço em tempo real na corretora antes de qualquer ordem.`}
 $("#nuni").textContent="("+R.length.toLocaleString("pt-PT")+")";
 
 // ---------- estatística: fatores e comparação com o setor
