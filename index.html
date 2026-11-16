@@ -294,7 +294,7 @@ $("#mini").innerHTML=mini.filter(m=>m[1]).map(([l,k,f])=>`<div class="mc" data-k
 function list(){let ks=D.order.filter(k=>REG=='all'||regOf(k)==REG);
 if(cat=="top")ks=ks.filter(k=>T[k].elite).slice(0,10);else if(cat=="v")ks=ks.filter(k=>(T[k].upside||0)>=10&&T[k].drawdown<=-8);else ks=ks.filter(k=>T[k].cat==cat);
 
-if(sort!="rank")ks.sort((a,b)=>(T[b][sort]??-1e9)-(T[a][sort]??-1e9));return ks}
+ks.sort((a,b)=>(T[b][sort]??-1e9)-(T[a][sort]??-1e9));return ks}
 function grid(){$("#pills").innerHTML=CATS.map(([k,l])=>`<button class="pill ${k==cat&&!q?"on":""}" data-c="${k}">${l}</button>`).join("");
 const ks=list();$("#ord").textContent=(ORD[sort]||"")+(cat=="top"?` · crivo Top 10: ≥10 analistas com >65% compra, caixa livre positivo todos os anos, balanço saudável, sem pico de ciclo, qualidade ≥60 · ${ks.length} de 10 passam hoje`:"");$("#grid").innerHTML=ks.map((k,i)=>{const t=T[k],c=t.cons;const [cc,ca,cw]=call(t),qs=t.q&&t.q.qscore;return `<div class="card" data-k="${k}" style="animation-delay:${Math.min(i,12)*25}ms"><div class="pos">#${i+1}</div>
 <div class="ch">${av(k)}<div class="who"><div class="nm">${esc(t.name)}</div><div class="sub">${k} · ${exName(k)}</div></div>${ring(t.rank)}</div>
@@ -340,21 +340,21 @@ let plan;
 if(p){const g=`saída em <b>${pe(p.t1)}</b> <span class="up">+${(p.gain1*100).toFixed(0)}%</span> <span class="sub" style="display:inline">(${pcs(p.X.m1.pr)} prob. a ${p.X.m} meses)</span>${nhTag(p.X.m1)}`;
 plan=p.inZone?`Entrada ao preço atual (<b>${pe(p.entry)}</b>) → ${g}`:`Aguardar recuo até <b>${pe(p.entry)}</b> (${n((p.entry/t.price-1)*100)}%) → ${g}`}
 else if(E&&!E.inZone)plan=`Sem entrada realista agora: ${E.why.join(" e ")}.`;
-else plan="Sem plano: dados insuficientes, alvos abaixo do preço ou balanço em risco.";
+else plan="Sem plano: dados insuficientes, alvos abaixo do preço ou possível armadilha de valor.";
 const bal=pf&&pf.of?(f=>f>=8?"Forte":f<=1?"Fraca":"Razoável")(pf.score*9/pf.of)+` (Piotroski ${pf.score}/${pf.of})`:null;
 const risk=`Risco ${RISKPT[t.risk]||"n/d"} · ${bal?"Saúde contabilística "+bal:"Saúde contabilística: sem Piotroski (financeira ou dados em falta)"}`;
 return `<div class="exec"><div class="exh">⏱️ Resumo em 30 segundos</div>
 <div class="exr"><i>${icon}</i><div><b>${v1}</b><span class="sub">${esc(sub||"")}</span></div></div>
 <div class="exr"><i>🎯</i><div><b>${plan}</b>${p?`<span class="sub">Stop largo ${pe(p.stop)} (−${(p.loss*100).toFixed(0)}%): 6× ATR, só protege de quebras estruturais</span>`:""}</div></div>
 <div class="exr"><i>🛡️</i><div><b>${risk}</b>${q.qlabel?`<span class="sub">${esc(q.qlabel)}${q.qscore!=null?" · "+q.qscore+"/100":""}</span>`:""}</div></div>
-${prov("B","<b>Entrada boa</b> = (1) não esticada: percentil da distância do preço à SMA 50 (em ATR) abaixo de 90 na própria história da ação (evidência B, backtest próprio); (2) preço ≤ zona de valor = valor justo −15% (valor justo = média da meta dos analistas e do DCF; margem de segurança de value investing, evidência C); (3) sem armadilha de valor nem Altman em perigo. <b>Recuo</b> = o mais baixo entre o preço em que o esticamento volta ao percentil 75 da própria história (convenção) e a zona de valor. "+calTxt()+" <b>Níveis técnicos</b> (médias, VWAP ancorado, Volume Profile, pivôs, números redondos) foram testados contra níveis aleatórios e <b>não mostraram vantagem</b> (0 de 20 testes após correção de Holm), por isso não são usados. <b>Saídas</b> = o mais próximo entre o máximo de 52 semanas (referência factual), o valor justo e o teto de valuation (P/E máximo histórico, B); as probabilidades vêm de um modelo de volatilidade calibrado em backtest próprio (research/backtest_exits.py). <b>Stop</b> = 6× ATR (convenção, C).")}</div>`}
+${prov("B","<b>Entrada boa</b> = (1) não esticada: percentil da distância do preço à SMA 50 (em ATR) abaixo de 90 na própria história da ação (evidência B, backtest próprio); (2) preço ≤ zona de valor = valor justo −15% (valor justo = média da meta dos analistas e do DCF; margem de segurança de value investing, evidência C); (3) sem armadilha de valor. <b>Recuo</b> = o mais baixo entre o preço em que o esticamento volta ao percentil 75 da própria história (convenção) e a zona de valor. "+calTxt()+" <b>Níveis técnicos</b> (médias, VWAP ancorado, Volume Profile, pivôs, números redondos) foram testados contra níveis aleatórios e <b>não mostraram vantagem</b> (0 de 20 testes após correção de Holm), por isso não são usados. <b>Saídas</b> = o mais próximo entre o máximo de 52 semanas (referência factual), o valor justo e o teto de valuation (P/E máximo histórico, B); as probabilidades vêm de um modelo de volatilidade calibrado em backtest próprio (research/backtest_exits.py). <b>Stop</b> = 6× ATR (convenção, C).")}</div>`}
 // Análise completa em linguagem simples. Cada linha: [título, valor, nível g/a/r/n, significado, evidência A/B/C, "como foi calculado"].
 // Evidência: A = académica (paper citado) · B = convenção de praticantes / estatística sobre dados reais · C = heurística do projeto (sem validação).
 const EVL={A:"Académica",B:"Convenção de praticantes",C:"Heurística do projeto"};
 const BL={om:["Margem operacional",1,"%","De cada 100 vendidos, quanto sobra antes de juros e impostos."],roic:["Retorno do capital (ROIC)",1,"%","Quanto rende cada euro investido no negócio (após impostos)."],
 eve:["EV/EBITDA",-1,"×","Quanto vale a empresa inteira face ao lucro operacional. Mais baixo = mais barata face aos pares."],nd:["Dívida líquida/EBITDA",-1,"×","Anos de lucro operacional para pagar a dívida. Mais baixo = mais folgada."],
-fpe:["P/E projetado",-1,"×","Quanto pagas pelos lucros esperados. Mais baixo = mais barata face aos pares."],fcfy:["FCF yield",1,"%","Caixa livre gerada por cada 100 do valor da empresa."],
-rg:["Crescimento das vendas",1,"%","Variação das vendas face ao ano anterior."],eg:["Crescimento do lucro",1,"%","Variação do lucro face ao ano anterior."]};
+fpe:["P/E projetado",-1,"×","Quanto pagas pelos lucros esperados. Mais baixo = mais barata face aos pares."],fcfy:["FCF yield",1,"%","Caixa livre gerada por cada 100 de capitalização bolsista."],
+rg:["Crescimento das vendas",1,"%","Variação das vendas do último trimestre face ao mesmo trimestre do ano anterior."],eg:["Crescimento do lucro",1,"%","Variação do lucro do último trimestre face ao mesmo trimestre do ano anterior."]};
 function fullHTML(t,k){const q=t.q||{},rs=t.rs||{},c=t.cons||{},BM=t.bench||{},R=[],add=(ti,v,l,e,ev,how)=>{if(v!=null&&v!=="")R.push([ti,v,l,e,ev,how])},DD=(D.audit&&D.audit.benchmarks||{}).dam_date||"";
 const U=(x,u)=>n(x,1)+u;
 for(const key of Object.keys(BL)){const b=BM[key];if(!b)continue;const[ti,d,u,ex]=BL[key],good=d>0?b.pct:100-b.pct,l=good>=67?"g":good<=33?"r":"a",
@@ -426,11 +426,11 @@ ${tile(t.fpe?n(t.fpe,1)+"x":"–","Preço / lucro esperado","Quanto pagas por ca
 ${tile(t.dy?n(t.dy,1)+"%":"0%","Dividendo","Pago aos acionistas por ano")}
 ${tile(t.om!=null?n(t.om)+"%":"–","Margem operacional","De cada $100 vendidos, sobram assim")}
 ${tile(t.nd!=null?(t.nd<0?"Sem dívida líquida":n(t.nd,1)+" anos"):"–","Dívida","Anos de lucro para a pagar")}
-${tile(t.fcfy!=null?n(t.fcfy,1)+"%":"–","Caixa livre","Dinheiro que sobra por ano ÷ valor da empresa")}
-${tile(t.eg!=null?(t.eg>=0?"+":"")+n(t.eg)+"%":"–","Crescimento dos lucros","Face ao ano anterior")}</div></div>
+${tile(t.fcfy!=null?n(t.fcfy,1)+"%":"–","Caixa livre","Dinheiro que sobra por ano ÷ capitalização bolsista")}
+${tile(t.eg!=null?(t.eg>500?">+500%":t.eg<-500?"<−500%":(t.eg>=0?"+":"")+n(t.eg)+"%"):"–","Crescimento dos lucros","Último trimestre vs mesmo trimestre do ano anterior")}</div></div>
 <div class="sec news"><h3>Notícias e sentimento</h3>${newsHTML(t)}</div>
 <div style="padding:0 20px"><button class="pill dl" id="dlr" style="display:block;width:100%">📥 Descarregar Resumo de Análise</button></div>
-<p class="cap" style="padding:0 20px 30px">Análise completa: Yahoo Finance (${esc(D.analysis_updated||D.updated)}). Preços em USD (€ ao câmbio atual). Não é aconselhamento financeiro.</p>`;
+<p class="cap" style="padding:0 20px 30px">Análise completa: Yahoo Finance (${esc(D.analysis_updated||D.updated)}). Preços na moeda de cotação (€ ao câmbio atual). Não é aconselhamento financeiro.</p>`;
 $("#dr").classList.add("on");$("#ov").classList.add("on");simBind(t);{const d=$("#dlr");if(d)d.onclick=()=>exportReport(k)}document.body.style.overflow="hidden";$("#dr").dataset.k=k;
 $("#bk").onclick=()=>location.hash=""}
 function close(){$("#dr").classList.remove("on");$("#ov").classList.remove("on");document.body.style.overflow="";delete $("#dr").dataset.k}
@@ -486,7 +486,7 @@ $("#dr").innerHTML=`<div class="dh"><button class="back" id="bk" aria-label="Vol
 <button class="pill dl" id="dlr" style="display:block;width:100%;margin-bottom:8px">📥 Descarregar Resumo de Análise</button><a class="pill" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://finance.yahoo.com/quote/${encodeURIComponent(k)}">Ver no Yahoo Finance</a></div>`;
 $("#dr").classList.add("on");$("#ov").classList.add("on");document.body.style.overflow="hidden";$("#dr").dataset.k=k;$("#dr").scrollTop=0;$("#bk").onclick=()=>location.hash=""}
 function riskHTML(t,k){const s=t.rs||{};if(!s.vol)return"";const f=s.fan||{};const cell=(l,v)=>v==null?"":`<div class="kv"><span>${l}</span><b>${usd(v,t.cur)} ${sg((v/t.price-1)*100)}</b></div>`;
-return `<div class="tiles" style="margin:8px 0">${tile(n(s.vol)+"%","Volatilidade anual","Quanto o preço oscila num ano")}${tile(n(s.maxdd)+"%","Maior queda (12m)","Do máximo ao mínimo seguinte")}${tile(s.beta==null?"–":n(s.beta,2),"Beta vs S&P 500","1 = acompanha o mercado")}${tile(n(s.var95,1)+"%","Pior dia típico (VaR 95%)","Em 1 de cada 20 dias perde pelo menos isto")}${tile(s.sharpe==null?"–":n(s.sharpe,2),"Rácio de Sharpe","Retorno por unidade de risco")}${tile(s.ptouch==null?"–":n(s.ptouch)+"%","Prob. de tocar a Meta 1","Em 12 meses, segundo o modelo")}</div>
+return `<div class="tiles" style="margin:8px 0">${tile(n(s.vol)+"%","Volatilidade anual","Quanto o preço oscila num ano")}${tile(n(s.maxdd)+"%","Maior queda (12m)","Do máximo ao mínimo seguinte")}${tile(s.beta==null?"–":n(s.beta,2),"Beta ajustado vs S&P 500","Ajuste de Blume; 1 = acompanha o mercado")}${tile(n(s.var95,1)+"%","Pior dia típico (VaR 95%)","Em 1 de cada 20 dias perde pelo menos isto")}${tile(s.sharpe==null?"–":n(s.sharpe,2),"Rácio de Sharpe","Retorno por unidade de risco")}${tile(s.ptouch==null?"–":n(s.ptouch)+"%","Prob. de tocar o alvo dos analistas","Em 12 meses, segundo o modelo")}</div>
 <h3 style="margin-top:12px">Cenários a 12 meses (modelo)</h3>${cell("Pessimista (1 em 20)",f["5"])}${cell("Abaixo do central",f["25"])}${cell("Central",f["50"])}${cell("Acima do central",f["75"])}${cell("Otimista (1 em 20)",f["95"])}
 <p class="cap">Modelo lognormal com volatilidade histórica de 12 meses e retorno esperado ${n(s.mu,1)}% (CAPM: ${D.meta.rf*100}% + beta × ${D.meta.erp*100}%). É uma ilustração estatística, não uma previsão.</p>`}
 // <quant-ui> Auditoria forense e modelos quantitativos (Sloan, Mohanram, Greenblatt) + sinais técnicos informativos. Não entram no ranking nem no veredicto.
@@ -718,7 +718,7 @@ document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{PF.sel=PF.sel.f
 
 // ================= Plano de Ação: carteira pronta a executar (capital + perfil → ordens) =================
 // Níveis por ação: entrada, Meta 1 (tática, ~65% de probabilidade no prazo escolhido), Meta 2 (preço justo, 12 meses) e stop largo (6×ATR ou abaixo do suporte principal: só protege de quebras estruturais; stops curtos foram acionados por ruído em 53-59% das operações no backtest)
-function planLevels(t){const E=entryCheck(t),q=t.q||{};if(!E||!E.realistic||q.trap||(q.altman&&q.altman.zone=="perigo"))return null;
+function planLevels(t){const E=entryCheck(t),q=t.q||{};if(!E||!E.realistic||q.trap)return null;
 const p=t.price,atr=fin(t.atr)&&t.atr>0?t.atr:p*((t.vol||30)/100)/Math.sqrt(252)*.9,entry=E.entry,X=exitTargets(t,entry);if(!X)return null;
 const t1=X.m1.v,t2=X.m2.v,stop=clamp(entry-6*atr,entry*.7,entry*.9); // stop largo = 6×ATR (convenção, sem validação estatística): só protege de quebras estruturais
 return{p,atr,E,inZone:E.inZone,entry,entry1:E.inZone?p:null,entry2:E.inZone?null:entry,t1,t2,X,stop,ref:entry,loss:(entry-stop)/entry,gain1:t1/entry-1,gain2:t2/entry-1,rr:(t1-entry)/Math.max(entry-stop,1e-9)}}

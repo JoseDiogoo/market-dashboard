@@ -99,7 +99,7 @@ def gen(i, t):
     if an.get("rev90") is not None and an["rev90"] >= 2:
         cat.append(f"Estimativas de lucro a subir ({an['rev90']:+.1f}% em 90 dias).")
     pe, fpe = i.get("trailingPE"), i.get("forwardPE")
-    if pe and fpe and 0 < fpe < pe:
+    if pe and fpe and 0 < fpe < pe <= 1.5 * fpe:  # acima disto a diferença é contabilística (itens extraordinários, lucro ajustado vs GAAP), não crescimento
         cat.append(f"O mercado espera lucros {100 * (pe / fpe - 1):.0f}% mais altos nos próximos 12 meses (P/E projetado {f1(fpe)} vs {f1(pe)} atual).")
     if q.get("eps_cagr") and q["eps_cagr"] > 8:
         cat.append(f"Histórico de lucro por ação a crescer {f1(q['eps_cagr'])}% ao ano.")

@@ -50,6 +50,10 @@ mism = [(s, t["price"], ROW[s]["px"]) for s, t in T.items() if s in ROW and abs(
 check("preço completo ≈ preço do screener (±5%)", not mism, str(mism[:5]))
 tg = [(s, t["target"], t["price"]) for s, t in T.items() if t["target"] and not (0.3 <= t["target"] / t["price"] <= 3.5)]
 check("alvos coerentes com o preço", not tg, str(tg[:5]))
+check("volatilidade anual plausível (<150%) e cenários não nulos", all((t["rs"].get("vol") or 0) < 150 and all(v for v in t["rs"].get("fan", {"x": 1}).values()) for t in T.values()), str([s for s, t in T.items() if (t["rs"].get("vol") or 0) >= 150]))
+check("beta ajustado (Blume) dentro de [0,33; 3]", all(t["rs"].get("beta") is None or 0.33 <= t["rs"]["beta"] <= 3 for t in T.values()))
+check("sem frases de crescimento de lucros >50% por diferença contabilística", all(not ("mais altos" in c and int(c.split("lucros ")[1].split("%")[0]) > 50) for t in T.values() for c in t["tese"]["cat"]))
+check("Altman só em setores industriais", all(not t["q"].get("altman") or t["sector"] in ("Industrials", "Basic Materials", "Consumer Cyclical", "Consumer Defensive", "Technology", "Healthcare") for t in T.values()))
 check("ordem de oportunidades só com análise completa", all(s in T for s in D["order"]))
 check("destaques existem", all((v is None or v in T) for v in D["highlights"].values()))
 # comparação com cotações obtidas de novo e de forma independente (histórico diário)

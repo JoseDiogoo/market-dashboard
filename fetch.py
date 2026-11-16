@@ -295,6 +295,7 @@ def risk_stats(h, p, tgt):
         j = pd.concat([a.rename("a"), SPY["ret"].rename("b")], axis=1, join="inner").dropna()
         if len(j) >= 100 and j.b.var() > 0:
             beta = float(j.cov().iloc[0, 1] / j.b.var())
+            beta = 0.67 * beta + 0.33  # ajuste de Blume: puxa para 1 (os fechos europeus e americanos não coincidem, o que enviesa o beta bruto para baixo)
     mu = RF + ERP * (beta if beta is not None else 1.0)
     m = mu - vol ** 2 / 2
     z = {5: -1.645, 25: -0.674, 50: 0.0, 75: 0.674, 95: 1.645}
@@ -443,6 +444,11 @@ def deep(sym):
         atr = atr14(hd)
         if len(h) < 30:
             return sym, None
+        rr = h.pct_change().dropna()
+        if rr.abs().max() > 0.5 and rr.std() * math.sqrt(252) > 1.5:  # salto >50% num dia E volatilidade >150%: erro de dados do Yahoo, não um movimento real
+            QC.setdefault("bad_history", []).append(sym)
+            log("histórico com erro, ignorado:", sym)
+            return sym, None
         cur, fcur = i.get("currency"), i.get("financialCurrency")
         p = i.get("currentPrice") or i.get("regularMarketPrice") or float(h.iloc[-1])
         lo, hi = i.get("fiftyTwoWeekLow") or float(h.min()), i.get("fiftyTwoWeekHigh") or float(h.max())
@@ -569,7 +575,7 @@ def rerank(d):
     def elite(t):  # crivo do Top 10: compounders com consenso forte, caixa real, balanço saudável
         q, c = t["q"], t["cons"]
         return bool(c["total"] >= 10 and (c["buy_pct"] or 0) > 65 and q.get("compounder", {}).get("ok") and not q.get("trap") and not (q.get("norm") or {}).get("peak")
-                    and (q.get("qscore") or 0) >= 60 and (q.get("altman") or {}).get("zone") != "perigo" and (t.get("nd") is not None and t["nd"] < 4)
+                    and (q.get("qscore") or 0) >= 60 and (t.get("nd") is not None and t["nd"] < 4)
                     and (t.get("fcfy") is not None and t["fcfy"] > 0))
     for t in T.values():
         t["elite"] = elite(t)
@@ -651,7 +657,7 @@ def build(quick=False):
     except Exception:
         mn = {"items": [], "sources": [], "summary": {"n": 0}}
     QC.update({"benchmarks": BM, "market_news_sources": mn["sources"], "macro": {k: v["v"] for k, v in MAC.items()}})
-    d = {"mnews": mn, "macro": MAC, "version": "Radar de Investimento", "tape": tape, "tape_names": TAPE, "audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": tape.get("EURUSD=X", {}).get("price"), "order": [], "highlights": {}, "tickers": T, "cols": cols, "rows": rows,
+    d = {"mnews": mn, "macro": MAC, "version": "Radar de Investimento", "tape": tape, "tape_names": TAPE, "audit": QC, "updated": time.strftime("%Y-%m-%d %H:%M"), "eurusd": r(fx.get("EUR"), 4) or tape.get("EURUSD=X", {}).get("price"), "order": [], "highlights": {}, "tickers": T, "cols": cols, "rows": rows,
             "pais": PAIS, "exinfo": {k: {"n": v[0], "p": v[1], "r": v[2]} for k, v in EX.items()}, "sector_stats": stats, "cal": CAL, "meta": {"n_universe": len(df), "n_deep": len(T), "n_exch": int(df.ex.nunique()), "min_usd": MIN_USD, "deep_min_usd": DEEP_MIN_USD, "rf": RF, "erp": ERP, "sources": ["Yahoo Finance (cotações, fundamentais, analistas, insiders)", "FRED (taxas EUA)", "CNBC / MarketWatch / Bloomberg / Yahoo (notícias RSS)"]}}
     return rerank(d)
 

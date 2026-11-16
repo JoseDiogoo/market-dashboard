@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 
 RF, ERP = 0.04, 0.05
+ALTMAN_SECTORS = {"Industrials", "Basic Materials", "Consumer Cyclical", "Consumer Defensive", "Technology", "Healthcare"}
+ALTMAN_SKIP_IND = ("auto manufacturers", "airline", "rental", "leasing", "aerospace", "farm & heavy", "trucks", "marine", "airports")
 
 
 def _v(df, names, k=0):
@@ -244,16 +246,20 @@ def analyze(t, i, p, mcap, beta, hist5, fin_sector):
     cv = None
     if len(epss) >= 3 and abs(np.mean(epss)) > 0:
         cv = float(np.std(epss) / abs(np.mean(epss)))
-    cyc = bool(cyc_ind or (cv is not None and cv > 0.6))
+    # crescimento secular (lucro por ação sempre a subir e vendas a crescer >10%/ano) não é ciclo: a média de 4 anos subestima o lucro "normal" de quem cresce
+    rv5 = [x["rev"] for x in ser if x["rev"]]
+    hard_cyc = (i.get("sector") in ("Energy", "Basic Materials")) or any(k in ind for k in cyc_kw if k != "semiconductor")  # ciclo de matérias-primas/capital: nunca é "crescimento secular"
+    grower = bool(not hard_cyc and len(epss) >= 3 and min(epss) > 0 and len(rv5) >= 3 and all(b_ >= a_ for a_, b_ in zip(rv5, rv5[1:])) and (out["rev_cagr"] or 0) >= 10)  # vendas sempre a subir, lucros positivos
+    cyc = bool(not grower and (cyc_ind or (cv is not None and cv > 0.6)))
     if len(epss) >= 3 and same:
         en = float(np.mean(epss))
         pe_n = p / en if en > 0 else None
         eps_ttm = i.get("trailingEps")
         peak = bool(cyc and en > 0 and eps_ttm and eps_ttm > 1.6 * en)
-        out["norm"] = {"eps": _r(en, 2), "pe": _r(pe_n, 1) if pe_n and pe_n < 1000 else None, "years": len(epss), "cyc": cyc, "peak": peak, "cv": _r(cv, 2),
-                       "reason": "setor/indústria cíclica" if cyc_ind else ("lucros muito voláteis entre anos" if cyc else None)}
+        out["norm"] = {"eps": _r(en, 2), "pe": _r(pe_n, 1) if pe_n and pe_n < 1000 else None, "years": len(epss), "cyc": cyc, "grower": grower, "peak": peak, "cv": _r(cv, 2),
+                       "reason": "setor/indústria cíclica" if cyc and cyc_ind else ("lucros muito voláteis entre anos" if cyc else None)}
     else:
-        out["norm"] = {"cyc": cyc, "peak": False, "reason": "setor/indústria cíclica" if cyc_ind else None}
+        out["norm"] = {"cyc": cyc, "peak": False, "reason": "setor/indústria cíclica" if cyc and cyc_ind else None}
 
     # ---- DuPont (ROE = margem líquida × rotação dos ativos × alavancagem)
     du = [x for x in ser if x["nm"] is not None and x["at"] and x["lev"]]
@@ -278,7 +284,9 @@ def analyze(t, i, p, mcap, beta, hist5, fin_sector):
     if n >= 2 and not fin_sector:
         f, nt, det = piotroski(fin, bs, cf)
         out["piotroski"] = {"score": f, "of": nt, "tests": det}
-    z = altman(fin, bs, mcap) if n and same and not fin_sector else None
+    # Altman (1968) só é calibrado para empresas industriais; telecom, utilities, imobiliário, energia e negócios com financiamento próprio (auto, aviação, leasing) dão falsos "perigo"
+    alt_ok = i.get("sector") in ALTMAN_SECTORS and not any(k in (i.get("industry") or "").lower() for k in ALTMAN_SKIP_IND)
+    z = altman(fin, bs, mcap) if n and same and not fin_sector and alt_ok else None
     if z is not None:
         out["altman"] = {"z": _r(z, 2), "zone": "segura" if z > 2.99 else "cinzenta" if z > 1.81 else "perigo"}
     m = beneish(fin, bs, cf) if n >= 2 and same and not fin_sector else None
@@ -394,9 +402,10 @@ def _verdict(q, i, p, tm):
         (why if ro["spread"] >= 5 else risk if ro["spread"] < 0 else []).append(
             f"ROIC {ro['now']}% vs custo de capital {ro['wacc']}%: " + ("cria valor com folga." if ro["spread"] >= 5 else "rende menos do que o capital custa."))
     ho, hp = q.get("hist_om"), q.get("hist_pe")
+    grower = bool((q.get("norm") or {}).get("grower"))
     if ho and ho["now"] is not None and ho["mean"]:
         add(1 if ho["now"] >= ho["mean"] else 0.4, 1)
-        if ho["now"] > max(ho["mean"] * 1.5, ho["mean"] + 10):
+        if ho["now"] > max(ho["mean"] * 1.5, ho["mean"] + 10) and not grower:
             peak = True
             risk.append(f"Margem operacional {ho['now']}% muito acima da sua média de {ho['mean']}%: possível pico de ciclo, o P/E baixo pode enganar.")
         elif ho["now"] < ho["mean"] - 3:
@@ -428,7 +437,7 @@ def _verdict(q, i, p, tm):
     if nm_.get("peak"):
         peak = True
         risk.append(f"Lucros atuais bem acima da média de {nm_.get('years')} anos (setor cíclico): P/E normalizado {nm_.get('pe')} vs P/E atual {(q.get('hist_pe') or {}).get('now', i.get('trailingPE') and round(i['trailingPE'], 1))}.")
-    trap = bool((cheap and ((score is not None and score < 45) or peak or len(risk) >= 2)) or nm_.get("peak"))
+    trap = bool((cheap and ((score is not None and score < 45) or peak or (len(risk) >= 2 and not grower))) or nm_.get("peak"))
     if score is None:
         label = "Sem dados suficientes"
     elif trap:

@@ -130,3 +130,34 @@ class TechnicalTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CorrectionsTests(unittest.TestCase):
+    def test_altman_skips_telecom_and_autos(self):
+        for sec, ind in (("Communication Services", "Telecom Services"), ("Consumer Cyclical", "Auto Manufacturers"), ("Utilities", "Utilities - Regulated Electric")):
+            with self.subTest(sec=sec):
+                fin, bs, cf = frames([10] * 4, [12] * 4, [200.0] * 4)
+                bs.loc["Total Liabilities Net Minority Interest"] = 150.0
+                bs.loc["Working Capital"] = 5.0
+                bs.loc["Retained Earnings"] = 10.0
+                class T_:
+                    financials, balance_sheet, cashflow = fin, bs, cf
+                q = quality.analyze(T_, {"sector": sec, "industry": ind}, 10.0, 500.0, 1.0, None, False)
+                self.assertNotIn("altman", q)
+
+    def test_growth_not_flagged_as_peak(self):
+        fin, bs, cf = frames([10] * 4, [12] * 4, [200.0] * 4, rev=[200e6, 150e6, 110e6, 80e6])
+        fin.loc["Diluted EPS"] = [5.0, 3.0, 1.5, 0.7]
+        class T_:
+            financials, balance_sheet, cashflow = fin, bs, cf
+        q = quality.analyze(T_, {"sector": "Technology", "industry": "Semiconductors", "trailingEps": 5.0}, 100.0, 5000.0, 1.0, None, False)
+        self.assertFalse(q["norm"]["peak"])
+        self.assertFalse(q["trap"])
+
+    def test_cyclical_peak_still_flagged(self):
+        fin, bs, cf = frames([10] * 4, [12] * 4, [200.0] * 4)
+        fin.loc["Diluted EPS"] = [9.0, 1.0, 1.5, 0.5]
+        class T_:
+            financials, balance_sheet, cashflow = fin, bs, cf
+        q = quality.analyze(T_, {"sector": "Technology", "industry": "Semiconductors", "trailingEps": 9.0}, 100.0, 5000.0, 1.0, None, False)
+        self.assertTrue(q["norm"]["peak"])

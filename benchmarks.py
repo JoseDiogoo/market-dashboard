@@ -31,7 +31,7 @@ YMAP = {
     "Auto Manufacturers": ("Auto & Truck", 0), "Auto Parts": ("Auto Parts", 0), "Banks - Diversified": ("Bank (Money Center)", 1),
     "Banks - Regional": ("Banks (Regional)", 1), "Beverages - Brewers": ("Beverage (Alcoholic)", 0),
     "Beverages - Non-Alcoholic": ("Beverage (Soft)", 0), "Beverages - Wineries & Distilleries": ("Beverage (Alcoholic)", 0),
-    "Biotechnology": ("Drugs (Biotechnology)", 0), "Building Materials": ("Building Materials", 0),
+    "Biotechnology": ("Drugs (Biotechnology)", 0), "Building Materials": ("Building Materials", 0), "Building Products & Equipment": ("Building Materials", 0),
     "Capital Markets": ("Brokerage & Investment Banking", 1), "Communication Equipment": ("Telecom. Equipment", 0),
     "Computer Hardware": ("Computers/Peripherals", 0), "Consulting Services": ("Business & Consumer Services", 0),
     "Consumer Electronics": ("Electronics (Consumer & Office)", 0), "Credit Services": ("Financial Svcs. (Non-bank & Insurance)", 1),

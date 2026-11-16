@@ -68,9 +68,9 @@ assert.equal(run('planLevels(T.A)'), null); assert.equal(run('entryCheck(T.A).re
 run('T.A.ext={pct:95,x75:92}; T.A.buy_below=95'); // esticada e rica: o mais baixo dos dois
 assert.equal(run('entryCheck(T.A).wait'), 92);
 run('T.A.buy_below=127.5; T.A.ext={pct:50,x75:97}');
-// --- crivos: armadilha de valor e Altman em perigo => sem plano ---
+// --- crivo: armadilha de valor => sem plano (Altman já não exclui: só é fiável para indústria) ---
 run('T.A.q.trap=true'); assert.equal(run('planLevels(T.A)'), null); run('T.A.q.trap=false');
-run('T.A.q.altman={zone:"perigo"}'); assert.equal(run('planLevels(T.A)'), null); run('delete T.A.q.altman');
+run('T.A.q.altman={zone:"perigo"}'); assert.notEqual(run('planLevels(T.A)'), null); run('delete T.A.q.altman');
 // --- sem esticamento e sem valor justo: sem base para decidir ---
 run('delete T.A.ext; delete T.A.buy_below'); assert.equal(run('entryCheck(T.A)'), null);
 run('T.A.buy_below=127.5');
