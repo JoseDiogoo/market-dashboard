@@ -29,8 +29,8 @@ jobs:
         continue-on-error: true
       - run: node tests/simple.cjs
         continue-on-error: true
-      - run: python fetch.py
-      - run: python audit.py
+      - run: python fetch.py 2>&1 | tee run.log
+      - run: python audit.py 2>&1 | tee -a run.log   # pipefail é o padrão no bash do Actions
       - name: Commit data.js
         run: |
           git config user.name "market-bot"
@@ -41,4 +41,6 @@ jobs:
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh issue create --title "Atualização de dados falhou ($(date -u +%F\ %H:%M) UTC)" --body "Ver $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
+        run: |
+          { echo "Ver $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"; echo; echo "Causa (linhas FALHA / erros / fim do log):"; echo '```'; grep -E "^FALHA|Traceback|Error" run.log | head -20 || true; echo ...; tail -15 run.log | cut -c1-300 || true; echo '```'; } > body.md
+          gh issue create --title "Atualização de dados falhou ($(date -u +%F\ %H:%M) UTC)" --body-file body.md || true
